@@ -1,0 +1,15 @@
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\bin\Debug\net6.0\Proyecto.exe
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\bin\Debug\net6.0\Proyecto.deps.json
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\bin\Debug\net6.0\Proyecto.runtimeconfig.json
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\bin\Debug\net6.0\Proyecto.dll
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\bin\Debug\net6.0\ref\Proyecto.dll
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\bin\Debug\net6.0\Proyecto.pdb
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\obj\Debug\net6.0\Proyecto.csproj.AssemblyReference.cache
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\obj\Debug\net6.0\Proyecto.GeneratedMSBuildEditorConfig.editorconfig
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\obj\Debug\net6.0\Proyecto.AssemblyInfoInputs.cache
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\obj\Debug\net6.0\Proyecto.AssemblyInfo.cs
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\obj\Debug\net6.0\Proyecto.csproj.CoreCompileInputs.cache
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\obj\Debug\net6.0\Proyecto.dll
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\obj\Debug\net6.0\ref\Proyecto.dll
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\obj\Debug\net6.0\Proyecto.pdb
+C:\Karen\Universidad\2do Ano\Programacion II\Proyecto\obj\Debug\net6.0\Proyecto.genruntimeconfig.cache

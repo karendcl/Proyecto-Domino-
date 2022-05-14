@@ -9,24 +9,20 @@ namespace Domino
         public static List<Ficha> PosiblesFichas = new List<Ficha>();
         public static List<Ficha> ManodelUsuario = new List<Ficha>();
         public static List<Ficha> ManoDeLaCompu = new List<Ficha>();
-
-        public static List<Ficha> Juego = new List<Ficha>();
-
-        
-
+       
         public static void Main(string[] args)
         {
             PosiblesFichas.Clear();
 
-            int max = 5;
+            int max = 9;
             GenerarFichas( max);
 
-            int cadauno = 5;
+            int cadauno = 10;
             RepartirFichas ( cadauno);
 
             Ficha fichainicial = PosiblesFichas[0];
 
-            Game game = new Game(Juego, ManoDeLaCompu, ManodelUsuario);
+            Game game = new Normal(new List<Ficha>(), ManoDeLaCompu, ManodelUsuario);
 
             game.board.Add(fichainicial);
 
@@ -35,7 +31,7 @@ namespace Domino
                 Console.Clear();
                 Console.WriteLine("Fichas Mias");
 
-                foreach (var item in ManodelUsuario)
+                foreach (var item in game.UserFichas)
                 {
                     Console.Write(item.ToString());
                 }
@@ -44,7 +40,7 @@ namespace Domino
 
                 Console.WriteLine("Board:");
 
-                foreach (var item in Juego)
+                foreach (var item in game.board)
                 {
                     Console.Write( item.ToString());
                 }
@@ -55,9 +51,9 @@ namespace Domino
                 {
                   var ficha = TirnoDelUsuario(game);
                   if (ficha != null) {
-                    AddFichaToGame(ficha);  
-                    ManodelUsuario.Remove(ficha);
-                    if (ManodelUsuario.Count ==0) break;
+                    AddFichaToGame(ficha, game);  
+                    game.UserFichas.Remove(ficha);
+                    if (game.UserFichas.Count ==0) break;
                 }  
                 }
                 catch (System.Exception)
@@ -68,9 +64,9 @@ namespace Domino
                    var ficha1 = TurnoDeCompu(game);
 
                  if (ficha1 != null) {
-                     AddFichaToGame(ficha1);
-                    ManoDeLaCompu.Remove(ficha1);
-                    if (ManoDeLaCompu.Count ==0) break;
+                     AddFichaToGame(ficha1, game);
+                    game.ComputerFichas.Remove(ficha1);
+                    if (game.ComputerFichas.Count ==0) break;
                 }
                 }  
                 
@@ -83,34 +79,34 @@ namespace Domino
 
             Console.Clear();
             Console.WriteLine("Game Over");  
-            Console.WriteLine("Winner: {0}", Winner());        
+            Console.WriteLine("Winner: {0}", Winner(game));        
           
         }
 
-        public static void AddFichaToGame(Ficha ficha){
-           Ficha first = Juego.First();
+        public static void AddFichaToGame(Ficha ficha, Game game){
+           Ficha first = game.board.First();
 
            if (ficha.Contains(first.Parte1)){
                if (first.Parte1 == ficha.Parte1){
                    ficha.SwapFicha();
-                   Juego.Insert(0,ficha);
+                   game.board.Insert(0,ficha);
                    return;
                }
                
-               Juego.Insert(0, ficha);
+               game.board.Insert(0, ficha);
                return;
            }
 
-           Ficha last = Juego.Last();
+           Ficha last = game.board.Last();
 
             if (ficha.Contains(last.Parte2)){
                if (ficha.Parte2 == last.Parte2){
                    ficha.SwapFicha();
-                   Juego.Add(ficha);
+                   game.board.Add(ficha);
                    return;
                }
                
-               Juego.Add(ficha);
+               game.board.Add(ficha);
                return;
            }
 
@@ -118,17 +114,17 @@ namespace Domino
 
         }
 
-        public static string Winner(){
+        public static string Winner(Game game){
             var PointsUser = 0;;
 
-            foreach (var item in ManodelUsuario)
+            foreach (var item in game.UserFichas)
             {
                 PointsUser += item.Suma();
             }
 
             var PointsComp = 0;
 
-            foreach (var item in ManoDeLaCompu)
+            foreach (var item in game.ComputerFichas)
             {
                 PointsComp += item.Suma();
             }
@@ -141,17 +137,24 @@ namespace Domino
         }
 
         public static Ficha TurnoDeCompu(Game game){
-
-            var Possible = PossiblePlays(game);
-            return BestPlay(Possible);
-
+            return game.BestPlay();
         }
 
         public static Ficha TirnoDelUsuario(Game game){
+
+            
             Console.WriteLine("Escriba el indice de la ficha a jugar. Comenzando desde 0. Si no lleva escriba -1");
             int ToPlay = int.Parse(Console.ReadLine());
 
             if (ToPlay==-1) return null;
+
+            while (OutRange(ToPlay, game))
+            {
+            Console.WriteLine("Escriba el indice de la ficha a jugar. Comenzando desde 0. Si no lleva escriba -1");
+             ToPlay = int.Parse(Console.ReadLine());
+            }
+
+        
 
             while (! game.ValidPlay(game.UserFichas[ToPlay])){
                 Console.WriteLine("No haga trampa! Escriba otra ficha");
@@ -162,9 +165,13 @@ namespace Domino
 
         }
 
+        public static bool OutRange(int index, Game game){
+            return (index < 0 || index > game.UserFichas.Count());
+        }
+
         public static bool EndGame(Game game){
 
-            if (ManoDeLaCompu.Count == 0 || ManodelUsuario.Count == 0) return false;
+            if (game.ComputerFichas.Count == 0 || game.UserFichas.Count == 0) return false;
 
             foreach (var item in game.ComputerFichas)
             {
@@ -179,51 +186,8 @@ namespace Domino
             return true;
 
         } 
-        public static Ficha BestPlay(List<Ficha> Possibles){
-            int[] Scores = new int[Possibles.Count];
-            int count = 0;
-
-            foreach (var item in Possibles)
-            {
-                Scores[count] = Evaluate(item);
-                count++;
-            }
-
-            var best =  Scores.Max();
-
-            if (best==0) return null;
-
-            return Possibles.ElementAt(Array.IndexOf(Scores, best));
-        }
-
-        public static int Evaluate(Ficha ficha){
-            int Score = 0;
-
-            foreach (var item in ManoDeLaCompu)
-            {
-             if (item.IsMatch(ficha)) Score++;   
-            }
-
-            if (ficha.IsDouble()) Score++;
-
-            Score += ficha.Suma() / 2;
-
-            return Score;
-        }
-
-        public static List<Ficha> PossiblePlays( Game game){
-
-            var CanPlay = new List<Ficha>();
-
-            foreach (var item in game.ComputerFichas )
-            {
-                if (game.ValidPlay(item))  CanPlay.Add(item);
-            }
-
-            return CanPlay;
-        }
-
         
+
 
         public static void RepartirFichas( int cadauno){
            int cantidadDisponible = PosiblesFichas.Count;

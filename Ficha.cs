@@ -43,27 +43,5 @@ namespace Domino
 
       
     }
-
-    public class Game{
-       public List<Ficha> board {get; set;}
-       public List<Ficha> ComputerFichas {get; set;}
-       public List<Ficha> UserFichas {get; set;}
-
-       public Game(List<Ficha> board,List<Ficha> ComputerFichas, List<Ficha> UserFichas ){
-           this.board = board;
-           this.ComputerFichas = ComputerFichas;
-           this.UserFichas = UserFichas;
-
-       }
-
-       public bool ValidPlay(Ficha ficha){
-           if (ficha.Contains(board.First().Parte1)) return true;
-           if (ficha.Contains(board.Last().Parte2)) return true;
-           return false;
-
-       }
-
-    }
 }
-
-
+   

@@ -1,84 +1,96 @@
 namespace Domino
 {
-     public abstract class Game{
-       public List<Ficha> board {get; set;}
-       public List<Ficha> ComputerFichas {get; set;}
-       public List<Ficha> UserFichas {get; set;}
+    public abstract class Game
+    {
+        public List<Ficha> board { get; set; }
+        public Player[] player{get; set;}
 
-       public Game(List<Ficha> board,List<Ficha> ComputerFichas, List<Ficha> UserFichas ){
-           this.board = board;
-           this.ComputerFichas = ComputerFichas;
-           this.UserFichas = UserFichas;
+        public Game(List<Ficha> board, Player[] players)
+        {
+            this.board = board;
+            this.player = players;
+           // this.player2 = player2;
 
-       }
-       public abstract bool ValidPlay(Ficha ficha);
+        }
+        public abstract bool ValidPlay(Ficha ficha);
 
-       public abstract Ficha BestPlay();
+        public virtual void AddFichaToGame(Ficha ficha, int side){
+          Ficha first = board.First();
+            Ficha last = board.Last();
 
-       
+            if (side != -1)
+            {
+                if (side == 0)
+                {
+                    PlayAlante(ficha, first);
+                    return;
+                }
 
+                if (side == 1)
+                {
+                    if (ficha.Contains(last.Parte2))
+                        PlayAtras(ficha, last);
+                    return;
+                }
+            }
+
+
+            if (ficha.Contains(first.Parte1))
+            {
+                PlayAlante(ficha, first);
+                return;
+            }
+
+            if (ficha.Contains(last.Parte2))
+            {
+                PlayAtras(ficha, last);
+                return;
+            }
+        }
+
+         public void PlayAlante(Ficha ficha, Ficha first)
+        {
+            if (first.Parte1 == ficha.Parte1)
+            {
+                ficha.SwapFicha();
+                board.Insert(0, ficha);
+
+                return;
+            }
+
+            board.Insert(0, ficha);
+
+            return;
+        }
+
+        public void PlayAtras(Ficha ficha, Ficha last)
+        {
+            if (ficha.Parte2 == last.Parte2)
+            {
+                ficha.SwapFicha();
+                board.Add(ficha);
+                return;
+            }
+
+            board.Add(ficha);
+            return;
+        }
     }
 
-    public class Normal : Game {
-      
-       public Normal(List<Ficha> board,List<Ficha> ComputerFichas, List<Ficha> UserFichas) : base(board, ComputerFichas, UserFichas){
+    public class Normal : Game
+    {
+        public Normal(List<Ficha> board, Player[] players) : base(board, players)
+        {
 
-       }
-
-      public override bool ValidPlay(Ficha ficha){
-         if (ficha.Contains(board.First().Parte1)) return true;
-           if (ficha.Contains(board.Last().Parte2)) return true;
-           return false;
-      }
-
-       public  List<Ficha> PossiblePlays( ){
-
-            var CanPlay = new List<Ficha>();
-
-            foreach (var item in ComputerFichas )
-            {
-                if (ValidPlay(item))  CanPlay.Add(item);
-            }
-
-            return CanPlay;
         }
 
-          public override Ficha BestPlay(){
-
-            var Possibles = PossiblePlays();
-            int[] Scores = new int[Possibles.Count];
-            int count = 0;
-
-            foreach (var item in Possibles)
-            {
-                Scores[count] = Evaluate(item);
-                count++;
-            }
-
-            var best =  Scores.Max();
-
-            if (best==0) return null;
-
-            return Possibles.ElementAt(Array.IndexOf(Scores, best));
+        public override bool ValidPlay(Ficha ficha)
+        {
+            if (ficha.Contains(board.First().Parte1)) return true;
+            if (ficha.Contains(board.Last().Parte2)) return true;
+            return false;
         }
 
-        public  int Evaluate(Ficha ficha){
-            int Score = 0;
-
-            foreach (var item in ComputerFichas)
-            {
-             if (item.IsMatch(ficha)) Score++;   
-            }
-
-            if (ficha.IsDouble()) Score++;
-
-            Score += ficha.Suma() / 2;
-
-            return Score;
-        }
-
-
-        
     }
 }
 

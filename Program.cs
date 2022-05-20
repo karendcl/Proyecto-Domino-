@@ -2,226 +2,177 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Domino 
+namespace Domino
 {
     public class Program
     {
         public static List<Ficha> PosiblesFichas = new List<Ficha>();
-        public static List<Ficha> ManodelUsuario = new List<Ficha>();
-        public static List<Ficha> ManoDeLaCompu = new List<Ficha>();
-       
+
         public static void Main(string[] args)
         {
             PosiblesFichas.Clear();
 
             int max = 9;
-            GenerarFichas( max);
+            GenerarFichas(max);
+            
+            
+            foreach (var item in PosiblesFichas)
+            {
+                Console.WriteLine(item.ToString());
+            }
 
             int cadauno = 10;
-            RepartirFichas ( cadauno);
 
-            Ficha fichainicial = PosiblesFichas[0];
+            Player[] players = {
+                new  Player(RepartirFichas(cadauno)),
+                new  Player(RepartirFichas(cadauno)),
+            };
 
-            Game game = new Normal(new List<Ficha>(), ManoDeLaCompu, ManodelUsuario);
+            var r = new Random();
+
+            Ficha fichainicial = PosiblesFichas[r.Next(0,PosiblesFichas.Count)];
+
+            Game game = new Normal(new List<Ficha>(), players);
 
             game.board.Add(fichainicial);
 
             while (!EndGame(game))
             {
-                Console.Clear();
-                Console.WriteLine("Fichas Mias");
+               
+                int count=0;
+                int turno = 1;
 
-                foreach (var item in game.UserFichas)
+                foreach (var player in players)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Player {0}", turno);
+                    Console.WriteLine();
+                    turno++;
+
+                  foreach (var ficha in player.hand)
+                {
+                    Console.Write( ficha.ToString());
+                    count++;
+                }  
+
+                 Console.WriteLine(" ");
+
+                 Console.WriteLine("Board:");
+
+                 foreach (var item in game.board)
                 {
                     Console.Write(item.ToString());
                 }
 
-                Console.WriteLine(" ");
-
-                Console.WriteLine("Board:");
-
-                foreach (var item in game.board)
+                 try
                 {
-                    Console.Write( item.ToString());
+                    var ficha1 = Turno(player, game);
+
+                    if (ficha1 != null)
+                    {
+                        game.AddFichaToGame(ficha1, -1);
+                        player.hand.Remove(ficha1);
+                        if (player.hand.Count == 0){
+                         break;
+                        } 
+                    }
                 }
+                catch{}
+
+                Thread.Sleep(1000);
                 
-                Console.WriteLine(" ");
-
-                try
-                {
-                  var ficha = TirnoDelUsuario(game);
-                  if (ficha != null) {
-                    AddFichaToGame(ficha, game);  
-                    game.UserFichas.Remove(ficha);
-                    if (game.UserFichas.Count ==0) break;
-                }  
                 }
-                catch (System.Exception)
-                { }
-
-              try
-                {
-                   var ficha1 = TurnoDeCompu(game);
-
-                 if (ficha1 != null) {
-                     AddFichaToGame(ficha1, game);
-                    game.ComputerFichas.Remove(ficha1);
-                    if (game.ComputerFichas.Count ==0) break;
-                }
-                }  
-                
-                catch (System.Exception)
-                {  }
-
-             
-            Thread.Sleep(100);    
             }
 
             Console.Clear();
-            Console.WriteLine("Game Over");  
-            Console.WriteLine("Winner: {0}", Winner(game));        
-          
-        }
-
-        public static void AddFichaToGame(Ficha ficha, Game game){
-           Ficha first = game.board.First();
-
-           if (ficha.Contains(first.Parte1)){
-               if (first.Parte1 == ficha.Parte1){
-                   ficha.SwapFicha();
-                   game.board.Insert(0,ficha);
-                   return;
-               }
-               
-               game.board.Insert(0, ficha);
-               return;
-           }
-
-           Ficha last = game.board.Last();
-
-            if (ficha.Contains(last.Parte2)){
-               if (ficha.Parte2 == last.Parte2){
-                   ficha.SwapFicha();
-                   game.board.Add(ficha);
-                   return;
-               }
-               
-               game.board.Add(ficha);
-               return;
-           }
-
-
-
-        }
-
-        public static string Winner(Game game){
-            var PointsUser = 0;;
-
-            foreach (var item in game.UserFichas)
-            {
-                PointsUser += item.Suma();
-            }
-
-            var PointsComp = 0;
-
-            foreach (var item in game.ComputerFichas)
-            {
-                PointsComp += item.Suma();
-            }
-
-            if (PointsComp < PointsUser) return "me";
-            if (PointsComp > PointsUser) return "you";
-            else return "tie";
-
-
-        }
-
-        public static Ficha TurnoDeCompu(Game game){
-            return game.BestPlay();
-        }
-
-        public static Ficha TirnoDelUsuario(Game game){
-
+            Console.WriteLine("Game Over");
+            Winner(game);
             
-            Console.WriteLine("Escriba el indice de la ficha a jugar. Comenzando desde 0. Si no lleva escriba -1");
-            int ToPlay = int.Parse(Console.ReadLine());
 
-            if (ToPlay==-1) return null;
+        }
 
-            while (OutRange(ToPlay, game))
-            {
-            Console.WriteLine("Escriba el indice de la ficha a jugar. Comenzando desde 0. Si no lleva escriba -1");
-             ToPlay = int.Parse(Console.ReadLine());
-            }
 
+       public static void Winner(Game game){
+
+           int suma1 = Suma(game.player[0].hand);
+           int suma2 = Suma(game.player[1].hand);
+
+           if (suma1 > suma2) Console.WriteLine("Gano player 2.");
+           else if (suma2> suma1) Console.WriteLine("Gano player 1.");
+           else Console.WriteLine("Empate");
         
+            Console.WriteLine("Score del player 1 {0}, score del player 2 {1}", suma1, suma2);
 
-            while (! game.ValidPlay(game.UserFichas[ToPlay])){
-                Console.WriteLine("No haga trampa! Escriba otra ficha");
-                ToPlay = int.Parse(Console.ReadLine());
-            }
+       }
 
-            return game.UserFichas[ToPlay];
+       public static int Suma(List<Ficha> hand){
+           int suma = 0;
 
+           foreach (var item in hand)
+           {
+               suma += item.Suma();
+           }
+
+           return suma;
+       }
+
+        public static Ficha Turno(Player player, Game game)
+        {
+            return player.BestPlay(game);
         }
 
-        public static bool OutRange(int index, Game game){
-            return (index < 0 || index > game.UserFichas.Count());
-        }
 
-        public static bool EndGame(Game game){
+        public static bool EndGame(Game game)
+        {
 
-            if (game.ComputerFichas.Count == 0 || game.UserFichas.Count == 0) return false;
+            if (game.player[0].hand.Count == 0 || game.player[1].hand.Count == 0) return true;
 
-            foreach (var item in game.ComputerFichas)
+            foreach (var item in game.player[0].hand)
             {
-               if (game.ValidPlay(item)) return false; 
+                if (game.ValidPlay(item)) return false;
             }
 
-            foreach (var item in game.UserFichas)
+            foreach (var item in game.player[1].hand)
             {
-               if (game.ValidPlay(item)) return false; 
+                if (game.ValidPlay(item)) return false;
             }
 
             return true;
 
-        } 
-        
-
-
-        public static void RepartirFichas( int cadauno){
-           int cantidadDisponible = PosiblesFichas.Count;
-
-           if (!(cadauno*2 < cantidadDisponible))  cadauno = cantidadDisponible /2;
-           
-           int contador;
-           var lista = new List<Ficha>();
-
-           for (int i = 0; i < 2; i++)
-           {
-               contador=0;
-               if (i==0) lista = ManoDeLaCompu;
-               else lista = ManodelUsuario;
-
-               while (contador != cadauno)
-               {
-                   var r = new Random();
-                   var index = r.Next(0,cantidadDisponible);
-                   cantidadDisponible--;
-                   contador++;
-                   lista.Add(PosiblesFichas.ElementAt(index));
-                   PosiblesFichas.RemoveAt(index);                   
-               }
-           }
         }
 
-        public static void GenerarFichas(int max){
+
+        public static List<Ficha> RepartirFichas(int cadauno)
+        {
+            int cantidadDisponible = PosiblesFichas.Count;
+
+            if (!(cadauno * 2 < cantidadDisponible)) cadauno = cantidadDisponible / 2;
+
+            int contador = 0;
+            var lista = new List<Ficha>();
+
+                while (contador != cadauno)
+                {
+                    var r = new Random();
+                    var index = r.Next(0, cantidadDisponible);
+                    cantidadDisponible--;
+                    contador++;
+                    lista.Add(PosiblesFichas.ElementAt(index));
+                    PosiblesFichas.RemoveAt(index);
+                }
+
+            return lista;    
+            
+        }
+
+        public static void GenerarFichas(int max)
+        {
             for (int i = 0; i <= max; i++)
             {
-                for (int j = i; j <= max ; j++)
+                for (int j = i; j <= max; j++)
                 {
-                    Ficha ficha = new Ficha(i,j);
-                    PosiblesFichas.Add(ficha); 
+                    Ficha ficha = new Ficha(i, j);
+                    PosiblesFichas.Add(ficha);
                 }
             }
         }

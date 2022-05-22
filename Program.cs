@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Domino
+namespace Juego
 {
-    public class Program
+     public class Program
     {
         public static List<Ficha> PosiblesFichas = new List<Ficha>();
 
@@ -12,27 +12,37 @@ namespace Domino
         {
             PosiblesFichas.Clear();
 
-            int max = 9;
-            GenerarFichas(max);
-            
-            
-            foreach (var item in PosiblesFichas)
+            int cadauno = 10;
+            int cantplay = 4;
+
+            while (!ValidSettings(cantplay, cadauno))
             {
-                Console.WriteLine(item.ToString());
+            Console.Clear();
+            Console.WriteLine("Escriba el doble maximo de las fichas");
+            int max = int.Parse(Console.ReadLine()!);
+            GenerarFichas(max);
+     
+            Console.WriteLine("Escriba cuantas fichas se van a repartir a cada jugador");
+            cadauno = int.Parse(Console.ReadLine()!);
+
+            Console.WriteLine("Escriba cuantos jugadores van a jugar");
+            cantplay = int.Parse(Console.ReadLine()!); 
             }
 
-            int cadauno = 10;
 
-            Player[] players = {
-                new  Player(RepartirFichas(cadauno)),
-                new  Player(RepartirFichas(cadauno)),
-            };
+
+            Player[] players = new Player[cantplay];
+
+            for (int i = 0; i < cantplay; i++)
+            {
+                players[i] = new Player(RepartirFichas(cadauno));
+            }
 
             var r = new Random();
 
             Ficha fichainicial = PosiblesFichas[r.Next(0,PosiblesFichas.Count)];
 
-            Game game = new Normal(new List<Ficha>(), players);
+            Game game = new Game(new List<Ficha>(), players);
 
             game.board.Add(fichainicial);
 
@@ -70,7 +80,11 @@ namespace Domino
 
                     if (ficha1 != null)
                     {
-                        game.AddFichaToGame(ficha1, -1);
+                        int index = -1;
+                        if (ficha1.Ambigua(game)){
+                         index = player.ChooseSide(game);
+                        }
+                        game.AddFichaToGame(ficha1, index);
                         player.hand.Remove(ficha1);
                         if (player.hand.Count == 0){
                          break;
@@ -79,7 +93,7 @@ namespace Domino
                 }
                 catch{}
 
-                Thread.Sleep(1000);
+                Thread.Sleep(500);
                 
                 }
             }
@@ -91,17 +105,40 @@ namespace Domino
 
         }
 
+        public static bool ValidSettings(int players, int cadauno){
+
+            if (players <= 0) return false;
+            if (cadauno <=0) return false;
+            if (PosiblesFichas.Count == 0) return false ;
+            return (PosiblesFichas.Count - (players*cadauno) >= 0);
+        }
+
 
        public static void Winner(Game game){
+         int[] scores = new int[game.player.Length];
 
-           int suma1 = Suma(game.player[0].hand);
-           int suma2 = Suma(game.player[1].hand);
+        int count = 0;
 
-           if (suma1 > suma2) Console.WriteLine("Gano player 2.");
-           else if (suma2> suma1) Console.WriteLine("Gano player 1.");
-           else Console.WriteLine("Empate");
+        Console.WriteLine("All Scores:");
+
+        foreach (var player in game.player)
+        {
+            foreach (var ficha in player.hand)
+            {
+                scores[count] += ficha.Suma();
+            }
+            count++;
+            Console.WriteLine("Player {0} : {1} points", count, scores[count-1]);
+        }
+
+        int score = scores.Min();
+        int index = Array.IndexOf(scores, score);
+
+        Console.WriteLine("\n \n The winner is Player {0}, with a score of {1}", index +1, score);
+
         
-            Console.WriteLine("Score del player 1 {0}, score del player 2 {1}", suma1, suma2);
+
+        
 
        }
 
@@ -118,7 +155,7 @@ namespace Domino
 
         public static Ficha Turno(Player player, Game game)
         {
-            return player.BestPlay(game);
+            return player.BestPlay(game);           
         }
 
 

@@ -1,6 +1,6 @@
-namespace Domino
+namespace Juego
 {
-    public abstract class Game
+          public class Game
     {
         public List<Ficha> board { get; set; }
         public Player[] player{get; set;}
@@ -9,13 +9,18 @@ namespace Domino
         {
             this.board = board;
             this.player = players;
-           // this.player2 = player2;
 
         }
-        public abstract bool ValidPlay(Ficha ficha);
 
-        public virtual void AddFichaToGame(Ficha ficha, int side){
-          Ficha first = board.First();
+        public  bool ValidPlay(Ficha ficha)
+        {
+            if (ficha.Contains(board.First().Parte1)) return true;
+            if (ficha.Contains(board.Last().Parte2)) return true;
+            return false;
+        }
+
+         public  void AddFichaToGame(Ficha ficha, int side){
+            Ficha first = board.First();
             Ficha last = board.Last();
 
             if (side != -1)
@@ -74,21 +79,6 @@ namespace Domino
 
             board.Add(ficha);
             return;
-        }
-    }
-
-    public class Normal : Game
-    {
-        public Normal(List<Ficha> board, Player[] players) : base(board, players)
-        {
-
-        }
-
-        public override bool ValidPlay(Ficha ficha)
-        {
-            if (ficha.Contains(board.First().Parte1)) return true;
-            if (ficha.Contains(board.Last().Parte2)) return true;
-            return false;
         }
 
     }

@@ -1,6 +1,6 @@
-namespace Domino
+namespace Juego
 {
-    public class Ficha
+  public class Ficha  
     {
         public int Parte1 { set; get; }
         public int Parte2 { set; get; }
@@ -36,7 +36,7 @@ namespace Domino
 
         public int Suma()
         {
-            return this.Parte1 + this.Parte2;
+            return Parte1 + Parte2;
         }
 
         public void SwapFicha()
@@ -49,7 +49,5 @@ namespace Domino
         public bool Ambigua(Game game){
             return (this.Contains(game.board.First().Parte1) && this.Contains(game.board.Last().Parte2));
         }
-
-
     }
 }

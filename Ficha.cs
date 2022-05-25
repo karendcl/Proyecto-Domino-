@@ -47,6 +47,7 @@ namespace Juego
         }
 
         public bool Ambigua(Game game){
+            if (game.board.board.Count==0) return false;
             return (this.Contains(game.board.First().Parte1) && this.Contains(game.board.Last().Parte2));
         }
     }

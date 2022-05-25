@@ -14,77 +14,90 @@ namespace Juego
 
             int cadauno = 10;
             int cantplay = 4;
+            int max = 0;
+            
+            //Console.WriteLine("Desea que cambie la direccion del juego cada vez que alguien se pase?, si o no");
+           // char change =  Console.ReadLine()[0];
+            //bool changedirection = (change == 's' || change== 'S')? true : false;
 
-            while (!ValidSettings(cantplay, cadauno))
-            {
+           // while (!ValidSettings(cantplay, cadauno))
+            //{
             Console.Clear();
             Console.WriteLine("Escriba el doble maximo de las fichas");
-            int max = int.Parse(Console.ReadLine()!);
-            GenerarFichas(max);
+            max = int.Parse(Console.ReadLine()!);
      
             Console.WriteLine("Escriba cuantas fichas se van a repartir a cada jugador");
             cadauno = int.Parse(Console.ReadLine()!);
 
             Console.WriteLine("Escriba cuantos jugadores van a jugar");
             cantplay = int.Parse(Console.ReadLine()!); 
-            }
-
-
+           // }
 
             Player[] players = new Player[cantplay];
 
             for (int i = 0; i < cantplay; i++)
             {
-                players[i] = new Player(RepartirFichas(cadauno));
+                Console.Clear();
+                Console.WriteLine("Elija el tipo de jugador para el Player {0}. \n \n Escriba 0 para jugador humano. \n Escriba 1 para jugador botagorda. \n Escriba 2 para jugador random", i+1);
+                //validar que sea entre 0 y no se
+
+                int a = int.Parse(Console.ReadLine()!);
+
+                switch (a)
+                {
+                    case 0:
+                     players[i] = new HumanPlayer(new List<Ficha>(), i+1);
+                     break;
+
+                     case 1:
+                     players[i] = new BotaGorda(new List<Ficha>(), i+1);
+                     break;
+
+                     case 2:
+                     players[i] = new RandomPlayer(new List<Ficha>(), i+1);     
+                     break;
+                }
             }
 
-            var r = new Random();
+           
 
-            Ficha fichainicial = PosiblesFichas[r.Next(0,PosiblesFichas.Count)];
+            Board board = new Board(new List<Ficha>());
 
-            Game game = new Game(new List<Ficha>(), players);
+            Game game = new Game(board, players, true, max, cantplay,cadauno);
 
-            game.board.Add(fichainicial);
+
+            //Console.WriteLine(players[0].ToString());
+            //Ficha fichainicial = players[0].FirstFicha(game);
+
+           // game.board.board.Insert(0, fichainicial);
 
             while (!EndGame(game))
             {
-               
-                int count=0;
-                int turno = 1;
-
                 foreach (var player in players)
                 {
                     Console.Clear();
-                    Console.WriteLine("Player {0}", turno);
-                    Console.WriteLine();
-                    turno++;
-
-                  foreach (var ficha in player.hand)
-                {
-                    Console.Write( ficha.ToString());
-                    count++;
-                }  
-
-                 Console.WriteLine(" ");
-
-                 Console.WriteLine("Board:");
-
-                 foreach (var item in game.board)
-                {
-                    Console.Write(item.ToString());
-                }
+                    Console.WriteLine(player.ToString());
+                    Console.WriteLine(game.board.ToString());
 
                  try
                 {
-                    var ficha1 = Turno(player, game);
+                    Ficha ficha1; 
+
+                    ficha1 = (game.board.board.Count ==0)? PrimerTurno(player,game) : Turno(player, game);
+
+                    if (ficha1 is null){
+                        //if (changedirection) game.SwapDirection();;
+                    }
 
                     if (ficha1 != null)
                     {
                         int index = -1;
+
                         if (ficha1.Ambigua(game)){
                          index = player.ChooseSide(game);
                         }
-                        game.AddFichaToGame(ficha1, index);
+
+                        game.board.AddFichaToGame(ficha1, index);
                         player.hand.Remove(ficha1);
                         if (player.hand.Count == 0){
                          break;
@@ -100,10 +113,22 @@ namespace Juego
 
             Console.Clear();
             Console.WriteLine("Game Over");
-            Winner(game);
+            game.Winner();
             
 
         }
+
+        public static void SwapDirection(Game game){
+
+           for (int i = 0; i < game.player.Length/2; i++)
+           {
+               Player temp = game.player[i];
+               game.player[i] = game.player[game.player.Length -i-1];
+               game.player[game.player.Length -i-1] = temp;
+           }
+
+        }
+
 
         public static bool ValidSettings(int players, int cadauno){
 
@@ -113,47 +138,12 @@ namespace Juego
             return (PosiblesFichas.Count - (players*cadauno) >= 0);
         }
 
-
-       public static void Winner(Game game){
-         int[] scores = new int[game.player.Length];
-
-        int count = 0;
-
-        Console.WriteLine("All Scores:");
-
-        foreach (var player in game.player)
+        public static Ficha Turno(Player player, Game game)
         {
-            foreach (var ficha in player.hand)
-            {
-                scores[count] += ficha.Suma();
-            }
-            count++;
-            Console.WriteLine("Player {0} : {1} points", count, scores[count-1]);
+            return player.BestPlay(game);           
         }
 
-        int score = scores.Min();
-        int index = Array.IndexOf(scores, score);
-
-        Console.WriteLine("\n \n The winner is Player {0}, with a score of {1}", index +1, score);
-
-        
-
-        
-
-       }
-
-       public static int Suma(List<Ficha> hand){
-           int suma = 0;
-
-           foreach (var item in hand)
-           {
-               suma += item.Suma();
-           }
-
-           return suma;
-       }
-
-        public static Ficha Turno(Player player, Game game)
+        public static Ficha PrimerTurno(Player player, Game game)
         {
             return player.BestPlay(game);           
         }
@@ -161,25 +151,20 @@ namespace Juego
 
         public static bool EndGame(Game game)
         {
-
-            if (game.player[0].hand.Count == 0 || game.player[1].hand.Count == 0) return true;
-
-            foreach (var item in game.player[0].hand)
+            foreach (var player in game.player)
             {
-                if (game.ValidPlay(item)) return false;
-            }
+                if (player.hand.Count ==0) return true;
 
-            foreach (var item in game.player[1].hand)
-            {
-                if (game.ValidPlay(item)) return false;
+                foreach (var ficha in player.hand)
+                {
+                    if (game.ValidPlay(ficha)) return false;
+                }
             }
-
             return true;
-
         }
 
 
-        public static List<Ficha> RepartirFichas(int cadauno)
+       /* public static List<Ficha> RepartirFichas(int cadauno)
         {
             int cantidadDisponible = PosiblesFichas.Count;
 
@@ -200,9 +185,9 @@ namespace Juego
 
             return lista;    
             
-        }
+        }*/
 
-        public static void GenerarFichas(int max)
+        /*public static void GenerarFichas(int max)
         {
             for (int i = 0; i <= max; i++)
             {
@@ -212,6 +197,6 @@ namespace Juego
                     PosiblesFichas.Add(ficha);
                 }
             }
-        }
+        }*/
     }
 }

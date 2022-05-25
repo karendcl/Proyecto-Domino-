@@ -1,13 +1,33 @@
 namespace Juego
 {
-    public class Player
+    public class Player: IEstrategia
     {
         public List<Ficha> hand;
+        public int Id;
 
-        public Player(List<Ficha> fichas)
+        public Player(List<Ficha> fichas, int id)
         {
             this.hand = fichas;
+            this.Id = id;
+
         }
+
+        public virtual Ficha FirstFicha(Game game){
+             var r = new Random();
+            return hand.ElementAt(r.Next(0,hand.Count));
+        }
+
+        public override string ToString(){
+            string a = "Player " + this.Id + "\n";
+
+            foreach (var item in this.hand)
+            {
+                a += item.ToString();
+            }
+
+            return a;
+        }
+
 
         public List<Ficha> PossiblePlays(Game game)
         {
@@ -23,13 +43,16 @@ namespace Juego
 
         public virtual Ficha BestPlay(Game game)
         {
-            var Possibles = PossiblePlays(game);
+
+            List<Ficha> Possibles;
+            Possibles = PossiblePlays(game);
+
             int[] Scores = new int[Possibles.Count];
             int count = 0;
 
             foreach (var item in Possibles)
             {
-                Scores[count] = Evaluate(item);
+                Scores[count] = Evaluate(item, game);
                 count++;
             }
 
@@ -40,20 +63,9 @@ namespace Juego
             return Possibles.ElementAt(Array.IndexOf(Scores, best));
         }
 
-        public int Evaluate(Ficha ficha)
+        public virtual int Evaluate(Ficha ficha, Game game)
         {
-            int Score = 0;
-
-            foreach (var item in hand)
-            {
-                if (item.IsMatch(ficha)) Score++;
-            }
-
-            if (ficha.IsDouble()) Score++;
-
-            Score += ficha.Suma() / 2;
-
-            return Score;
+            return ficha.Suma();
         }
 
         public virtual int ChooseSide(Game game){
@@ -62,9 +74,41 @@ namespace Juego
 
     }
 
+    public class BotaGorda : Player, IEstrategia{
+        public BotaGorda(List<Ficha> fichas, int id) : base(fichas,id)
+        {
+        }
+
+        public override int Evaluate(Ficha ficha, Game game){
+             int valor = 0;
+
+             foreach (var item in this.hand)
+             {
+                if (item.IsMatch(ficha)) valor++; 
+             }
+
+             if (ficha.IsDouble()) valor++;
+
+             valor += (int)(ficha.Suma() / 2);
+
+             return valor;
+        }
+    }
+
+    public class RandomPlayer : Player, IEstrategia{
+        public RandomPlayer(List<Ficha> fichas, int id) : base(fichas,id)
+        {
+        }
+
+        public override int Evaluate(Ficha ficha, Game game){
+             var r = new Random();
+             return r.Next(1,100);
+        }
+    }
+
     public class HumanPlayer : Player
     {
-        public HumanPlayer(List<Ficha> fichas) : base(fichas)
+        public HumanPlayer(List<Ficha> fichas, int id) : base(fichas,id)
         {
         }
 
@@ -72,6 +116,11 @@ namespace Juego
         {
             return index < -1 || index >= hand.Count;
         }
+
+        public override Ficha FirstFicha(Game game){
+           return BestPlay(game);
+        }
+        
 
         public override Ficha BestPlay(Game game)
         {
@@ -89,15 +138,13 @@ namespace Juego
                 ToPlay = int.Parse(Console.ReadLine()!);
             }
             }
-
             return this.hand[ToPlay];
-
         }
 
          public override int ChooseSide(Game game){
            Console.WriteLine("Escriba 0 para jugar alante y 1 para jugar atras");
 
            return int.Parse(Console.ReadLine()!);
-        }
+        }        
     }
 }

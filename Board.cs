@@ -18,7 +18,7 @@ namespace Juego
           return a;
         }
 
-      public  void AddFichaToGame(Ficha ficha, int side){
+      public  void AddFichaToBoard(Ficha ficha, int side){
 
             if (this.board.Count==0) {
                 board.Insert(0, ficha);
@@ -88,12 +88,12 @@ namespace Juego
         }
 
         public Ficha First(){
-            if (board.Count == 0) return null;
+            if (board.Count == 0) return null!;
             return this.board.First();
         }
 
         public Ficha Last(){
-            if (board.Count == 0) return null;
+            if (board.Count == 0) return null!;
             return this.board.Last();
         }
     }

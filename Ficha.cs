@@ -26,12 +26,12 @@ namespace Juego
 
         public bool Contains(int a)
         {
-            return (this.Parte1 == a || this.Parte2 == a);
+            return (this.Parte1.Equals(a) || this.Parte2.Equals(a));
         }
 
         public bool IsDouble()
         {
-            return (this.Parte1 == this.Parte2);
+            return (this.Parte1.Equals(this.Parte2));
         }
 
         public int Suma()

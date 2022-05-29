@@ -1,15 +1,14 @@
 namespace Juego
 {
-    public class Player: IEstrategia
+    public abstract class Player : IPlayer
     {
-        public List<Ficha> hand;
-        public int Id;
+        public List<Ficha> hand{get; set;}
+        public int Id{get; set;}
 
         public Player(List<Ficha> fichas, int id)
         {
             this.hand = fichas;
             this.Id = id;
-
         }
 
         public virtual Ficha FirstFicha(Game game){
@@ -28,7 +27,6 @@ namespace Juego
             return a;
         }
 
-
         public List<Ficha> PossiblePlays(Game game)
         {
             var CanPlay = new List<Ficha>();
@@ -41,32 +39,7 @@ namespace Juego
             return CanPlay;
         }
 
-        public virtual Ficha BestPlay(Game game)
-        {
-
-            List<Ficha> Possibles;
-            Possibles = PossiblePlays(game);
-
-            int[] Scores = new int[Possibles.Count];
-            int count = 0;
-
-            foreach (var item in Possibles)
-            {
-                Scores[count] = Evaluate(item, game);
-                count++;
-            }
-
-            var best = Scores.Max();
-
-            if (best == 0) return null!;
-
-            return Possibles.ElementAt(Array.IndexOf(Scores, best));
-        }
-
-        public virtual int Evaluate(Ficha ficha, Game game)
-        {
-            return ficha.Suma();
-        }
+        public abstract Ficha BestPlay(Game game);
 
         public virtual int ChooseSide(Game game){
             return 0;
@@ -74,12 +47,27 @@ namespace Juego
 
     }
 
-    public class BotaGorda : Player, IEstrategia{
+    public class BotaGorda : Player{
         public BotaGorda(List<Ficha> fichas, int id) : base(fichas,id)
         {
         }
 
-        public override int Evaluate(Ficha ficha, Game game){
+        public override Ficha BestPlay(Game game){
+            var posibles = PossiblePlays(game);
+            if (posibles.Count ==0) return null!;
+
+            int[] scores = new int[posibles.Count];
+
+            for (int i = 0; i < scores.Length; i++)
+            {
+                scores[i] += Evaluate(posibles[i], game);
+            }
+
+            int index = Array.IndexOf(scores, scores.Max());
+            return posibles[index];
+        }
+
+        public  int Evaluate(Ficha ficha, Game game){
              int valor = 0;
 
              foreach (var item in this.hand)
@@ -95,15 +83,53 @@ namespace Juego
         }
     }
 
-    public class RandomPlayer : Player, IEstrategia{
+    public class RandomPlayer : Player{
         public RandomPlayer(List<Ficha> fichas, int id) : base(fichas,id)
         {
         }
 
-        public override int Evaluate(Ficha ficha, Game game){
+        public int Evaluate(Ficha ficha, Game game){
              var r = new Random();
              return r.Next(1,100);
         }
+
+          public override Ficha BestPlay(Game game){
+            var posibles = PossiblePlays(game);
+            if (posibles.Count ==0) return null!;
+            
+            int[] scores = new int[posibles.Count];
+
+            for (int i = 0; i < scores.Length; i++)
+            {
+                scores[i] += Evaluate(posibles[i], game);
+            }
+
+            int index = Array.IndexOf(scores, scores.Max());
+            return posibles[index];
+        }
+
+        public override int ChooseSide(Game game){
+            var r = new Random();
+            return r.Next(0,2);
+        }
+    }
+
+     public class FirstSee : Player{
+        public FirstSee(List<Ficha> fichas, int id) : base(fichas,id)
+        {
+        }
+
+        public override Ficha BestPlay(Game game){
+            var posibles = PossiblePlays(game);
+            if (posibles.Count ==0) return null!;
+
+            return posibles[0];  
+        }
+
+        public override int ChooseSide(Game game){
+            return 1;
+        }
+       
     }
 
     public class HumanPlayer : Player
@@ -120,7 +146,6 @@ namespace Juego
         public override Ficha FirstFicha(Game game){
            return BestPlay(game);
         }
-        
 
         public override Ficha BestPlay(Game game)
         {

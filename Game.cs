@@ -87,7 +87,7 @@ namespace Juego
 
         
 
-       public void Winner(){
+       public virtual void Winner(){
         int[] scores = new int[player.Length];
 
         int count = 0;
@@ -105,6 +105,17 @@ namespace Juego
             count++;
             Console.WriteLine("Player {0} : {1} points", count, scores[count-1]);
         }
+ 
+         var pl =0;
+
+        foreach (var player in player)
+        {
+            if (player.hand.Count==0){
+               Console.WriteLine("\n \n The winner is Player {0}, because they ran out of fichas", pl +1);
+               return;
+            }
+            pl++;
+        }
 
         int score = scores.Min();
         int index = Array.IndexOf(scores, score);
@@ -112,15 +123,38 @@ namespace Juego
         Console.WriteLine("\n \n The winner is Player {0}, with a score of {1}", index +1, score);
        }
 
-        public void SwapDirection(){
+        public void SwapDirection(int player){
 
-           for (int i = 0; i < player.Length/2; i++)
-           {
-               Player temp = player[i];
-               player[i] = player[player.Length -i-1];
-               player[player.Length -i-1] = temp;
-           }
+          if (SwitchDirection){
+              Player[] players = new Player[this.Players];
 
+               for (int i = 0; i < players.Length; i++)
+                 {
+                     if (player ==0) player = players.Length;
+
+                     players[i] = this.player[player-1];
+                     player --;   
+                 }
+
+                 this.player = players;
+          
+          }
+
+
+        }
+
+        public virtual bool EndGame()
+        {
+            foreach (var player in this.player)
+            {
+                if (player.hand.Count ==0) return true;
+
+                foreach (var ficha in player.hand)
+                {
+                    if (this.ValidPlay(ficha)) return false;
+                }
+            }
+            return true;
         }
     }
 }

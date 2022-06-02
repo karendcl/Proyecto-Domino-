@@ -25,6 +25,10 @@ namespace Juego
             AssignTokens();
         }
 
+        public void AddPlayer(Player player){
+            this.player.Add(player);
+        }
+
         public void AssignTokens(){
 
             List<Token> PosiblesTokens =  GenerarTokens(); 

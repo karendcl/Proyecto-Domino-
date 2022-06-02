@@ -7,23 +7,24 @@ namespace Juego
 {
      public class Program
     {
-        public static List<Token> PosiblesTokens = new List<Token>();
-
-    [STAThread]
-
         public static void Main(string[] args)
         {
-            PosiblesTokens.Clear();
+             Console.Title = "Domino Game";
+             Console.ForegroundColor = ConsoleColor.DarkRed;
+             Console.BackgroundColor = ConsoleColor.White;
+             Console.Clear();
 
-            int cadauno = 10;
+            int cadauno = 28;
             int cantplay = 4;
             int max = 9;
+
+            Judge judge = new Judge();
             
             Console.WriteLine("Desea que cambie la direccion del juego cada vez que alguien se pase?, si o no");
             char change =  Console.ReadLine()![0];
             bool changedirection = (change == 's' || change== 'S')? true : false;
 
-            while (!ValidSettings(cantplay, cadauno))
+            while (!judge.ValidSettings(cadauno, max,cantplay))
             {
             Console.Clear();
             Console.WriteLine("Escriba el doble maximo de las Tokens");
@@ -64,12 +65,9 @@ namespace Juego
                      players[i] = new FirstSee(new List<Token>(), i+1);
                      break;
                 }
-            }
-
-           
+            } 
 
             Board board = new Board(new List<Token>());
-            Judge judge = new Judge();
 
             Game game = new Game(board, players, changedirection, max, cantplay,cadauno, judge);
 
@@ -78,6 +76,7 @@ namespace Juego
                 for (int i = 0; i < players.Length; i++)
                 {
                     Console.Clear();
+
                     Console.WriteLine(players[i].ToString());
                     Console.WriteLine(game.board.ToString());
 
@@ -117,10 +116,12 @@ namespace Juego
         }
 
         public static void WriteStats(Game game){
+            Console.BackgroundColor = ConsoleColor.DarkRed;
+            Console.ForegroundColor = ConsoleColor.White;
             Console.Clear();
             Console.WriteLine("Game Over");
             
-            Console.WriteLine("\n {0} \n  Scores of this game:", game.board.ToString() );
+            Console.WriteLine(" {0} \n \n Scores of this game:", game.board.ToString() );
 
             foreach (var play in game.player)
             {
@@ -133,16 +134,6 @@ namespace Juego
             {
                 Console.WriteLine("Player {0}", winner.Id);
             }
-        }
-
-
-        public static bool ValidSettings(int players, int cadauno){
-
-            if (players <= 0) return false;
-            if (cadauno <=0) return false;
-            //if (PosiblesTokens.Count == 0) return false ;
-           //return (PosiblesTokens.Count - (players*cadauno) >= 0);
-           return true;
         }
 
         public static Token Turno(Player player, Game game)

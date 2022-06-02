@@ -7,13 +7,13 @@ namespace Juego
 {
      public class Program
     {
-        public static List<Ficha> PosiblesFichas = new List<Ficha>();
+        public static List<Token> PosiblesTokens = new List<Token>();
 
     [STAThread]
 
         public static void Main(string[] args)
         {
-            PosiblesFichas.Clear();
+            PosiblesTokens.Clear();
 
             int cadauno = 10;
             int cantplay = 4;
@@ -26,10 +26,10 @@ namespace Juego
             while (!ValidSettings(cantplay, cadauno))
             {
             Console.Clear();
-            Console.WriteLine("Escriba el doble maximo de las fichas");
+            Console.WriteLine("Escriba el doble maximo de las Tokens");
             max = int.Parse(Console.ReadLine()!);
      
-            Console.WriteLine("Escriba cuantas fichas se van a repartir a cada jugador");
+            Console.WriteLine("Escriba cuantas Tokens se van a repartir a cada jugador");
             cadauno = int.Parse(Console.ReadLine()!);
 
             Console.WriteLine("Escriba cuantos jugadores van a jugar");
@@ -49,30 +49,31 @@ namespace Juego
                 switch (a)
                 {
                     case 0:
-                     players[i] = new HumanPlayer(new List<Ficha>(), i+1);
+                     players[i] = new HumanPlayer(new List<Token>(), i+1);
                      break;
 
                      case 1:
-                     players[i] = new BotaGorda(new List<Ficha>(), i+1);
+                     players[i] = new BotaGorda(new List<Token>(), i+1);
                      break;
 
                      case 2:
-                     players[i] = new RandomPlayer(new List<Ficha>(), i+1);     
+                     players[i] = new RandomPlayer(new List<Token>(), i+1);     
                      break;
 
                      case 3:
-                     players[i] = new FirstSee(new List<Ficha>(), i+1);
+                     players[i] = new FirstSee(new List<Token>(), i+1);
                      break;
                 }
             }
 
            
 
-            Board board = new Board(new List<Ficha>());
+            Board board = new Board(new List<Token>());
+            Judge judge = new Judge();
 
-            Game game = new Game(board, players, changedirection, max, cantplay,cadauno);
+            Game game = new Game(board, players, changedirection, max, cantplay,cadauno, judge);
 
-            while (!game.EndGame())
+            while (!judge.EndGame(game))
             {
                 for (int i = 0; i < players.Length; i++)
                 {
@@ -82,25 +83,25 @@ namespace Juego
 
                  try
                 {
-                    Ficha ficha1; 
+                    Token Token1; 
 
-                    ficha1 = (game.board.board.Count ==0)? PrimerTurno(players[i],game) : Turno(players[i], game);
+                    Token1 = (game.board.board.Count ==0)? PrimerTurno(players[i],game) : Turno(players[i], game);
 
-                    if (ficha1 is null){
+                    if (Token1 is null){
                         if (changedirection) game.SwapDirection(i);;
                     }
 
-                    if (ficha1 != null)
+                    if (Token1 != null)
                     {
                         int index = -1;
 
-                        if (ficha1.Ambigua(game)){
+                        if (Token1.Ambigua(game)){
                          index = players[i].ChooseSide(game);
                         }
 
-                        game.board.AddFichaToBoard(ficha1, index);
-                        players[i].hand.Remove(ficha1);
-                        if (game.EndGame()){
+                        game.board.AddTokenToBoard(Token1, index);
+                        players[i].hand.Remove(Token1);
+                        if (judge.EndGame(game)){
                          break;
                         } 
                     }
@@ -109,27 +110,29 @@ namespace Juego
 
                 Thread.Sleep(500);  
                 }
-                    
-                
-               // }
             }
 
-            Console.Clear();
-            Console.WriteLine("Game Over");
-            game.Winner();
-            
+            WriteStats(game);
 
         }
 
-        public static void SwapDirection(Game game){
+        public static void WriteStats(Game game){
+            Console.Clear();
+            Console.WriteLine("Game Over");
+            
+            Console.WriteLine("\n {0} \n  Scores of this game:", game.board.ToString() );
 
-           for (int i = 0; i < game.player.Length/2; i++)
-           {
-               Player temp = game.player[i];
-               game.player[i] = game.player[game.player.Length -i-1];
-               game.player[game.player.Length -i-1] = temp;
-           }
+            foreach (var play in game.player)
+            {
+                Console.WriteLine("Player {0}: {1}", play.Id, play.Score());
+            }
+            
+            Console.WriteLine("\n Winner(s): ");
 
+            foreach (var winner in game.judge.Winner(game))
+            {
+                Console.WriteLine("Player {0}", winner.Id);
+            }
         }
 
 
@@ -137,17 +140,17 @@ namespace Juego
 
             if (players <= 0) return false;
             if (cadauno <=0) return false;
-            //if (PosiblesFichas.Count == 0) return false ;
-           //return (PosiblesFichas.Count - (players*cadauno) >= 0);
+            //if (PosiblesTokens.Count == 0) return false ;
+           //return (PosiblesTokens.Count - (players*cadauno) >= 0);
            return true;
         }
 
-        public static Ficha Turno(Player player, Game game)
+        public static Token Turno(Player player, Game game)
         {
             return player.BestPlay(game);           
         }
 
-        public static Ficha PrimerTurno(Player player, Game game)
+        public static Token PrimerTurno(Player player, Game game)
         {
             return player.BestPlay(game);           
         }

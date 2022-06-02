@@ -1,9 +1,9 @@
 namespace Juego
 {
     public class Board : IBoard {
-        public List<Ficha> board {get; set;}
+        public List<Token> board {get; set;}
 
-        public Board(List<Ficha> a){
+        public Board(List<Token> a){
           this.board = a;
         }
 
@@ -18,81 +18,81 @@ namespace Juego
           return a;
         }
 
-      public  void AddFichaToBoard(Ficha ficha, int side){
+      public  void AddTokenToBoard(Token Token, int side){
 
             if (this.board.Count==0) {
-                board.Insert(0, ficha);
+                board.Insert(0, Token);
                 return;
             }
 
-            Ficha first = board.First();
-            Ficha last = board.Last();
+            Token first = board.First();
+            Token last = board.Last();
 
             if (side != -1)
             {
                 if (side == 0)
                 {
-                    PlayAlante(ficha, first);
+                    PlayAlante(Token, first);
                     return;
                 }
 
                 if (side == 1)
                 {
-                    if (ficha.Contains(last.Parte2))
-                        PlayAtras(ficha, last);
+                    if (Token.Contains(last.Parte2))
+                        PlayAtras(Token, last);
                     return;
                 }
             }
 
 
-            if (ficha.Contains(first.Parte1))
+            if (Token.Contains(first.Parte1))
             {
-                PlayAlante(ficha, first);
+                PlayAlante(Token, first);
                 return;
             }
 
-            if (ficha.Contains(last.Parte2))
+            if (Token.Contains(last.Parte2))
             {
-                PlayAtras(ficha, last);
+                PlayAtras(Token, last);
                 return;
             }
 
         }
 
-         public void PlayAlante(Ficha ficha, Ficha first)
+         public void PlayAlante(Token Token, Token first)
         {
-            if (first.Parte1 == ficha.Parte1)
+            if (first.Parte1 == Token.Parte1)
             {
-                ficha.SwapFicha();
-                board.Insert(0, ficha);
+                Token.SwapToken();
+                board.Insert(0, Token);
 
                 return;
             }
 
-            board.Insert(0, ficha);
+            board.Insert(0, Token);
 
             return;
         }
 
-        public void PlayAtras(Ficha ficha, Ficha last)
+        public void PlayAtras(Token Token, Token last)
         {
-            if (ficha.Parte2 == last.Parte2)
+            if (Token.Parte2 == last.Parte2)
             {
-                ficha.SwapFicha();
-                board.Add(ficha);
+                Token.SwapToken();
+                board.Add(Token);
                 return;
             }
 
-            board.Add(ficha);
+            board.Add(Token);
             return;
         }
 
-        public Ficha First(){
+        public Token First(){
             if (board.Count == 0) return null!;
             return this.board.First();
         }
 
-        public Ficha Last(){
+        public Token Last(){
             if (board.Count == 0) return null!;
             return this.board.Last();
         }

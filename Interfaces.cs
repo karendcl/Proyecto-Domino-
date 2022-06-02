@@ -1,16 +1,16 @@
 namespace Juego
 {
   public interface IBoard{
-    List<Ficha> board {get;set;}
-    void AddFichaToBoard(Ficha ficha, int side);
+    List<Token> board {get;set;}
+    void AddTokenToBoard(Token Token, int side);
     string ToString();
   }
 
   public interface IPlayer {
-    public List<Ficha> hand {get; set;}
+    public List<Token> hand {get; set;}
     public int Id{get; set;}
 
-    public Ficha BestPlay(Game game);
+    public Token BestPlay(Game game);
   }
 
   public interface IRules 
@@ -18,11 +18,17 @@ namespace Juego
     bool SwitchDirection{get; set;}
     int MaxDouble{get; set;}
     int Players{get; set;}
-    int FichasForEach{get; set;}
-    public bool EndGame();
-
+    int TokensForEach{get; set;}
 }
   
+
+  public interface IJudge
+  {
+    bool ValidPlay(Board board, Token token);
+    bool EndGame(Game game);
+    bool ValidSettings(int TokensForEach, int MaxDoble, int players);
+    List<Player> Winner(Game game);
+  }
 
   
 }

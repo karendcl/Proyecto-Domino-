@@ -1,11 +1,11 @@
 namespace Juego
 {
-  public class Ficha  
+  public class Token  
     {
         public int Parte1 { set; get; }
         public int Parte2 { set; get; }
 
-        public Ficha(int parte1, int parte2)
+        public Token(int parte1, int parte2)
         {
             Parte1 = parte1;
             Parte2 = parte2;
@@ -16,7 +16,7 @@ namespace Juego
             return "[" + Parte1 + "|" + Parte2 + "] ";
         }
 
-        public bool IsMatch(Ficha other)
+        public bool IsMatch(Token other)
         {
             return (this.Parte1 == other.Parte1) ||
                    (this.Parte1 == other.Parte2) ||
@@ -34,12 +34,12 @@ namespace Juego
             return (this.Parte1.Equals(this.Parte2));
         }
 
-        public int Suma()
+        public int Value()
         {
             return Parte1 + Parte2;
         }
 
-        public void SwapFicha()
+        public void SwapToken()
         {
             var temp = this.Parte1;
             this.Parte1 = this.Parte2;

@@ -1,72 +1,74 @@
 namespace Juego
 {
-          public class Game : IRules
+        public class Game : IRules
     {
         public Board board { get; set; }
-        public Player[] player{get; set;}
+        public List<Player> player{get; set;}
         public bool SwitchDirection{get; set;}
         public int MaxDouble{get; set;}
         public int Players{get; set;}
-        public int FichasForEach{get; set;}
+        public int TokensForEach{get; set;}
+        public Judge judge{get;set;}
 
 
-        public Game(Board board, Player[] players, bool direction, int max, int plays, int rep)
+        public Game(Board board, Player[] players, bool direction, int max, int plays, int rep, Judge judge)
         {
             this.board = board;
-            this.player = players;
+            this.player = players.ToList();
             this.SwitchDirection = direction;
             this.MaxDouble = max;
             this.Players = plays;
-            this.FichasForEach = rep;
+            this.TokensForEach = rep;
+            this.judge = judge;
 
-           // GenerarFichas();
-            AssignFichas();
+           // GenerarTokens();
+            AssignTokens();
         }
 
-        public void AssignFichas(){
+        public void AssignTokens(){
 
-            List<Ficha> PosiblesFichas =  GenerarFichas(); 
+            List<Token> PosiblesTokens =  GenerarTokens(); 
 
             foreach (var play in player)
             {
-                play.hand = RepartirFichas(PosiblesFichas);
+                play.hand = RepartirTokens(PosiblesTokens);
             }
         }
 
 
-        public List<Ficha> RepartirFichas(List<Ficha> PosiblesFichas){
-            int cantidadDisponible = PosiblesFichas.Count;
+        public List<Token> RepartirTokens(List<Token> PosiblesTokens){
+            int cantidadDisponible = PosiblesTokens.Count;
 
             int contador = 0;
-            var lista = new List<Ficha>();
+            var lista = new List<Token>();
 
-                while (contador != FichasForEach)
+                while (contador != TokensForEach)
                 {
                     var r = new Random();
                     var index = r.Next(0, cantidadDisponible);
                     cantidadDisponible--;
                     contador++;
-                    lista.Add(PosiblesFichas.ElementAt(index));
-                    PosiblesFichas.RemoveAt(index);
+                    lista.Add(PosiblesTokens[index]);
+                    PosiblesTokens.RemoveAt(index);
                 }
 
             return lista;
         }
 
-        public List<Ficha> GenerarFichas(){
+        public List<Token> GenerarTokens(){
 
-            List<Ficha> PosiblesFichas = new List<Ficha>();
+            List<Token> PosiblesTokens = new List<Token>();
 
              for (int i = 0; i <= this.MaxDouble; i++)
             {
                 for (int j = i; j <= this.MaxDouble; j++)
                 {
-                    Ficha ficha = new Ficha(i, j);
-                    PosiblesFichas.Add(ficha);
+                    Token Token = new Token(i, j);
+                    PosiblesTokens.Add(Token);
                 }
             }
 
-            return PosiblesFichas;
+            return PosiblesTokens;
         } 
 
         public override string ToString(){
@@ -76,53 +78,9 @@ namespace Juego
 
           return a;     
         }
+    
 
-        public bool ValidPlay(Ficha ficha)
-        {
-            if (board.board.Count==0) return true;
-            if (ficha.Contains(board.First().Parte1)) return true;
-            if (ficha.Contains(board.Last().Parte2)) return true;
-            return false;
-        }
-
-        
-
-       public virtual void Winner(){
-        int[] scores = new int[player.Length];
-
-        int count = 0;
-
-        Console.WriteLine(this.ToString());
-
-        Console.WriteLine("\n\nAll Scores:");
-
-        foreach (var player in player)
-        {
-            foreach (var ficha in player.hand)
-            {
-                scores[count] += ficha.Suma();
-            }
-            count++;
-            Console.WriteLine("Player {0} : {1} points", count, scores[count-1]);
-        }
- 
-         var pl =0;
-
-        foreach (var player in player)
-        {
-            if (player.hand.Count==0){
-               Console.WriteLine("\n \n The winner is Player {0}, because they ran out of fichas", pl +1);
-               return;
-            }
-            pl++;
-        }
-
-        int score = scores.Min();
-        int index = Array.IndexOf(scores, score);
-
-        Console.WriteLine("\n \n The winner is Player {0}, with a score of {1}", index +1, score);
-       }
-
+       
         public void SwapDirection(int player){
 
           if (SwitchDirection){
@@ -136,26 +94,14 @@ namespace Juego
                      player --;   
                  }
 
-                 this.player = players;
+                 this.player = players.ToList();
           
           }
 
 
         }
 
-        public virtual bool EndGame()
-        {
-            foreach (var player in this.player)
-            {
-                if (player.hand.Count ==0) return true;
-
-                foreach (var ficha in player.hand)
-                {
-                    if (this.ValidPlay(ficha)) return false;
-                }
-            }
-            return true;
-        }
+        
     }
 }
 

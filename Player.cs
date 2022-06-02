@@ -2,16 +2,16 @@ namespace Juego
 {
     public abstract class Player : IPlayer
     {
-        public List<Ficha> hand{get; set;}
+        public List<Token> hand{get; set;}
         public int Id{get; set;}
 
-        public Player(List<Ficha> fichas, int id)
+        public Player(List<Token> Tokens, int id)
         {
-            this.hand = fichas;
+            this.hand = Tokens;
             this.Id = id;
         }
 
-        public virtual Ficha FirstFicha(Game game){
+        public virtual Token FirstToken(Game game){
              var r = new Random();
             return hand.ElementAt(r.Next(0,hand.Count));
         }
@@ -27,19 +27,30 @@ namespace Juego
             return a;
         }
 
-        public List<Ficha> PossiblePlays(Game game)
+        public virtual int Score(){
+            int a = 0;
+
+            foreach (var token in hand)
+            {
+                a+= token.Value();
+            }
+
+            return a;
+        }
+
+        public List<Token> PossiblePlays(Game game)
         {
-            var CanPlay = new List<Ficha>();
+            var CanPlay = new List<Token>();
 
             foreach (var item in hand)
             {
-                if (game.ValidPlay(item)) CanPlay.Add(item);
+                if (game.judge.ValidPlay(game.board, item)) CanPlay.Add(item);
             }
 
             return CanPlay;
         }
 
-        public abstract Ficha BestPlay(Game game);
+        public abstract Token BestPlay(Game game);
 
         public virtual int ChooseSide(Game game){
             return 0;
@@ -48,11 +59,11 @@ namespace Juego
     }
 
     public class BotaGorda : Player{
-        public BotaGorda(List<Ficha> fichas, int id) : base(fichas,id)
+        public BotaGorda(List<Token> Tokens, int id) : base(Tokens,id)
         {
         }
 
-        public override Ficha BestPlay(Game game){
+        public override Token BestPlay(Game game){
             var posibles = PossiblePlays(game);
             if (posibles.Count ==0) return null!;
 
@@ -67,33 +78,33 @@ namespace Juego
             return posibles[index];
         }
 
-        public  int Evaluate(Ficha ficha, Game game){
+        public  int Evaluate(Token Token, Game game){
              int valor = 0;
 
              foreach (var item in this.hand)
              {
-                if (item.IsMatch(ficha)) valor++; 
+                if (item.IsMatch(Token)) valor++; 
              }
 
-             if (ficha.IsDouble()) valor++;
+             if (Token.IsDouble()) valor++;
 
-             valor += (int)(ficha.Suma() / 2);
+             valor += (int)(Token.Value() / 2);
 
              return valor;
         }
     }
 
     public class RandomPlayer : Player{
-        public RandomPlayer(List<Ficha> fichas, int id) : base(fichas,id)
+        public RandomPlayer(List<Token> Tokens, int id) : base(Tokens,id)
         {
         }
 
-        public int Evaluate(Ficha ficha, Game game){
+        public int Evaluate(Token Token, Game game){
              var r = new Random();
              return r.Next(1,100);
         }
 
-          public override Ficha BestPlay(Game game){
+          public override Token BestPlay(Game game){
             var posibles = PossiblePlays(game);
             if (posibles.Count ==0) return null!;
             
@@ -115,11 +126,11 @@ namespace Juego
     }
 
      public class FirstSee : Player{
-        public FirstSee(List<Ficha> fichas, int id) : base(fichas,id)
+        public FirstSee(List<Token> Tokens, int id) : base(Tokens,id)
         {
         }
 
-        public override Ficha BestPlay(Game game){
+        public override Token BestPlay(Game game){
             var posibles = PossiblePlays(game);
             if (posibles.Count ==0) return null!;
 
@@ -134,7 +145,7 @@ namespace Juego
 
     public class HumanPlayer : Player
     {
-        public HumanPlayer(List<Ficha> fichas, int id) : base(fichas,id)
+        public HumanPlayer(List<Token> Tokens, int id) : base(Tokens,id)
         {
         }
 
@@ -143,23 +154,23 @@ namespace Juego
             return index < -1 || index >= hand.Count;
         }
 
-        public override Ficha FirstFicha(Game game){
+        public override Token FirstToken(Game game){
            return BestPlay(game);
         }
 
-        public override Ficha BestPlay(Game game)
+        public override Token BestPlay(Game game)
         {
             int ToPlay = -2;
 
             while (OutRange(ToPlay))
             {
-                Console.WriteLine("Escriba el indice de la ficha a jugar. Comenzando desde 0. Si no lleva escriba -1");
+                Console.WriteLine("Escriba el indice de la Token a jugar. Comenzando desde 0. Si no lleva escriba -1");
                 ToPlay = int.Parse(Console.ReadLine()!);
                 if (ToPlay == -1) return null!;
 
-                 while (!game.ValidPlay(this.hand[ToPlay]))
+                 while (!game.judge.ValidPlay(game.board,this.hand[ToPlay]))
             {
-                Console.WriteLine("No haga trampa! Escriba otra ficha");
+                Console.WriteLine("No haga trampa! Escriba otra Token");
                 ToPlay = int.Parse(Console.ReadLine()!);
             }
             }

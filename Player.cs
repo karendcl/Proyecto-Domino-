@@ -1,14 +1,19 @@
 namespace Juego
 {
-    public abstract class Player : IPlayer
+    public  class Player : IPlayer
     {
         public List<Token> hand{get; set;}
         public int Id{get; set;}
+        public int TotalScore{get; set;}
 
-        public Player(List<Token> Tokens, int id)
+        public IPlayerStrategy strategy{get;set;}
+
+        public Player(List<Token> Tokens, int id, IPlayerStrategy strategy)
         {
             this.hand = Tokens;
             this.Id = id;
+            this.TotalScore = 0;
+            this.strategy = strategy;
         }
 
         public virtual Token FirstToken(Game game){
@@ -17,22 +22,11 @@ namespace Juego
         }
 
         public override string ToString(){
-            string a = "Player " + this.Id + "\n";
+            string a = "\n Player " + this.Id + "\n" ;
 
             foreach (var item in this.hand)
             {
                 a += item.ToString();
-            }
-
-            return a;
-        }
-
-        public virtual int Score(){
-            int a = 0;
-
-            foreach (var token in hand)
-            {
-                a+= token.Value();
             }
 
             return a;
@@ -50,7 +44,20 @@ namespace Juego
             return CanPlay;
         }
 
-        public abstract Token BestPlay(Game game);
+        public virtual Token BestPlay(Game game){
+            var posibles = PossiblePlays(game);
+            if (posibles.Count ==0) return null!;
+
+            int[] scores = new int[posibles.Count];
+
+            for (int i = 0; i < scores.Length; i++)
+            {
+                scores[i] += strategy.Evaluate(posibles[i], hand, game);
+            }
+
+            int index = Array.IndexOf(scores, scores.Max());
+            return posibles[index];
+        }
 
         public virtual int ChooseSide(Game game){
             return 0;
@@ -58,104 +65,16 @@ namespace Juego
 
     }
 
-    public class BotaGorda : Player{
-        public BotaGorda(List<Token> Tokens, int id) : base(Tokens,id)
-        {
-        }
-
-        public override Token BestPlay(Game game){
-            var posibles = PossiblePlays(game);
-            if (posibles.Count ==0) return null!;
-
-            int[] scores = new int[posibles.Count];
-
-            for (int i = 0; i < scores.Length; i++)
-            {
-                scores[i] += Evaluate(posibles[i], game);
-            }
-
-            int index = Array.IndexOf(scores, scores.Max());
-            return posibles[index];
-        }
-
-        public  int Evaluate(Token Token, Game game){
-             int valor = 0;
-
-             foreach (var item in this.hand)
-             {
-                if (item.IsMatch(Token)) valor++; 
-             }
-
-             if (Token.IsDouble()) valor++;
-
-             valor += (int)(Token.Value() / 2);
-
-             return valor;
-        }
-    }
-
-    public class RandomPlayer : Player{
-        public RandomPlayer(List<Token> Tokens, int id) : base(Tokens,id)
-        {
-        }
-
-        public int Evaluate(Token Token, Game game){
-             var r = new Random();
-             return r.Next(1,100);
-        }
-
-          public override Token BestPlay(Game game){
-            var posibles = PossiblePlays(game);
-            if (posibles.Count ==0) return null!;
-            
-            int[] scores = new int[posibles.Count];
-
-            for (int i = 0; i < scores.Length; i++)
-            {
-                scores[i] += Evaluate(posibles[i], game);
-            }
-
-            int index = Array.IndexOf(scores, scores.Max());
-            return posibles[index];
-        }
-
-        public override int ChooseSide(Game game){
-            var r = new Random();
-            return r.Next(0,2);
-        }
-    }
-
-     public class FirstSee : Player{
-        public FirstSee(List<Token> Tokens, int id) : base(Tokens,id)
-        {
-        }
-
-        public override Token BestPlay(Game game){
-            var posibles = PossiblePlays(game);
-            if (posibles.Count ==0) return null!;
-
-            return posibles[0];  
-        }
-
-        public override int ChooseSide(Game game){
-            return 1;
-        }
-       
-    }
 
     public class HumanPlayer : Player
     {
-        public HumanPlayer(List<Token> Tokens, int id) : base(Tokens,id)
+        public HumanPlayer(List<Token> Tokens, int id, IPlayerStrategy strategy) : base(Tokens,id, strategy)
         {
         }
 
         public bool OutRange(int index)
         {
             return index < -1 || index >= hand.Count;
-        }
-
-        public override Token FirstToken(Game game){
-           return BestPlay(game);
         }
 
         public override Token BestPlay(Game game)

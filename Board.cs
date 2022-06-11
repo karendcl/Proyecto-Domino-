@@ -38,20 +38,20 @@ namespace Juego
 
                 if (side == 1)
                 {
-                    if (Token.Contains(last.Parte2))
+                    if (Token.Contains(last.Part2))
                         PlayAtras(Token, last);
                     return;
                 }
             }
 
 
-            if (Token.Contains(first.Parte1))
+            if (Token.Contains(first.Part1))
             {
                 PlayAlante(Token, first);
                 return;
             }
 
-            if (Token.Contains(last.Parte2))
+            if (Token.Contains(last.Part2))
             {
                 PlayAtras(Token, last);
                 return;
@@ -61,7 +61,7 @@ namespace Juego
 
          public void PlayAlante(Token Token, Token first)
         {
-            if (first.Parte1 == Token.Parte1)
+            if (first.Part1 == Token.Part1)
             {
                 Token.SwapToken();
                 board.Insert(0, Token);
@@ -76,7 +76,7 @@ namespace Juego
 
         public void PlayAtras(Token Token, Token last)
         {
-            if (Token.Parte2 == last.Parte2)
+            if (Token.Part2 == last.Part2)
             {
                 Token.SwapToken();
                 board.Add(Token);

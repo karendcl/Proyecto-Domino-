@@ -2,16 +2,17 @@ namespace Juego
 {
         public class Game : IRules
     {
-        public Board board { get; set; }
-        public List<Player> player{get; set;}
+        public IBoard board { get; set; }
+        public bool DrawToken {get;set;}
+        public List<IPlayer> player{get; set;}
         public bool SwitchDirection{get; set;}
         public int MaxDouble{get; set;}
         public int Players{get; set;}
         public int TokensForEach{get; set;}
-        public Judge judge{get;set;}
+        public IJudge judge{get;set;}
 
 
-        public Game(Board board, Player[] players, bool direction, int max, int plays, int rep, Judge judge)
+        public Game(IBoard board, IPlayer[] players, bool direction, int max, int plays, int rep, IJudge judge, bool draw)
         {
             this.board = board;
             this.player = players.ToList();
@@ -20,6 +21,7 @@ namespace Juego
             this.Players = plays;
             this.TokensForEach = rep;
             this.judge = judge;
+            this.DrawToken = draw;
 
            // GenerarTokens();
             AssignTokens();
@@ -29,9 +31,16 @@ namespace Juego
             this.player.Add(player);
         }
 
+        public bool DeletePlayer(Player player){
+            if (this.player.Count ==1) return false;
+
+            this.player.Remove(player);
+            return true; 
+        }
+
         public void AssignTokens(){
 
-            List<Token> PosiblesTokens =  GenerarTokens(); 
+            List<Token> PosiblesTokens =  GenerarTokens();
 
             foreach (var play in player)
             {
@@ -88,7 +97,7 @@ namespace Juego
         public void SwapDirection(int player){
 
           if (SwitchDirection){
-              Player[] players = new Player[this.Players];
+              IPlayer[] players = new Player[this.Players];
 
                for (int i = 0; i < players.Length; i++)
                  {
@@ -101,9 +110,13 @@ namespace Juego
                  this.player = players.ToList();
           
           }
-
-
         }
+
+         public virtual List<IPlayer> Winner(){
+          return this.judge.winCondition.Winner(this.player, this.judge);
+    }
+
+        
 
         
     }

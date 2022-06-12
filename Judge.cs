@@ -74,33 +74,18 @@ namespace Juego
             Token first = board.First();
             Token last = board.Last();
 
-            if (side != -1)
-            {
-                if (side == 0)
+           
+                if ((side == 0) || (valid.Match(token.Part1, first.Part1) || valid.Match(token.Part2, first.Part1)))
                 {
-                    PlayAlante(token, first,board);
+                    PlayAlante(token, first, board);
                     return;
                 }
 
-                if (side == 1)
+                if ((side == 1) || (valid.Match(token.Part1, last.Part2) || valid.Match(token.Part2, last.Part2)))
                 {
                      PlayAtras(token, last, board);
                     return;
                 }
-            }
-
-
-            if (valid.Match(token.Part1, first.Part1) || valid.Match(token.Part2, first.Part1))
-            {
-                PlayAlante(token, first, board);
-                return;
-            }
-
-            if (valid.Match(token.Part1, last.Part2) || valid.Match(token.Part2, last.Part2))
-            {
-                PlayAtras(token, last, board);
-                return;
-            }
 
         }
         
@@ -108,29 +93,18 @@ namespace Juego
          public void PlayAlante(Token Token, Token first, IBoard board)
         {
             if (valid.Match(Token.Part1, first.Part1))
-            {
                 Token.SwapToken();
-                board.board.Insert(0, Token);
-
-                return;
-            }
-
+            
             board.board.Insert(0, Token);
-
-            return;
         }
 
         public void PlayAtras(Token Token, Token last, IBoard board)
         {
             if (valid.Match(Token.Part2, last.Part2))
-            {
                 Token.SwapToken();
-                board.board.Add(Token);
-                return;
-            }
-
+            
             board.board.Add(Token);
-            return;
+        
         }
 
     public bool PlayAmbigua(Token token, IBoard board){

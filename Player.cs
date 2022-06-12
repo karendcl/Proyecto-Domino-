@@ -60,7 +60,7 @@ namespace Juego
         }
 
         public virtual int ChooseSide(Game game){
-            return 0;
+            return strategy.ChooseSide(game);
         }
 
     }

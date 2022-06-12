@@ -8,6 +8,7 @@ namespace Juego
 
  public interface IPlayerStrategy {
    int Evaluate(Token token, List<Token> hand,Game game);
+   int ChooseSide(Game game);
  }
  
    public interface IGetScore{
@@ -47,7 +48,9 @@ namespace Juego
     bool ValidPlay(IBoard board, Token token);
     bool ValidPlayFront(IBoard board, Token token);
     bool ValidPlayBack(IBoard board, Token token);
-      bool Match (int Part1, int part2);
+    bool Match (int Part1, int part2);
+
+    bool FirstPlay(IBoard board);
   }
 
   public interface IJudge

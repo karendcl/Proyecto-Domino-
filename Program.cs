@@ -91,7 +91,7 @@ namespace Juego
                     case 3:
                         int spscore = 0;
                         Console.WriteLine("Que score especifico?");
-                        spscore = int.Parse(Console.ReadLine());
+                        spscore = int.Parse(Console.ReadLine()!);
                         winCondition = new Specificscore(spscore);
                         break;
                 }
@@ -122,7 +122,6 @@ namespace Juego
                         break;    
                 }
             }
-
 
 
             IJudge judge = new Judge(stopcondition, HowTogetScore, winCondition, validPlay);
@@ -189,10 +188,7 @@ namespace Juego
                 {
                     for (int i = 0; i < game.player.Count; i++) //turno de cada jugador
                     {
-                        if (judge.EndGame(game))
-                        { //si el juez determina que se acabo el juego
-                            break;
-                        }
+                        if (judge.EndGame(game)) break;
 
                         Console.Clear();
                         Console.WriteLine(players[i].ToString());

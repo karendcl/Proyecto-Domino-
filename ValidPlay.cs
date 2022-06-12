@@ -2,12 +2,9 @@
 namespace Juego;
 public class ClassicValidPlay : IValidPlay
 {
-    public ClassicValidPlay()
-    {
-    }
     public bool ValidPlay(IBoard board, Token token)
     {
-        if (board.board.Count == 0) return true;
+        if (FirstPlay(board)) return true;
         if (ValidPlayFront(board, token)) return true;
         if (ValidPlayBack(board, token)) return true;
         return false;
@@ -35,11 +32,11 @@ public class ClassicValidPlay : IValidPlay
     }
 }
 
-public class SmallerValidPlay : IValidPlay
+public class BiggerValidPlay : IValidPlay
 {
     public bool ValidPlay(IBoard board, Token token)
     {
-        if (board.board.Count == 0) return true;
+        if (FirstPlay(board)) return true;
         if (ValidPlayFront(board, token)) return true;
         if (ValidPlayBack(board, token)) return true;
         return false;
@@ -48,8 +45,8 @@ public class SmallerValidPlay : IValidPlay
 
     public bool ValidPlayFront(IBoard board, Token token)
     {    if (FirstPlay(board)) return true;
-        return (token.Part1 < board.First().Part1 ||
-                token.Part2 < board.First().Part1);
+        return (Match(token.Part1, board.First().Part1) ||
+                Match(token.Part2, board.First().Part1));
     }
     public bool FirstPlay(IBoard board)
     {
@@ -59,17 +56,17 @@ public class SmallerValidPlay : IValidPlay
     public bool ValidPlayBack(IBoard board, Token token)
     {     
         if (FirstPlay(board)) return true;
-        return (token.Part1 < board.Last().Part2 ||
-                token.Part2 < board.Last().Part2);
+        return (Match(token.Part1, board.Last().Part2) ||
+                Match(token.Part2, board.Last().Part2));
     }
 
-    public bool Match(int Part1, int part2)
+    public bool Match(int token, int board)
     {
-        return (part2 < Part1);
+        return (board < token);
     }
 }
 
-public class BiggerValidPlay : IValidPlay
+public class SmallerValidPlay : IValidPlay
 {
     public bool ValidPlay(IBoard board, Token token)
     {       if (FirstPlay(board)) return true;
@@ -82,8 +79,8 @@ public class BiggerValidPlay : IValidPlay
 
     public bool ValidPlayFront(IBoard board, Token token)
     {      if (FirstPlay(board)) return true;
-        return (token.Part1 > board.First().Part1 ||
-                token.Part2 > board.First().Part1);
+        return (Match(token.Part1, board.First().Part1) ||
+                 Match(token.Part2, board.First().Part1));
     }
    public bool FirstPlay(IBoard board)
     {    
@@ -92,8 +89,8 @@ public class BiggerValidPlay : IValidPlay
     }
     public bool ValidPlayBack(IBoard board, Token token)
     {    if (FirstPlay(board)) return true;
-        return (token.Part1 > board.Last().Part2 ||
-                 token.Part2 > board.Last().Part2);
+        return (Match(token.Part1, board.Last().Part2) ||
+                Match(token.Part2, board.Last().Part2));
     }
 
     public bool Match(int Part1, int part2)

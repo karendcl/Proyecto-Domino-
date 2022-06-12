@@ -28,8 +28,8 @@ namespace Juego
             while (stop < 1 || stop > 2)
             {
                 Console.WriteLine("Que tipo de criterio quiere para terminar el juego? \n\n 1. Clasico (se tranque o alguien se pegue) \n 2. Que alguien tenga un score especifico");
-                stop = int.Parse(Console.ReadLine()!);
-
+                //stop = int.Parse(Console.ReadLine()!);
+                    stop=1;
                 switch (stop)
                 {
                     case 1:
@@ -44,7 +44,7 @@ namespace Juego
                 }
             }
 
-            Console.Clear();
+           // Console.Clear();
 
             IGetScore HowTogetScore = new ClassicScore();
 
@@ -53,8 +53,8 @@ namespace Juego
             while (score < 1 || score > 2)
             {
                 Console.WriteLine("Que manera quiere para contar las fichas? \n\n 1. Clasico (la suma del valor de sus partes) \n 2. Si la ficha es doble, vale el doble de puntos");
-                score = int.Parse(Console.ReadLine()!);
-
+                //score = int.Parse(Console.ReadLine()!);
+                    score=1;
                 switch (score)
                 {
                     case 1:
@@ -76,8 +76,8 @@ namespace Juego
             while (winConditionn < 1 || winConditionn > 3)
             {
                 Console.WriteLine("Una vez acabe el juego, quien ganaria? \n \n 1. El que tenga mas puntos \n 2. El que tenga menos puntos \n 3. El que tenga una catidad de puntos especificos");
-                winConditionn = int.Parse(Console.ReadLine()!);
-
+               // winConditionn = int.Parse(Console.ReadLine()!);
+                    winConditionn=1;
                 switch (winConditionn)
                 {
                     case 1:
@@ -92,12 +92,13 @@ namespace Juego
                         int spscore = 0;
                         Console.WriteLine("Que score especifico?");
                         spscore = int.Parse(Console.ReadLine());
+                       
                         winCondition = new Specificscore(spscore);
                         break;
                 }
             }
 
-            Console.Clear();
+           // Console.Clear();
 
             IValidPlay validPlay = new ClassicValidPlay();
             int val =0;
@@ -105,8 +106,8 @@ namespace Juego
             while (val < 1 || val > 3)
             {
                 Console.WriteLine("Que jugada seria valida? \n\n 1. Clasico  \n 2. Solo si el nuemero es menor \n 3. Solo si el numero es mayor");
-                val = int.Parse(Console.ReadLine()!);
-
+                //val = int.Parse(Console.ReadLine()!);
+                    val=1;
                 switch (val)
                 {
                     case 1:
@@ -135,13 +136,14 @@ namespace Juego
             {
                 Console.Clear();
                 Console.WriteLine("Escriba el doble maximo de las Tokens");
-                max = int.Parse(Console.ReadLine()!);
-
+               // max = int.Parse(Console.ReadLine()!);
+                    max=9;
                 Console.WriteLine("Escriba cuantas Tokens se van a repartir a cada jugador");
-                cadauno = int.Parse(Console.ReadLine()!);
-
+                //cadauno = int.Parse(Console.ReadLine()!);
+                    cadauno=5;
                 Console.WriteLine("Escriba cuantos jugadores van a jugar");
-                cantplay = int.Parse(Console.ReadLine()!);
+                //cantplay = int.Parse(Console.ReadLine()!);
+                cantplay=5;
             }
 
             IPlayer[] players = new Player[cantplay];
@@ -157,7 +159,8 @@ namespace Juego
                     Console.WriteLine("Elija la estrategia para el Player {0}. \n \n ➤ Escriba 0 para un jugador semi inteligente. \n ➤ Escriba 1 para jugador botagorda. \n ➤ Escriba 2 para jugador random. ", i + 1);
                    // a = 2;
 
-                   a = int.Parse(Console.ReadLine()!);
+                   //a = int.Parse(Console.ReadLine()!);
+                   a=2;
                 }
 
                 switch (a)

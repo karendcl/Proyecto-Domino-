@@ -8,24 +8,26 @@
     "net6.0": []
   },
   "packageFolders": {
-    "C:\\Users\\karen\\.nuget\\packages\\": {}
+    "C:\\Users\\paco2\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Karen\\Universidad\\2do Ano\\Programacion II\\Proyecto\\Proyecto.csproj",
+      "projectUniqueName": "C:\\Users\\paco2\\Desktop\\proyects\\Domino duo\\junio\\Prog-Project-Game\\Proyecto.csproj",
       "projectName": "Proyecto",
-      "projectPath": "C:\\Karen\\Universidad\\2do Ano\\Programacion II\\Proyecto\\Proyecto.csproj",
-      "packagesPath": "C:\\Users\\karen\\.nuget\\packages\\",
-      "outputPath": "C:\\Karen\\Universidad\\2do Ano\\Programacion II\\Proyecto\\obj\\",
+      "projectPath": "C:\\Users\\paco2\\Desktop\\proyects\\Domino duo\\junio\\Prog-Project-Game\\Proyecto.csproj",
+      "packagesPath": "C:\\Users\\paco2\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\paco2\\Desktop\\proyects\\Domino duo\\junio\\Prog-Project-Game\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\karen\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\paco2\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net6.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

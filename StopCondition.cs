@@ -1,7 +1,11 @@
-namespace Juego
-{
+
+namespace Juego;
 
 public class Classic : IStopGame{
+
+    public Classic()
+    {
+    }
     public bool MeetsCriteria(IPlayer player, IGetScore score){
         return (player.hand.Count==0)? true : false;
     }
@@ -24,5 +28,4 @@ public class CertainScore: IStopGame{
 
         return (result == Score);
     }
-}
 }

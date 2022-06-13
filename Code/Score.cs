@@ -1,6 +1,9 @@
 namespace Juego
 {
     public class ClassicScore: IGetScore{
+        public ClassicScore()
+        {
+        }
         public int Score(Token token){
             return token.Part1.GetHashCode() + token.Part2.GetHashCode();
         }

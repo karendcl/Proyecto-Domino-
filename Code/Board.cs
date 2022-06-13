@@ -93,7 +93,7 @@ namespace Juego
         }
 
         public Token Last(){
-            if (board.Count == 0) return null!;
+            if (board.Count == 0) throw new NullReferenceException("The token can´t be null");
             return this.board.Last();
         }
     }

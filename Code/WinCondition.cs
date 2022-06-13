@@ -1,6 +1,11 @@
-namespace Juego
-{
+
+    namespace Juego;
     public class MinScore : IWinCondition{
+
+        public MinScore()
+        {
+            
+        }
        public List<IPlayer> Winner (List<IPlayer> players, IJudge judge){
 
         int count = 0;
@@ -131,4 +136,3 @@ namespace Juego
         return result;
         }
     }
-}

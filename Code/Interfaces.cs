@@ -45,6 +45,8 @@ namespace Juego
 }
   
   public interface IValidPlay{
+     bool FirstPlay(IBoard board);
+    
     bool ValidPlay(IBoard board, Token token);
     bool ValidPlayFront(IBoard board, Token token);
     bool ValidPlayBack(IBoard board, Token token);

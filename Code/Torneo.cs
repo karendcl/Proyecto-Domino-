@@ -113,14 +113,4 @@ public class Championship
 }
 
 
-public class Msg
-{
-    public IPlayer player { private set; get; }
-
-    public void PlayerMsg(IPlayer player)
-    {
-        this.player = player;
-
-    }
-}
 

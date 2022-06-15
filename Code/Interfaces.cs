@@ -81,6 +81,6 @@ namespace Juego
     public interface ICloneable<T> : ICloneable
     {
         new T Clone();
-        Object ICloneable.Clone() => Clone();
+        Object ICloneable.Clone() => Clone()!;
     }
 }

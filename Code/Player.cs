@@ -69,7 +69,7 @@ namespace Juego
 
         public virtual Player Clone()
         {
-            return new Player(this.hand,this.Id,this.strategy);
+            return new Player(new List<Token>(),this.Id,this.strategy);
         }
     }
 

@@ -2,6 +2,10 @@ namespace Juego
 {
         public class Game : IRules,ICloneable<Game>
     {
+        public bool Test{get; set;}=false; 
+        //Para testiar que se clonan correctamente
+        public bool AssignToken{get; private set;}=false;
+          
         public IBoard board { get; set; }
         public bool DrawToken {get;set;}
         public List<IPlayer> player{get; set;}
@@ -46,6 +50,7 @@ namespace Juego
             {
                 play.hand = RepartirTokens(PosiblesTokens);
             }
+            AssignToken=true;
         }
 
 
@@ -118,7 +123,7 @@ namespace Juego
 
        public Game Clone() 
        {
-            return new Game(this.board,this.player.ToArray(),this.SwitchDirection,this.MaxDouble,this.Players,this.TokensForEach,this.judge,this.DrawToken);
+            return new Game(new Board(new List<Token>()),this.player.ToArray(),this.SwitchDirection,this.MaxDouble,this.Players,this.TokensForEach,this.judge,this.DrawToken);
        }
         
     }

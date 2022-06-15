@@ -30,7 +30,7 @@ namespace Juego
         bool MeetsCriteria(IPlayer player, IGetScore howtogetscore);
     }
 
-    public interface IPlayer:ICloneable
+    public interface IPlayer : ICloneable
     {
         public List<Token> hand { get; set; }
         public int Id { get; set; }
@@ -75,5 +75,12 @@ namespace Juego
 
         void AddTokenToBoard(Token token, IBoard board, int side);
 
+    }
+
+
+    public interface ICloneable<T> : ICloneable
+    {
+        new T Clone();
+        Object ICloneable.Clone() => Clone();
     }
 }

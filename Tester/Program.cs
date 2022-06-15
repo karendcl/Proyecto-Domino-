@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 
-namespace Juego
-{
+namespace Juego;
+/*
     public class Program
     {
         public static void Main(string[] args)
@@ -258,4 +258,21 @@ namespace Juego
             return player.BestPlay(game);
         }
     }
-}
+*/
+
+ public class Program
+    {
+        public static void Main(string[] args)
+        {
+             System.Console.WriteLine("Desea Empezar una nueva partida");
+            string msg= Console.ReadLine()!;
+            bool start=msg[0]=='s'?true:false;
+            if (!start) Console.Clear();
+
+            Console.WriteLine("Cuantos plays desea jugar");
+            int cantPlays=int.Parse(Console.ReadLine()!);
+            Console.Clear();
+            Championship torneo=new Championship(cantPlays);
+        }
+
+    }

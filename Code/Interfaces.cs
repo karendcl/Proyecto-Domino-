@@ -30,7 +30,7 @@ namespace Juego
         bool MeetsCriteria(IPlayer player, IGetScore howtogetscore);
     }
 
-    public interface IPlayer
+    public interface IPlayer:ICloneable
     {
         public List<Token> hand { get; set; }
         public int Id { get; set; }

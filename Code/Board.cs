@@ -1,26 +1,31 @@
 namespace Juego
 {
-    public class Board : IBoard {
-        public List<Token> board {get; set;}
+    public class Board : IBoard, ICloneable
+    {
+        public List<Token> board { get; set; }
 
-        public Board(List<Token> a){
-          this.board = a;
+        public Board(List<Token> a)
+        {
+            this.board = a;
         }
 
-        public override string ToString(){
-          string a ="\n Board:  \n";
+        public override string ToString()
+        {
+            string a = "\n Board:  \n";
 
-          foreach (var item in this.board)
-          {
-              a += item.ToString();
-          }
+            foreach (var item in this.board)
+            {
+                a += item.ToString();
+            }
 
-          return a;
+            return a;
         }
 
-      public  void AddTokenToBoard(Token Token, int side){
+        public void AddTokenToBoard(Token Token, int side)
+        {
 
-            if (this.board.Count==0) {
+            if (this.board.Count == 0)
+            {
                 board.Insert(0, Token);
                 return;
             }
@@ -59,7 +64,7 @@ namespace Juego
 
         }
 
-         public void PlayAlante(Token Token, Token first)
+        public void PlayAlante(Token Token, Token first)
         {
             if (first.Part1 == Token.Part1)
             {
@@ -87,15 +92,22 @@ namespace Juego
             return;
         }
 
-        public Token First(){
+        public Token First()
+        {
             if (board.Count == 0) return null!;
             return this.board.First();
         }
 
-        public Token Last(){
+        public Token Last()
+        {
             if (board.Count == 0) throw new NullReferenceException("The token can´t be null");
             return this.board.Last();
         }
+
+        public object Clone()
+        {
+            return new Board(this.board);
+        }
     }
-    
+
 }

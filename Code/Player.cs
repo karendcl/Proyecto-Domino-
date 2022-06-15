@@ -1,12 +1,12 @@
 namespace Juego
 {
-    public  class Player : IPlayer
+    public class Player : IPlayer, ICloneable<Player>
     {
-        public List<Token> hand{get; set;}
-        public int Id{get; set;}
-        public int TotalScore{get; set;}
+        public List<Token> hand { get; set; }
+        public int Id { get; set; }
+        public int TotalScore { get; set; }
 
-        public IPlayerStrategy strategy{get;set;}
+        public IPlayerStrategy strategy { get; set; }
 
         public Player(List<Token> Tokens, int id, IPlayerStrategy strategy)
         {
@@ -16,13 +16,15 @@ namespace Juego
             this.strategy = strategy;
         }
 
-        public virtual Token FirstToken(Game game){
-             var r = new Random();
-            return hand.ElementAt(r.Next(0,hand.Count));
+        public virtual Token FirstToken(Game game)
+        {
+            var r = new Random();
+            return hand.ElementAt(r.Next(0, hand.Count));
         }
 
-        public override string ToString(){
-            string a = "\n Player " + this.Id + "\n" ;
+        public override string ToString()
+        {
+            string a = "\n Player " + this.Id + "\n";
 
             foreach (var item in this.hand)
             {
@@ -44,9 +46,10 @@ namespace Juego
             return CanPlay;
         }
 
-        public virtual Token BestPlay(Game game){
+        public virtual Token BestPlay(Game game)
+        {
             var posibles = PossiblePlays(game);
-            if (posibles.Count ==0) return null!;
+            if (posibles.Count == 0) return null!;
 
             int[] scores = new int[posibles.Count];
 
@@ -59,16 +62,21 @@ namespace Juego
             return posibles[index];
         }
 
-        public virtual int ChooseSide(Game game){
+        public virtual int ChooseSide(Game game)
+        {
             return strategy.ChooseSide(game);
         }
 
+        public virtual Player Clone()
+        {
+            return new Player(this.hand,this.Id,this.strategy);
+        }
     }
 
 
     public class HumanPlayer : Player
     {
-        public HumanPlayer(List<Token> Tokens, int id, IPlayerStrategy strategy) : base(Tokens,id, strategy)
+        public HumanPlayer(List<Token> Tokens, int id, IPlayerStrategy strategy) : base(Tokens, id, strategy)
         {
         }
 
@@ -87,19 +95,25 @@ namespace Juego
                 ToPlay = int.Parse(Console.ReadLine()!);
                 if (ToPlay == -1) return null!;
 
-                 while (!game.judge.ValidPlay(game.board,this.hand[ToPlay]))
-            {
-                Console.WriteLine("No haga trampa! Escriba otra Token");
-                ToPlay = int.Parse(Console.ReadLine()!);
-            }
+                while (!game.judge.ValidPlay(game.board, this.hand[ToPlay]))
+                {
+                    Console.WriteLine("No haga trampa! Escriba otra Token");
+                    ToPlay = int.Parse(Console.ReadLine()!);
+                }
             }
             return this.hand[ToPlay];
         }
 
-         public override int ChooseSide(Game game){
-           Console.WriteLine("Escriba 0 para jugar alante y 1 para jugar atras");
+        public override int ChooseSide(Game game)
+        {
+            Console.WriteLine("Escriba 0 para jugar alante y 1 para jugar atras");
 
-           return int.Parse(Console.ReadLine()!);
-        }        
+            return int.Parse(Console.ReadLine()!);
+        }
+
+        public override HumanPlayer Clone()
+        {
+            return new HumanPlayer(this.hand,this.Id,this.strategy);
+        }
     }
 }

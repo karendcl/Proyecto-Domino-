@@ -1,6 +1,6 @@
 namespace Juego
 {
-    public class Token{
+    public class Token:ICloneable<Token>{
         public int Part1 { set; get; }
         public int Part2 { set; get; }
         
@@ -41,5 +41,10 @@ namespace Juego
             this.Part2 = temp;
         }
        
+      public Token Clone()
+      {
+         return new Token(this.Part1,this.Part2);
+      }
     }
+
 }

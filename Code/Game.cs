@@ -1,6 +1,6 @@
 namespace Juego
 {
-        public class Game : IRules
+        public class Game : IRules,ICloneable<Game>
     {
         public IBoard board { get; set; }
         public bool DrawToken {get;set;}
@@ -116,8 +116,10 @@ namespace Juego
           return this.judge.winCondition.Winner(this.player, this.judge);
     }
 
-        
-
+       public Game Clone() 
+       {
+            return new Game(this.board,this.player.ToArray(),this.SwitchDirection,this.MaxDouble,this.Players,this.TokensForEach,this.judge,this.DrawToken);
+       }
         
     }
 }

@@ -31,7 +31,8 @@ public class Championship
             Game game = Games[i];
 
             PlayAGame(game);
-
+            System.Console.WriteLine("Termino el juego {0}", i + 1);
+            Thread.Sleep(500);
 
             if (!ContinueGames()) { observer.WriteStats(game); break; }
             observer.WriteStats(game);

@@ -214,14 +214,14 @@ public class Observer
         {
             Console.Clear();
             Console.WriteLine("Escriba el doble maximo de las Tokens");
-            // max = int.Parse(Console.ReadLine()!);
-            max = 9;
+            int.TryParse(Console.ReadLine()!, out max);
+            // max = 9;
             Console.WriteLine("Escriba cuantas Tokens se van a repartir a cada jugador");
-            // cadauno = int.Parse(Console.ReadLine()!);
-            cadauno = 5;
+            int.TryParse(Console.ReadLine()!, out cadauno);
+            //cadauno = 5;
             Console.WriteLine("Escriba cuantos jugadores van a jugar");
-            // int.TryParse(Console.ReadLine(),out cantplay);
-            cantplay = 5;
+            int.TryParse(Console.ReadLine(), out cantplay);
+            //cantplay = 5;
         }
 
         return judge;
@@ -242,8 +242,8 @@ public class Observer
                 Console.WriteLine("Elija la estrategia para el Player {0}. \n \n ➤ Escriba 0 para un jugador semi inteligente. \n ➤ Escriba 1 para jugador botagorda. \n ➤ Escriba 2 para jugador random. ", i + 1);
 
 
-                //a = int.Parse(Console.ReadLine()!);
-                a = 2;
+                int.TryParse(Console.ReadLine()!, out a);
+                //a = 2;
             }
 
             switch (a)
@@ -285,7 +285,17 @@ public class Observer
         {
             for (int i = 0; i < Games.Length; i++)
             {
-                Games[i] = ChooseAGame();
+                if (i > 0 && Msg("Desea que el juego tenga las mismas configuaraciones que el anterior? si/no"))
+                {
+                    int x = i - 1;
+                    Games[i] = Games[x].Clone();//Clona la partida para que no existan problemas de referencia
+
+                    // Debug.Assert(Games[i].board.board.Count == 0, "Se clono correctamente");
+                }
+                else
+                {
+                    Games[i] = ChooseAGame();
+                }
             }
             return Games;
         }

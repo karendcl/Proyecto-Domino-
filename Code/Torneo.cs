@@ -11,6 +11,8 @@ namespace Juego;
 public class Championship
 {
     public int Champions { get; private set; }
+
+
     private Game[] Games;
     Observer observer = new Observer();
 
@@ -31,11 +33,23 @@ public class Championship
             Game game = Games[i];
 
             PlayAGame(game);
+
             System.Console.WriteLine("Termino el juego {0}", i + 1);
             Thread.Sleep(500);
 
             if (!ContinueGames()) { observer.WriteStats(game); break; }
             observer.WriteStats(game);
+        }
+        int o = 1;
+        foreach (var gamed in Games) //Esto esta clableado 
+        {
+            System.Console.WriteLine("partida {0}", o++);
+            foreach (var winner in gamed.Winner())
+            {
+                Console.WriteLine("Player {0}", winner.Id);
+            }
+            System.Console.WriteLine("////////////////////////////////////");
+
         }
 
     }
@@ -45,10 +59,9 @@ public class Championship
         return observer.Msg("Desea seguir jugando?, si / no");
     }
 
-    private bool PlayAGame(Game game)
+    private bool PlayAGame(Game game)  //Se paso a Game 
     {
 
-        //game.AssignTokens();
         //Control que todo se pase por referencia
         // Debug.Assert(game.board.board.Count>1,"Problemas con valores de referencia");
 
@@ -94,7 +107,7 @@ public class Championship
                     }
                 }
 
-                Thread.Sleep(100);
+                Thread.Sleep(500);
             }
 
 
@@ -107,6 +120,8 @@ public class Championship
     {
         return player.BestPlay(game);
     }
+
+
 
 
 

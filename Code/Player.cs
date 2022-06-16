@@ -1,6 +1,6 @@
 namespace Juego
 {
-    public class Player : IPlayer, ICloneable<Player>
+    public class Player : IPlayer
     {
         public List<Token> hand { get; set; }
         public int Id { get; set; }
@@ -69,7 +69,7 @@ namespace Juego
 
         public virtual Player Clone()
         {
-            return new Player(new List<Token>(),this.Id,this.strategy);
+            return new Player(new List<Token>(), this.Id, this.strategy);
         }
     }
 
@@ -113,7 +113,7 @@ namespace Juego
 
         public override HumanPlayer Clone()
         {
-            return new HumanPlayer(this.hand,this.Id,this.strategy);
+            return new HumanPlayer(this.hand, this.Id, this.strategy);
         }
     }
 }

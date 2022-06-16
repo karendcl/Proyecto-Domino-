@@ -314,7 +314,6 @@ public class Observer
             {
                 Games[i] = ChooseAGame(true);
             }
-            if (i == 0) { Games[0].Test = true; /*Debug.Assert(Games[0].board.board.Count > 0, "Comienza con fichas en el board");*/ }
 
             //  Debug.Assert(Games[i] != null, "No es null");
         }

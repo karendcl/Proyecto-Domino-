@@ -1,56 +1,11 @@
 
-    namespace Juego;
-    public class MinScore : IWinCondition{
+namespace Juego;
 
-        public MinScore()
-        {
-            
-        }
-       public List<IPlayer> Winner (List<IPlayer> players, IJudge judge){
+public abstract class WinCondition : IWinCondition
+{
 
-        int count = 0;
-        var result = new List<IPlayer>();
-        int[] scores = new int[players.Count];
-
-        foreach (var player in players)
-        {
-            if (player.hand.Count==0){
-              result.Add(player);
-            }
-
-            foreach (var Token in player.hand)
-            {
-                scores[count] += judge.howtogetscore.Score(Token);
-            }
-            count++;
-        }
-
-        if (result.Count != 0) return result;
-
-        return FinalWinner(scores, players);
-        
-        
-        }
-
-        public  List<IPlayer> FinalWinner (int[] scores, List<IPlayer> players){
-            var result = new List<IPlayer>();
-
-            int score = scores.Min();
-
-            for (int i = 0; i < scores.Length; i++)
-        {
-            if (scores[i] == score){
-                result.Add(players[i]);
-            }
-        }
-        
-        return result;
-        }
-    }
-
-    public class MaxScore : IWinCondition
+    public virtual List<IPlayer> Winner(List<IPlayer> players, IJudge judge)
     {
-       public List<IPlayer> Winner (List<IPlayer> players, IJudge judge){
 
         int count = 0;
         var result = new List<IPlayer>();
@@ -58,53 +13,9 @@
 
         foreach (var player in players)
         {
-            foreach (var Token in player.hand)
+            if (player.hand.Count == 0)
             {
-                scores[count] +=  scores[count] += judge.howtogetscore.Score(Token);;
-            }
-            count++;
-        }
-
-        if (result.Count != 0) return result;
-
-        return FinalWinner(scores, players);
-        
-        
-        }
-
-        public  List<IPlayer> FinalWinner (int[] scores, List<IPlayer> players){
-            var result = new List<IPlayer>();
-
-            int score = scores.Min();
-
-            for (int i = 0; i < scores.Length; i++)
-        {
-            if (scores[i] == score){
-                result.Add(players[i]);
-            }
-        }
-        
-        return result;
-        }
-    }
-
-    public class Specificscore : IWinCondition{
-        int score{get;set;}
-        public Specificscore(int score){
-            this.score = score;
-        }
-
-        
-        public List<IPlayer> Winner (List<IPlayer> players, IJudge judge){
-
-        int count = 0;
-        var result = new List<IPlayer>();
-        int[] scores = new int[players.Count];
-
-        foreach (var player in players)
-        {
-            if (player.hand.Count==0){
-              result.Add(player);
+                result.Add(player);
             }
 
             foreach (var Token in player.hand)
@@ -117,22 +28,115 @@
         if (result.Count != 0) return result;
 
         return FinalWinner(scores, players);
-        
-        
+
+
+
+    }
+
+    public abstract List<IPlayer> FinalWinner(int[] scores, List<IPlayer> players);
+
+
+
+
+}
+public class MinScore : WinCondition
+{
+
+    public MinScore()
+    {
+
+    }
+    public List<IPlayer> Winner(List<IPlayer> players, IJudge judge)
+    {
+
+        int count = 0;
+        var result = new List<IPlayer>();
+        int[] scores = new int[players.Count];
+
+        foreach (var player in players)
+        {
+            if (player.hand.Count == 0)
+            {
+                result.Add(player);
+            }
+
+            foreach (var Token in player.hand)
+            {
+                scores[count] += judge.howtogetscore.Score(Token);
+            }
+            count++;
         }
 
-        public  List<IPlayer> FinalWinner (int[] scores, List<IPlayer> players){
-            var result = new List<IPlayer>();
+        if (result.Count != 0) return result;
 
-            int score = scores.Min();
+        return FinalWinner(scores, players);
 
-            for (int i = 0; i < scores.Length; i++)
+
+
+
+    }
+
+    public override List<IPlayer> FinalWinner(int[] scores, List<IPlayer> players)
+    {
+        var result = new List<IPlayer>();
+
+        int score = scores.Min();
+
+        for (int i = 0; i < scores.Length; i++)
         {
-            if (scores[i] == score){
+            if (scores[i] == score)
+            {
                 result.Add(players[i]);
             }
         }
-        
+
         return result;
-        }
     }
+}
+
+public class MaxScore : WinCondition
+{
+
+    public override List<IPlayer> FinalWinner(int[] scores, List<IPlayer> players)
+    {
+        var result = new List<IPlayer>();
+
+        int score = scores.Min();
+
+        for (int i = 0; i < scores.Length; i++)
+        {
+            if (scores[i] == score)
+            {
+                result.Add(players[i]);
+            }
+        }
+
+        return result;
+    }
+}
+
+public class Specificscore : WinCondition
+{
+    int score { get; set; }
+    public Specificscore(int score)
+    {
+        this.score = score;
+    }
+
+    public override List<IPlayer> FinalWinner(int[] scores, List<IPlayer> players)
+    {
+        var result = new List<IPlayer>();
+
+        int score = scores.Min();
+
+        for (int i = 0; i < scores.Length; i++)
+        {
+            if (scores[i] == score)
+            {
+                result.Add(players[i]);
+            }
+        }
+
+        return result;
+    }
+}

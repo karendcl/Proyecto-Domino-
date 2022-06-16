@@ -1,6 +1,6 @@
 namespace Juego
 {
-    public class Board : IBoard, ICloneable
+    public class Board : IBoard
     {
         public List<Token> board { get; set; }
 
@@ -104,7 +104,7 @@ namespace Juego
             return this.board.Last();
         }
 
-        public object Clone()
+        public IBoard Clone()
         {
             return new Board(this.board);
         }

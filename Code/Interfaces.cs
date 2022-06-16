@@ -16,7 +16,7 @@ namespace Juego
     {
         int Score(Token token);
     }
-    public interface IBoard
+    public interface IBoard : ICloneable<IBoard>
     {
         List<Token> board { get; set; }
         void AddTokenToBoard(Token Token, int side);
@@ -30,7 +30,7 @@ namespace Juego
         bool MeetsCriteria(IPlayer player, IGetScore howtogetscore);
     }
 
-    public interface IPlayer : ICloneable
+    public interface IPlayer : ICloneable<Player>
     {
         public List<Token> hand { get; set; }
         public int Id { get; set; }

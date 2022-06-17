@@ -32,7 +32,7 @@ public class Championship
         {
             Game game = Games[i];
 
-            PlayAGame(game);
+            game.PlayAGame();
 
             System.Console.WriteLine("Termino el juego {0}", i + 1);
             Thread.Sleep(500);
@@ -48,6 +48,8 @@ public class Championship
             {
                 Console.WriteLine("Player {0}", winner.Id);
             }
+            System.Console.WriteLine("Presiona una tecla para ver la sgt partida");
+            Console.ReadKey();
             System.Console.WriteLine("////////////////////////////////////");
 
         }
@@ -58,70 +60,70 @@ public class Championship
     {
         return observer.Msg("Desea seguir jugando?, si / no");
     }
+    /*
+  private bool PlayAGame(Game game)  //Se paso a Game 
+  {
 
-    private bool PlayAGame(Game game)  //Se paso a Game 
-    {
+      //Control que todo se pase por referencia
+      // Debug.Assert(game.board.board.Count>1,"Problemas con valores de referencia");
 
-        //Control que todo se pase por referencia
-        // Debug.Assert(game.board.board.Count>1,"Problemas con valores de referencia");
+      IJudge judge = game.judge;
+      List<IPlayer> player = game.player;
+      IBoard board = game.board;
 
-        IJudge judge = game.judge;
-        List<IPlayer> player = game.player;
-        IBoard board = game.board;
-
-        while (!judge.EndGame(game)) //mientras no se acabe el juego
-        {
-            for (int i = 0; i < game.player.Count; i++) //turno de cada jugador
-            {
-                if (judge.EndGame(game)) break;
-
-
-                // Console.WriteLine(player[i].ToString());
-                observer.PaintPlayerInConsole(player[i]);
-                // Console.WriteLine(game.board.ToString());
-
-                observer.PaintBord(board);
-
-                observer.Clean();
-
-                Token Token1 = Turno(player[i], game);  //la ficha que se va a jugar                     
-
-                if (Token1 is null || !game.judge.ValidPlay(game.board, Token1))
-                { //si es nulo, el jugador se ha pasado
-                    game.SwapDirection(i);
-                }
-
-                if (Token1 != null) //si no es nulo, entonces si lleva
-                {
-                    if (game.judge.ValidPlay(game.board, Token1))
-                    { //si es valido
-                        int index = -1;
-
-                        if (game.judge.PlayAmbigua(Token1, game.board))
-                        {  //si se puede jugar por ambos lados, se le pide que escoja un lado
-                            index = player[i].ChooseSide(game);
-                        }
-
-                        game.judge.AddTokenToBoard(Token1, game.board, index);
-                        player[i].hand.Remove(Token1); //se elimina la ficha de la mano del jugador
-                    }
-                }
-
-                Thread.Sleep(500);
-            }
+      while (!judge.EndGame(game)) //mientras no se acabe el juego
+      {
+          for (int i = 0; i < game.player.Count; i++) //turno de cada jugador
+          {
+              if (judge.EndGame(game)) break;
 
 
-        }
-        return true;
+              // Console.WriteLine(player[i].ToString());
+              observer.PaintPlayerInConsole(player[i]);
+              // Console.WriteLine(game.board.ToString());
 
-    }
+              observer.PaintBord(board);
 
-    private Token Turno(IPlayer player, Game game)
-    {
-        return player.BestPlay(game);
-    }
+              observer.Clean();
+
+              Token Token1 = Turno(player[i], game);  //la ficha que se va a jugar                     
+
+              if (Token1 is null || !game.judge.ValidPlay(game.board, Token1))
+              { //si es nulo, el jugador se ha pasado
+                  game.SwapDirection(i);
+              }
+
+              if (Token1 != null) //si no es nulo, entonces si lleva
+              {
+                  if (game.judge.ValidPlay(game.board, Token1))
+                  { //si es valido
+                      int index = -1;
+
+                      if (game.judge.PlayAmbigua(Token1, game.board))
+                      {  //si se puede jugar por ambos lados, se le pide que escoja un lado
+                          index = player[i].ChooseSide(game);
+                      }
+
+                      game.judge.AddTokenToBoard(Token1, game.board, index);
+                      player[i].hand.Remove(Token1); //se elimina la ficha de la mano del jugador
+                  }
+              }
+
+              Thread.Sleep(500);
+          }
 
 
+      }
+      return true;
+
+  }
+
+  private Token Turno(IPlayer player, Game game)
+  {
+      return player.BestPlay(game);
+  }
+
+   */
 
 
 
@@ -130,7 +132,7 @@ public class Championship
 
 public class Msg
 {
-    public IPlayer player { private set; get; }
+    public IPlayer? player { private set; get; }
 
     public void PlayerMsg(IPlayer player)
     {

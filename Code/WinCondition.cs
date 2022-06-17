@@ -1,10 +1,10 @@
 
 namespace Juego;
 
-public abstract class WinCondition : IWinCondition
+public abstract class WinCondition : IWinCondition<IPlayer, Token>
 {
 
-    public virtual List<IPlayer> Winner(List<IPlayer> players, IJudge judge)
+    public virtual List<IPlayer> Winner(List<IPlayer> players, IJudge<IPlayer, Token> judge)
     {
 
         int count = 0;
@@ -41,12 +41,7 @@ public abstract class WinCondition : IWinCondition
 }
 public class MinScore : WinCondition
 {
-
-    public MinScore()
-    {
-
-    }
-    public List<IPlayer> Winner(List<IPlayer> players, IJudge judge)
+    public override List<IPlayer> Winner(List<IPlayer> players, IJudge<IPlayer, Token> judge)
     {
 
         int count = 0;

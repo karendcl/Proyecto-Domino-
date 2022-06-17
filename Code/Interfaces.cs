@@ -1,9 +1,9 @@
 namespace Juego
 {
 
-    public interface IWinCondition
-    {
-        List<IPlayer> Winner(List<IPlayer> players, IJudge judge);
+    public interface IWinCondition<TCriterio, TToken>
+    {                           //List<IPlayer> players
+        List<IPlayer> Winner(List<TCriterio> criterios, IJudge<TCriterio, TToken> judge);
     }
 
     public interface IPlayerStrategy
@@ -12,9 +12,9 @@ namespace Juego
         int ChooseSide(Game game);
     }
 
-    public interface IGetScore
-    {
-        int Score(Token token);
+    public interface IGetScore<TToken>
+    {   //Puede ser un token o un juego
+        int Score(TToken item);
     }
     public interface IBoard : ICloneable<IBoard>
     {
@@ -25,9 +25,10 @@ namespace Juego
         Token Last();
     }
 
-    public interface IStopGame
-    {
-        bool MeetsCriteria(IPlayer player, IGetScore howtogetscore);
+    public interface IStopGame<TCriterio, TToken>
+    {                    // Puede ser un jugador 
+                         // Puede ser un Juego para parar el torneo
+        bool MeetsCriteria(TCriterio criterio, IGetScore<TToken> howtogetscore);
     }
 
     public interface IPlayer : ICloneable<Player>
@@ -58,18 +59,18 @@ namespace Juego
         bool ValidPlayBack(IBoard board, Token token);
         bool Match(int Part1, int part2);
     }
-
-    public interface IJudge
+    //Los criterios pueden darse en base a jugador o juego 
+    public interface IJudge<TCriterio, TToken> //Agreagar donde Es un IstopGame....
     {
         bool ValidPlay(IBoard board, Token token);
         bool EndGame(Game game);
         bool ValidSettings(int TokensForEach, int MaxDoble, int players);
-        IStopGame stopcriteria { get; set; }
-        IWinCondition winCondition { get; set; }
+        IStopGame<TCriterio, Token> stopcriteria { get; set; }
+        IWinCondition<TCriterio, TToken> winCondition { get; set; }
 
         IValidPlay valid { get; set; }
         int PlayerScore(IPlayer player);
-        public IGetScore howtogetscore { get; set; }
+        public IGetScore<Token> howtogetscore { get; set; }
 
         bool PlayAmbigua(Token token, IBoard board);
 

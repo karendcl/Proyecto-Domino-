@@ -1,24 +1,27 @@
 
 namespace Juego;
 
-public class Classic : IStopGame{
+public class Classic : IStopGame<IPlayer, Token>
+{
 
-    public Classic()
+
+    public bool MeetsCriteria(IPlayer player, IGetScore<Token> score)
     {
+        return (player.hand.Count == 0) ? true : false;
     }
-    public bool MeetsCriteria(IPlayer player, IGetScore score){
-        return (player.hand.Count==0)? true : false;
+}
+
+public class CertainScore : IStopGame<IPlayer, Token>
+{
+    public int Score { get; set; }
+
+    public CertainScore(int score)
+    {
+        this.Score = score;
     }
-}   
 
-public class CertainScore: IStopGame{
-    public int Score{get;set;}
-
-    public CertainScore(int score){
-        this.Score=score;
-    }
-
-    public bool MeetsCriteria(IPlayer player, IGetScore howtogetscore){
+    public bool MeetsCriteria(IPlayer player, IGetScore<Token> howtogetscore)
+    {
         int result = 0;
 
         foreach (var token in player.hand)

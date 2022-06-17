@@ -79,9 +79,9 @@ public class Observer
     }
     #region  Create Game
     //Elegir tipo de juego
-    private IStopGame ChooseStopGame(bool ConfGame = false)
+    private IStopGame<IPlayer, Token> ChooseStopGame(bool ConfGame = false)
     {
-        IStopGame stopcondition = new Classic();
+        IStopGame<IPlayer, Token> stopcondition = new Classic();
 
         int stop = 0;
 
@@ -108,9 +108,9 @@ public class Observer
         return stopcondition;
     }
 
-    public IGetScore ChooseGetScore(bool ConfGame = false)
+    public IGetScore<Token> ChooseGetScore(bool ConfGame = false)
     {
-        IGetScore HowTogetScore = new ClassicScore();
+        IGetScore<Token> HowTogetScore = new ClassicScore();
 
         int score = 0;
 
@@ -136,9 +136,9 @@ public class Observer
         return HowTogetScore;
     }
 
-    public IWinCondition ChooseWinCondition(bool ConfGame = false)
+    public IWinCondition<IPlayer, Token> ChooseWinCondition(bool ConfGame = false)
     {
-        IWinCondition winCondition = new MinScore();
+        IWinCondition<IPlayer, Token> winCondition = new MinScore();
 
         int winConditionn = 0;
 
@@ -201,9 +201,9 @@ public class Observer
     }
 
 
-    private IJudge ChooseJugde(IStopGame stopcondition, IGetScore HowTogetScore, IWinCondition winCondition, IValidPlay validPlay, bool ConfGame = false)
+    private IJudge<IPlayer, Token> ChooseJugde(IStopGame<IPlayer, Token> stopcondition, IGetScore<Token> HowTogetScore, IWinCondition<IPlayer, Token> winCondition, IValidPlay validPlay, bool ConfGame = false)
     {
-        IJudge judge = new Judge(stopcondition, HowTogetScore, winCondition, validPlay);
+        IJudge<IPlayer, Token> judge = new Judge(stopcondition, HowTogetScore, winCondition, validPlay);
 
         Console.WriteLine("Desea que cambie la direccion del juego cada vez que alguien se pase?, si o no");
         char change = 's';
@@ -269,11 +269,11 @@ public class Observer
     {
         if (ConfGame && Msg("Quiere Jugar con las configuraciones predeterminadas? Si/No")) { ConfGame = true; }//Sleccionar si se quiere modo de juego normal
 
-        IStopGame stopcondition = ChooseStopGame(ConfGame);
-        IGetScore HowTogetScore = ChooseGetScore(ConfGame);
-        IWinCondition winCondition = ChooseWinCondition(ConfGame);
+        IStopGame<IPlayer, Token> stopcondition = ChooseStopGame(ConfGame);
+        IGetScore<Token> HowTogetScore = ChooseGetScore(ConfGame);
+        IWinCondition<IPlayer, Token> winCondition = ChooseWinCondition(ConfGame);
         IValidPlay validPlay = ChooseValidPlay(ConfGame);
-        IJudge judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
+        IJudge<IPlayer, Token> judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
         IPlayer[] players = ChoosePlayers();
         return new Game(new Board(new List<Token>()), players, false, max, cantplay, cadauno, judge, true);
     }

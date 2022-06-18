@@ -1,5 +1,5 @@
 
-namespace Juego;
+namespace Game;
 
 public abstract class ValidPlayClass : IValidPlay
 {

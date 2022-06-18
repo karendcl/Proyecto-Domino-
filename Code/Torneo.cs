@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
 
-namespace Juego;
+namespace Game;
 
 
 
@@ -11,6 +11,7 @@ namespace Juego;
 public class Championship
 {
     public int Champions { get; private set; }
+
 
 
     private Game[] Games;

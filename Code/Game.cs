@@ -1,5 +1,5 @@
-namespace Juego
-{
+namespace Game;
+
     public class Game : IRules, ICloneable<Game>
     {
 
@@ -12,7 +12,7 @@ namespace Juego
         public int TokensForEach { get; set; }
         public IJudge<IPlayer, Token> judge { get; set; }
 
-        private Observer observer { get; set; }
+        private Observer observer { get; set; }//quitar
 
         public Game(IBoard board, IPlayer[] players, bool direction, int max, int plays, int rep, IJudge<IPlayer, Token> judge, bool draw)
         {
@@ -203,7 +203,7 @@ namespace Juego
         }
 
     }
-}
+
 
 
 

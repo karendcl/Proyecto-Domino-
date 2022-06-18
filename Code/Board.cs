@@ -1,113 +1,112 @@
-namespace Juego
+namespace Game;
+
+public class Board : IBoard
 {
-    public class Board : IBoard
+    public List<Token> board { get; set; }
+
+    public Board(List<Token> a)
     {
-        public List<Token> board { get; set; }
+        this.board = a;
+    }
 
-        public Board(List<Token> a)
+    public override string ToString()
+    {
+        string a = "\n Board:  \n";
+
+        foreach (var item in this.board)
         {
-            this.board = a;
+            a += item.ToString();
         }
 
-        public override string ToString()
+        return a;
+    }
+
+    public void AddTokenToBoard(Token Token, int side)
+    {
+
+        if (this.board.Count == 0)
         {
-            string a = "\n Board:  \n";
-
-            foreach (var item in this.board)
-            {
-                a += item.ToString();
-            }
-
-            return a;
+            board.Insert(0, Token);
+            return;
         }
 
-        public void AddTokenToBoard(Token Token, int side)
+        Token first = board.First();
+        Token last = board.Last();
+
+        if (side != -1)
         {
-
-            if (this.board.Count == 0)
-            {
-                board.Insert(0, Token);
-                return;
-            }
-
-            Token first = board.First();
-            Token last = board.Last();
-
-            if (side != -1)
-            {
-                if (side == 0)
-                {
-                    PlayAlante(Token, first);
-                    return;
-                }
-
-                if (side == 1)
-                {
-                    if (Token.Contains(last.Part2))
-                        PlayAtras(Token, last);
-                    return;
-                }
-            }
-
-
-            if (Token.Contains(first.Part1))
+            if (side == 0)
             {
                 PlayAlante(Token, first);
                 return;
             }
 
-            if (Token.Contains(last.Part2))
+            if (side == 1)
             {
-                PlayAtras(Token, last);
+                if (Token.Contains(last.Part2))
+                    PlayAtras(Token, last);
                 return;
             }
-
         }
 
-        public void PlayAlante(Token Token, Token first)
+
+        if (Token.Contains(first.Part1))
         {
-            if (first.Part1 == Token.Part1)
-            {
-                Token.SwapToken();
-                board.Insert(0, Token);
+            PlayAlante(Token, first);
+            return;
+        }
 
-                return;
-            }
+        if (Token.Contains(last.Part2))
+        {
+            PlayAtras(Token, last);
+            return;
+        }
 
+    }
+
+    public void PlayAlante(Token Token, Token first)
+    {
+        if (first.Part1 == Token.Part1)
+        {
+            Token.SwapToken();
             board.Insert(0, Token);
 
             return;
         }
 
-        public void PlayAtras(Token Token, Token last)
-        {
-            if (Token.Part2 == last.Part2)
-            {
-                Token.SwapToken();
-                board.Add(Token);
-                return;
-            }
+        board.Insert(0, Token);
 
+        return;
+    }
+
+    public void PlayAtras(Token Token, Token last)
+    {
+        if (Token.Part2 == last.Part2)
+        {
+            Token.SwapToken();
             board.Add(Token);
             return;
         }
 
-        public Token First()
-        {
-            if (board.Count == 0) return null!;
-            return this.board.First();
-        }
-
-        public Token Last()
-        {
-            if (board.Count == 0) throw new NullReferenceException("The token can´t be null");
-            return this.board.Last();
-        }
-
-        public IBoard Clone()
-        {
-            return new Board(this.board);
-        }
+        board.Add(Token);
+        return;
     }
 
+    public Token First()
+    {
+        if (board.Count == 0) return null!;
+        return this.board.First();
+    }
+
+    public Token Last()
+    {
+        if (board.Count == 0) throw new NullReferenceException("The token can´t be null");
+        return this.board.Last();
+    }
+
+    public IBoard Clone()
+    {
+        return new Board(this.board);
+    }
 }
+

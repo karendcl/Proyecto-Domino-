@@ -1,5 +1,5 @@
 
-namespace Juego;
+namespace Game;
 
 public class Classic : IStopGame<IPlayer, Token>
 {

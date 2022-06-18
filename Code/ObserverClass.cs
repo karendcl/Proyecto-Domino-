@@ -1,4 +1,4 @@
-namespace Juego;
+namespace Game;
 
 //El observer es el encargado de establecer el contacto entre el backend y el frontend
 public class Observer

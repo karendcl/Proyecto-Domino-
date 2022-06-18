@@ -39,8 +39,8 @@ public class Player : IPlayer
         var CanPlay = new List<Token>();
 
         foreach (var item in hand)
-        {
-            if (game.judge.ValidPlay(game.board, item)) CanPlay.Add(item);
+        {   //Cambie aca porque el jugador no debe saber si el juez es corrupto
+            if (game.validPlay.ValidPlay(game.board, item)) CanPlay.Add(item);
         }
 
         return CanPlay;
@@ -67,9 +67,19 @@ public class Player : IPlayer
         return strategy.ChooseSide(game);
     }
 
-    public virtual Player Clone()
+    public virtual IPlayer Clone()
     {
         return new Player(new List<Token>(), this.Id, this.strategy);
+    }
+
+    public bool Equals(IPlayer? other)
+    {
+        return (this.Id == other.Id);
+    }
+
+    public bool Equals(Player? other)
+    {
+        return (this.Id == other.Id && this.strategy == other.strategy);
     }
 }
 
@@ -111,7 +121,7 @@ public class HumanPlayer : Player
         return int.Parse(Console.ReadLine()!);
     }
 
-    public override HumanPlayer Clone()
+    public override IPlayer Clone()
     {
         return new HumanPlayer(this.hand, this.Id, this.strategy);
     }

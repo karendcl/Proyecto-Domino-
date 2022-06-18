@@ -21,6 +21,8 @@ public class Judge : IJudge<IPlayer, Token>
     }
     public virtual bool ValidPlay(IBoard board, Token token)
     {
+        int side = 0;
+
         return this.valid.ValidPlay(board, token);
     }
 
@@ -75,7 +77,7 @@ public class Judge : IJudge<IPlayer, Token>
 
         if (board.board.Count == 0)
         {
-            board.board.Insert(0, token);
+            board.board.Add(token);
             return;
         }
 

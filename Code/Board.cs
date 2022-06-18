@@ -106,7 +106,7 @@ public class Board : IBoard
 
     public IBoard Clone()
     {
-        return new Board(this.board);
+        return new Board(new List<Token>() { });
     }
 }
 

@@ -7,6 +7,7 @@ namespace Game;
 
 
 
+
 //Torneo Se encarga de crear los juegos y procesarlos
 public class Championship
 {
@@ -23,6 +24,7 @@ public class Championship
         this.Games = new Game[cantTorneos];
         run();
     }
+
 
 
     public void run()
@@ -128,8 +130,173 @@ public class Championship
 
 
 
+
+}
+public class ScoreChampionNormal : IGetScore<IPlayer>
+{
+    private Game game { get; set; }
+    public ScoreChampionNormal(Game game)
+    {
+        this.game = game;
+    }
+    public int Score(IPlayer item)
+    {
+        return game.judge.PlayerScore(item);
+    }
 }
 
+public class StopChampion : IStopGame<Game, IPlayer>
+{
+    private int Point { get; set; }
+    public List<IPlayer> Players { get; set; }
+    public List<int> acc { get; set; }
+    public StopChampion(int porcentOfpoints)
+    {
+        this.Players = new List<IPlayer>() { };
+        this.Point = porcentOfpoints;
+    }
+    //Cada juego se comprueba que no exeda de puntos
+    //Se asume que estan todos los jugadores desde un inicio en caso contrario se añade 
+    public bool MeetsCriteria(Game game, IGetScore<IPlayer> howtogetscore)
+    {
+        this.score(game, howtogetscore);
+        foreach (var item in acc) { if (item > Point) { return false; } }
+        return true;
+    }
+
+    private void score(Game game, IGetScore<IPlayer> howtogetscore)
+    {
+        List<IPlayer> temp = game.player;
+        foreach (var item in temp)
+        {
+            int cant = howtogetscore.Score(item);
+            if (!Players.Contains(item)) { Players.Add(item); acc.Add(cant); }
+            else { int i = Players.IndexOf(item); acc[i] += cant; }
+        }
+    }
+}
+
+public class WinChampion : IWinCondition<Game, IPlayer>
+
+
+
+{// Espresar en fraccion el porcentaje de ganadas del total del torneo
+
+    public double Porcent { get; private set; }
+
+    public List<WIPlayer<IPlayer>> players { get; private set; }
+    public List<int> cantwins { get; private set; }
+    public WinChampion(double porcentWins)
+    {
+        this.players = new List<WIPlayer<IPlayer>>() { };
+        this.cantwins = new List<int>() { };
+        this.Porcent = porcentWins;
+    }
+    public List<IPlayer> Winner(List<Game> games, IJudge<Game, IPlayer> judge)
+    {
+        List<IPlayer> winners = new List<IPlayer>() { };
+        foreach (var game in games)
+        {
+            winners = game.Winner();
+
+            for (int i = 0; i < winners.Count; i++)
+            {
+                WIPlayer<IPlayer> temp = new WIPlayer<IPlayer>(winners[i], i);
+                if (!players.Contains(temp)) { players.Add(temp); }
+                else { int x = players.IndexOf(temp); players[x].Puntuation += temp.Puntuation; }
+            }
+        }
+        players.Sort(new WIPlayer_Comparer());
+
+        players.Reverse();
+
+        List<IPlayer> list = new List<IPlayer>() { };
+        for (int i = 0; i < players.Count; i++)
+        {
+            list.Add(players[i].player);
+        }
+
+        return list;
+    }
+
+    public class WIPlayer<T> : IEquatable<WIPlayer<T>> where T : IEquatable<T>
+    {
+        public T player { get; private set; }
+        public int Puntuation { get; set; }
+
+        public WIPlayer(T player, int Puntuation)
+        {
+            this.player = player;
+            this.Puntuation = Puntuation;
+        }
+
+
+
+        public bool Equals(WIPlayer<T>? other)
+        {
+            if (other == null || this == null) { return false; }
+            return this.player.Equals(other.player);
+        }
+    }
+
+    public class WIPlayer_Comparer : IComparer<WIPlayer<IPlayer>>
+    {
+        public int Compare(WIPlayer<IPlayer>? x, WIPlayer<IPlayer>? y)
+        {
+            if (x == null || y == null) { throw new NullReferenceException("null"); }
+            if (x?.Puntuation < y?.Puntuation)
+            {
+                return -1;
+            }
+            if (x?.Puntuation > y?.Puntuation)
+            {
+                return 1;
+            }
+
+            return 0;
+        }
+    }
+}
+
+
+
+public class ValidChampion : IValidPlayChampion<Game, IPlayer>
+{
+    public bool ValidPlay(Game game, IPlayer players)
+    {
+        foreach (var player in game.player)
+        {
+            if (player.hand.Count > 0) return true;
+        }
+        return false;
+    }
+}
+
+public class ChampionJudge
+{
+    public IStopGame<Game, Token> stopcriteria { get; set; }
+    public IWinCondition<Game, Player> winCondition { get; set; }
+    public IValidPlayChampion<Game, IPlayer> valid { get; set; }
+    public IGetScore<Token> howtogetscore { get; set; }
+
+    public ChampionJudge(IStopGame<Game, Token> stopcriteria, IWinCondition<Game, Player> winCondition, IValidPlayChampion<Game, IPlayer> valid, IGetScore<Token> howtogetscore)
+    {
+        this.howtogetscore = howtogetscore;
+        this.stopcriteria = stopcriteria;
+        this.valid = valid;
+        this.winCondition = winCondition;
+    }
+    public bool EndGame(Game game)
+    {
+        if (stopcriteria.MeetsCriteria(game, howtogetscore)) return true;
+        return true;
+    }
+
+    public bool ValidPlay(Game game, IPlayer player)
+    {
+        return valid.ValidPlay(game, player);
+    }
+}
 
 public class Msg
 {

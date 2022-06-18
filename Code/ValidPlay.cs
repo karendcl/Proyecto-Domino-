@@ -2,7 +2,7 @@
 namespace Game;
 
 public abstract class ValidPlayClass : IValidPlay
-{
+{         //Devuelve el valor del numero donde se puede machear en RN
     public virtual bool ValidPlay(IBoard board, Token token)
     {
         if (FirstPlay(board)) return true;
@@ -22,7 +22,11 @@ public abstract class ValidPlayClass : IValidPlay
 
 
 
-    public abstract bool FirstPlay(IBoard board);
+    public virtual bool FirstPlay(IBoard board)
+    {
+        if (board.board == null || board.board.Count == 0) return true;
+        return false;
+    }
 
     public virtual bool ValidPlayBack(IBoard board, Token token)
     {
@@ -35,11 +39,8 @@ public abstract class ValidPlayClass : IValidPlay
 public class ClassicValidPlay : ValidPlayClass
 {
 
-    public override bool FirstPlay(IBoard board)
-    {
-        if (board.board == null || board.board.Count == 0) return true;
-        return false;
-    }
+
+
     public override bool ValidPlayFront(IBoard board, Token token)
     {
         if (FirstPlay(board)) return true;
@@ -60,14 +61,6 @@ public class ClassicValidPlay : ValidPlayClass
 
 public class BiggerValidPlay : ValidPlayClass
 {
-
-    public override bool FirstPlay(IBoard board)
-    {
-        if (board.board == null || board.board.Count == 0) return true;
-        return false;
-    }
-
-
     public override bool Match(int token, int board)
     {
         return (board < token);
@@ -85,14 +78,6 @@ public class SmallerValidPlay : ValidPlayClass
         return false;
 
     }
-
-
-    public override bool FirstPlay(IBoard board)
-    {
-        if (board.board == null || board.board.Count == 0) return true;
-        return false;
-    }
-
 
     public override bool Match(int Part1, int part2)
     {

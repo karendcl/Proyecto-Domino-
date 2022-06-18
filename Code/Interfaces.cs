@@ -14,13 +14,12 @@ public interface IPlayerStrategy
 
 public interface IGetScore<TToken>
 {   //Puede ser un token o un juego
-    int Score(TToken item);
+    int Score(TToken item);//hacer uno en torneo que sume todo lo de los metodos
 }
 public interface IBoard : ICloneable<IBoard>
 {
     List<Token> board { get; set; }
     void AddTokenToBoard(Token Token, int side);
-    string ToString();
     Token First();
     Token Last();
 }
@@ -31,12 +30,14 @@ public interface IStopGame<TCriterio, TToken>
     bool MeetsCriteria(TCriterio criterio, IGetScore<TToken> howtogetscore);
 }
 
-public interface IPlayer : ICloneable<Player>
+public interface IPlayer : ICloneable<IPlayer>, IEquatable<IPlayer>
 {
     public List<Token> hand { get; set; }
     public int Id { get; set; }
-    public Token BestPlay(Game game);
+    IPlayerStrategy strategy { get; set; }
 
+    //quitar estos y poner un Play para poner un jugador humano 
+    public Token BestPlay(Game game);
     public int TotalScore { get; set; }
     public int ChooseSide(Game game);
 }
@@ -50,33 +51,40 @@ public interface IRules
     int TokensForEach { get; set; }
 }
 
-public interface IValidPlay
+public interface IValidPlayChampion<TGame, TPlayer>
 {
-    bool FirstPlay(IBoard board);
+    bool ValidPlay(TGame game, TPlayer player);
+}
 
-    bool ValidPlay(IBoard board, Token token);
+public interface IValidPlay : IValidPlayChampion<IBoard, Token>
+{
+    //Devuelve el lugar donde el vector de Rn es compatible por la cara y el int -1 izquierda 0 por cualquir lado 
+    bool FirstPlay(IBoard board);
     bool ValidPlayFront(IBoard board, Token token);
     bool ValidPlayBack(IBoard board, Token token);
     bool Match(int Part1, int part2);
 }
 //Los criterios pueden darse en base a jugador o juego 
-public interface IJudge<TCriterio, TToken> //Agreagar donde Es un IstopGame....
+public interface IJudgeChampion<TCriterio, TToken>
 {
-    bool ValidPlay(IBoard board, Token token);
-    bool EndGame(Game game);
-    bool ValidSettings(int TokensForEach, int MaxDoble, int players);
-    IStopGame<TCriterio, Token> stopcriteria { get; set; }
+    IStopGame<TCriterio, TToken> stopcriteria { get; set; }
     IWinCondition<TCriterio, TToken> winCondition { get; set; }
-
     IValidPlay valid { get; set; }
-    int PlayerScore(IPlayer player);
     public IGetScore<Token> howtogetscore { get; set; }
 
-    bool PlayAmbigua(Token token, IBoard board);
+    bool ValidPlay(IBoard board, Token token);
+    bool EndGame(Game game);
+}
+public interface IJudge<TCriterio, TToken> : IJudgeChampion<TCriterio, TToken>//Agregar donde Es un IstopGame....
+{
 
+    bool ValidSettings(int TokensForEach, int MaxDoble, int players);
+    int PlayerScore(IPlayer player);
+    bool PlayAmbigua(Token token, IBoard board);
     void AddTokenToBoard(Token token, IBoard board, int side);
 
 }
+
 
 
 public interface ICloneable<T> : ICloneable

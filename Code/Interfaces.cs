@@ -8,8 +8,8 @@ public interface IWinCondition<TCriterio, TToken>
 
 public interface IPlayerStrategy
 {
-    int Evaluate(Token token, List<Token> hand, Game game);
-    int ChooseSide(Game game);
+    int Evaluate(Token token, List<Token> hand, IGetScore<Token> howtogetscore);
+    int ChooseSide(ChooseStrategyWrapped choose, IBoard board);
 }
 
 public interface IGetScore<TToken>
@@ -30,7 +30,7 @@ public interface IStopGame<TCriterio, TToken>
     bool MeetsCriteria(TCriterio criterio, IGetScore<TToken> howtogetscore);
 }
 
-public interface IPlayer : ICloneable<IPlayer>, IEquatable<IPlayer>
+public interface IPlayer : IPlayerStrategy, ICloneable<IPlayer>, IEquatable<IPlayer>
 {
     public List<Token> hand { get; set; }
     public int Id { get; set; }
@@ -39,7 +39,7 @@ public interface IPlayer : ICloneable<IPlayer>, IEquatable<IPlayer>
     //quitar estos y poner un Play para poner un jugador humano 
     public Token BestPlay(Game game);
     public int TotalScore { get; set; }
-    public int ChooseSide(Game game);
+
 }
 
 public interface IRules
@@ -50,6 +50,7 @@ public interface IRules
     int Players { get; set; }
     int TokensForEach { get; set; }
 }
+
 
 public interface IValidPlay<TGame, TPlayer, TCriterio>
 {

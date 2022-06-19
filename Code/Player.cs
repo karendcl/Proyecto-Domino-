@@ -34,39 +34,38 @@ public class Player : IPlayer
         return a;
     }
 
-    public List<Token> PossiblePlays(Game game)// Plays posibles
+    public List<Token> PossiblePlays(IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay, IBoard board)// Plays posibles
     {
         var CanPlay = new List<Token>();
 
         foreach (var item in hand)
         {   //Cambie aca porque el jugador no debe saber si el juez es corrupto
 
-            //Arrgleglar acaaa
-            if (game.validPlay.ValidPlay(game.board, item).Item1) CanPlay.Add(item);
+            if (validPlay.ValidPlay(board, item).CanMatch) CanPlay.Add(item);
         }
 
         return CanPlay;
     }
 
-    public virtual Token BestPlay(Game game)
+    public virtual Token BestPlay(IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay,IGetScore<Token>howtogetscore, IBoard board)
     {
-        var posibles = PossiblePlays(game);
+        var posibles = PossiblePlays(validPlay, board);
         if (posibles.Count == 0) return null!;
 
         int[] scores = new int[posibles.Count];
 
         for (int i = 0; i < scores.Length; i++)
         {
-            scores[i] += strategy.Evaluate(posibles[i], hand, game);
+            scores[i] += strategy.Evaluate(posibles[i], hand,howtogetscore);
         }
 
         int index = Array.IndexOf(scores, scores.Max());
         return posibles[index];
     }
 
-    public virtual int ChooseSide(Game game)
+    public virtual int ChooseSide(ChooseStrategyWrapped choose, IBoard board)
     {
-        return strategy.ChooseSide(game);
+        return strategy.ChooseSide(choose, board);
     }
 
     public virtual IPlayer Clone()

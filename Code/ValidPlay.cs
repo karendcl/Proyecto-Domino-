@@ -32,11 +32,11 @@ public abstract class ValidPlayClass : IValidPlay<IBoard, Token, ChooseStrategyW
         //if (FirstPlay(board)) return true;
         if (Match(token.Part1, board.First().Part1))
         {
-            choose.AddSide(1);
+            choose.AddSide(0);
         }
         if (Match(token.Part2, board.First().Part1))
         {
-            choose.AddSide(2);
+            choose.AddSide(1);
         }
         choose.Run();
         return choose;
@@ -57,12 +57,12 @@ public abstract class ValidPlayClass : IValidPlay<IBoard, Token, ChooseStrategyW
         // if (FirstPlay(board)) return true;
         if (Match(token.Part1, board.Last().Part2))
         {
-            choose.AddSide(1);
+            choose.AddSide(0);
         }
 
         if (Match(token.Part2, board.Last().Part2))
         {
-            choose.AddSide(2);
+            choose.AddSide(1);
         }
         choose.Run();
         return choose;

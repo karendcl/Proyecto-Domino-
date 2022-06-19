@@ -156,24 +156,24 @@ public class Game : IRules, ICloneable<Game>
 
                 Token Token1 = Turno(playerNow);  //la ficha que se va a jugar                     
 
-                (bool IsValid, List<(bool LadoAPoner, List<int> Cara)> list) valid = this.judge.valid.ValidPlay(board, token);
+                ChooseStrategyWrapped valid = this.judge.valid.ValidPlay(board, token);
 
 
-                if (Token1 is null || !valid.IsValid)
+                if (Token1 is null || !valid.CanMatch)
                 { //si es nulo, el jugador se ha pasado
                     this.SwapDirection(i);
                 }
 
                 if (Token1 != null) //si no es nulo, entonces si lleva
                 {
-                    if (valid.IsValid)
+                    if (valid.CanMatch)
                     { //si es valido
-                        int index = -1;
+                        int index = 0;
 
-                        if (this.judge.PlayAmbigua(Token1, this.board))
-                        {  //si se puede jugar por ambos lados, se le pide que escoja un lado
-                            index = player[i].ChooseSide(this);
-                        }
+
+                        index = player[i].ChooseSide(valid,board.Clone());
+                        //Enviar clonado para que no pueda ser el jugador quien cambie nada
+
 
                         this.judge.AddTokenToBoard(Token1, this.board, index);
                         player[i].hand.Remove(Token1); //se elimina la ficha de la mano del jugador

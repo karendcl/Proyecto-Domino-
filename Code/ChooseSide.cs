@@ -1,6 +1,6 @@
 namespace Game;
 
-public class ChooseStrategyWrapped
+public class ChooseStrategyWrapped : IEquatable<ChooseStrategyWrapped>
 {
     public bool CanMatch { get; private set; } = false;
 
@@ -23,6 +23,14 @@ public class ChooseStrategyWrapped
           if (board.board.Count < 1) { CanMatch = true; FirstPlay = true; }
       }*/
 
+    public (bool, ChooseSideWrapped) ControlSide(int side)
+    {
+        if (side >= this.side.Count) { return (false, null)!; }
+        ChooseSideWrapped temp = this.side[side];
+        return (temp.canChoose, temp);
+    }
+
+
     public void AddSide(ChooseSideWrapped side)
     {
         this.side.Add(side);
@@ -32,9 +40,11 @@ public class ChooseStrategyWrapped
         }
     }
 
-
-
-
+    public bool Equals(ChooseStrategyWrapped? other)
+    {  // SOn iguales si tienen el mismo token
+        if (other == null) { return false; }
+        return (this.token.Equals(other.token));
+    }
 }
 
 public sealed class ChooseSideWrapped

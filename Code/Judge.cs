@@ -1,30 +1,49 @@
 namespace Game;
 
-public class Judge : IJudge<IPlayer, Token>
+public class Judge
 {
-    public IStopGame<IPlayer, Token> stopcriteria { get; set; }
-    public IGetScore<Token> howtogetscore { get; set; }
-    public IWinCondition<IPlayer, Token> winCondition { get; set; }
-    public IValidPlay valid { get; set; }
-
-    public Judge(IStopGame<IPlayer, Token> stop, IGetScore<Token> getscore, IWinCondition<IPlayer, Token> winCondition, IValidPlay valid)
+    private IStopGame<IPlayer, Token> stopcriteria { get; set; }
+    public IGetScore<Token> howtogetscore { get; protected set; }
+    public IWinCondition<IPlayer, Token> winCondition { get; protected set; }
+    public IValidPlay<IBoard, Token, ChooseStrategyWrapped> valid { get; protected set; }
+    protected IPlayer playernow { get; set; } = null;
+    protected List<Token> validTokenFornow;
+    //Guarda las fichas que son validas en un momento x
+    public Judge(IStopGame<IPlayer, Token> stop, IGetScore<Token> getscore, IWinCondition<IPlayer, Token> winCondition, IValidPlay<IBoard, Token, ChooseStrategyWrapped> valid)
     {
         this.stopcriteria = stop;
         this.howtogetscore = getscore;
         this.winCondition = winCondition;
         this.valid = valid;
+        this.validTokenFornow = new List<Token>() { };
+
     }
 
     public bool PlayerMeetsStopCriteria(IPlayer player)
     {
         return this.stopcriteria.MeetsCriteria(player, this.howtogetscore);
     }
-    public virtual bool ValidPlay(IBoard board, Token token)
+    public virtual bool ValidPlay(IPlayer player, IBoard board, Token token)
     {
+        playernow = player;
+        if (playernow == null)
+        {
+            playernow = player;
+        }
+        else if (!player.Equals(playernow))
+        {
+            playernow = player;
+            validTokenFornow.Clear();
+        }
+        ChooseStrategyWrapped valid = this.valid.ValidPlay(board, token);
 
-
-        return this.valid.ValidPlay(board, token);
+        if (!valid.CanMatch) { return false; }
+        validTokenFornow.Add(token);
+        //Implemetar aca las descalificaciones
+        return true;
     }
+
+
 
     public virtual bool EndGame(Game game)
     {
@@ -38,7 +57,7 @@ public class Judge : IJudge<IPlayer, Token>
         {
             foreach (var token in player.hand)
             {
-                if (this.ValidPlay(game.board, token)) return false;
+                if (this.valid.ValidPlay(game.board, token).CanMatch) return false;
             }
         }// si no esta trancado
 
@@ -58,19 +77,7 @@ public class Judge : IJudge<IPlayer, Token>
 
         return result;
     }
-    public virtual bool ValidSettings(int TokensForEach, int MaxDoble, int players)
-    {
-        int totalamount = 0;
 
-        if (TokensForEach == 0 || MaxDoble == 0 || players == 0) return false;
-
-        for (int i = 0; i <= MaxDoble + 1; i++)
-        {
-            totalamount += i;
-        }
-
-        return (TokensForEach * players > totalamount) ? false : true;
-    }
 
     public void AddTokenToBoard(Token token, IBoard board, int side)
     {
@@ -85,7 +92,9 @@ public class Judge : IJudge<IPlayer, Token>
         Token last = board.Last();
 
 
-        if ((side == 0) || (valid.Match(token.Part1, first.Part1) || valid.Match(token.Part2, first.Part1)))
+
+
+        /*if ((side == 0) || (valid.Match(token.Part1, first.Part1) || valid.Match(token.Part2, first.Part1)))
         {
             PlayAlante(token, first, board);
             return;
@@ -96,7 +105,7 @@ public class Judge : IJudge<IPlayer, Token>
             PlayAtras(token, last, board);
             return;
         }
-
+*/
     }
 
 
@@ -117,10 +126,7 @@ public class Judge : IJudge<IPlayer, Token>
 
     }
 
-    public bool PlayAmbigua(Token token, IBoard board)
-    {
-        return (valid.ValidPlayBack(board, token) && valid.ValidPlayFront(board, token));
-    }
+
 
 
 }
@@ -134,7 +140,7 @@ public class ChampionJudge
 {
     public IStopGame<Game, IPlayer> stopcriteria { get; set; }
     public IWinCondition<Game, IPlayer> winCondition { get; set; }
-    public IValidPlayChampion<Game, IPlayer> valid { get; set; }
+    public IValidPlay<Game, IPlayer, List<IPlayer>> valid { get; set; }
     public IGetScore<IPlayer> howtogetscore { get; set; }
 
     public ChampionJudge(IStopGame<Game, IPlayer> stopcriteria, IWinCondition<Game, IPlayer> winCondition, IValidPlayChampion<Game, IPlayer> valid, IGetScore<IPlayer> howtogetscore)
@@ -150,9 +156,23 @@ public class ChampionJudge
         return false;
     }
     //Verificar antes de comenzar otro juego 
-    public bool ValidPlay(Game game, IPlayer player)
+    public List<IPlayer> ValidPlay(Game game, IPlayer player)//Los que continuan
     {
         return valid.ValidPlay(game, player);
+    }
+
+    public virtual bool ValidSettings(int TokensForEach, int MaxDoble, int players)
+    {
+        int totalamount = 0;
+
+        if (TokensForEach == 0 || MaxDoble == 0 || players == 0) return false;
+
+        for (int i = 0; i <= MaxDoble + 1; i++)
+        {
+            totalamount += i;
+        }
+
+        return (TokensForEach * players > totalamount) ? false : true;
     }
 }
 

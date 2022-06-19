@@ -34,13 +34,15 @@ public class Player : IPlayer
         return a;
     }
 
-    public List<Token> PossiblePlays(Game game)
+    public List<Token> PossiblePlays(Game game)// Plays posibles
     {
         var CanPlay = new List<Token>();
 
         foreach (var item in hand)
         {   //Cambie aca porque el jugador no debe saber si el juez es corrupto
-            if (game.validPlay.ValidPlay(game.board, item)) CanPlay.Add(item);
+
+            //Arrgleglar acaaa
+            if (game.validPlay.ValidPlay(game.board, item).Item1) CanPlay.Add(item);
         }
 
         return CanPlay;

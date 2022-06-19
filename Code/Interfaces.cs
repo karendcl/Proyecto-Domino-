@@ -3,7 +3,7 @@ namespace Game;
 
 public interface IWinCondition<TCriterio, TToken>
 {                           //List<IPlayer> players
-    List<IPlayer> Winner(List<TCriterio> criterios, IJudge<TCriterio, TToken> judge);
+    List<IPlayer> Winner(List<TCriterio> criterios, IGetScore<TToken> howtogetscore);
 }
 
 public interface IPlayerStrategy
@@ -51,39 +51,34 @@ public interface IRules
     int TokensForEach { get; set; }
 }
 
-public interface IValidPlayChampion<TGame, TPlayer>
+public interface IValidPlay<TGame, TPlayer, TCriterio>
 {
-    bool ValidPlay(TGame game, TPlayer player);
+    TCriterio ValidPlay(TGame game, TPlayer player);
+
 }
 
-public interface IValidPlay : IValidPlayChampion<IBoard, Token>
-{
-    //Devuelve el lugar donde el vector de Rn es compatible por la cara y el int -1 izquierda 0 por cualquir lado 
-    bool FirstPlay(IBoard board);
-    bool ValidPlayFront(IBoard board, Token token);
-    bool ValidPlayBack(IBoard board, Token token);
-    bool Match(int Part1, int part2);
-}
+
 //Los criterios pueden darse en base a jugador o juego 
-public interface IJudgeChampion<TCriterio, TToken>
+public interface IJudge<TCriterio, TToken, TWrapped>
 {
     IStopGame<TCriterio, TToken> stopcriteria { get; set; }
     IWinCondition<TCriterio, TToken> winCondition { get; set; }
-    IValidPlay valid { get; set; }
+
+    IValidPlay<TCriterio, TToken, TWrapped> valid { get; set; }
     public IGetScore<Token> howtogetscore { get; set; }
 
-    bool ValidPlay(IBoard board, Token token);
+    bool ValidPlay(TCriterio criterio, TToken token);
     bool EndGame(Game game);
-}
-public interface IJudge<TCriterio, TToken> : IJudgeChampion<TCriterio, TToken>//Agregar donde Es un IstopGame....
-{
+
+    int PlayerScore(IPlayer player);
 
     bool ValidSettings(int TokensForEach, int MaxDoble, int players);
-    int PlayerScore(IPlayer player);
-    bool PlayAmbigua(Token token, IBoard board);
-    void AddTokenToBoard(Token token, IBoard board, int side);
 
+    void AddTokenTCriterio(Token token, IBoard board, int side);
+    //Añadir al board
+    //Añadir a un partido un juegador
 }
+
 
 
 

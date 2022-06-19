@@ -4,7 +4,7 @@ namespace Game;
 public abstract class WinCondition : IWinCondition<IPlayer, Token>
 {
 
-    public virtual List<IPlayer> Winner(List<IPlayer> players, IJudge<IPlayer, Token> judge)
+    public virtual List<IPlayer> Winner(List<IPlayer> players, IGetScore<Token> howtogetscore)
     {
 
         int count = 0;
@@ -20,7 +20,7 @@ public abstract class WinCondition : IWinCondition<IPlayer, Token>
 
             foreach (var Token in player.hand)
             {
-                scores[count] += judge.howtogetscore.Score(Token);
+                scores[count] += howtogetscore.Score(Token);
             }
             count++;
         }
@@ -41,7 +41,7 @@ public abstract class WinCondition : IWinCondition<IPlayer, Token>
 }
 public class MinScore : WinCondition
 {
-    public override List<IPlayer> Winner(List<IPlayer> players, IJudge<IPlayer, Token> judge)
+    public override List<IPlayer> Winner(List<IPlayer> players, IGetScore<Token> howtogetscore)
     {
 
         int count = 0;
@@ -57,7 +57,7 @@ public class MinScore : WinCondition
 
             foreach (var Token in player.hand)
             {
-                scores[count] += judge.howtogetscore.Score(Token);
+                scores[count] += howtogetscore.Score(Token);
             }
             count++;
         }
@@ -150,8 +150,8 @@ public class WinChampion : IWinCondition<Game, IPlayer>
         this.cantwins = new List<int>() { };
         // this.Porcent = porcentWins;
     }
-    public List<IPlayer> Winner(List<Game> games, IJudge<Game, IPlayer> judge)
-    {
+    public List<IPlayer> Winner(List<Game> games, IGetScore<IPlayer> howtogetscore)
+    {                                              ///Agregar una que utiize esta 
         List<IPlayer> winners = new List<IPlayer>() { };
         foreach (var game in games)
         {

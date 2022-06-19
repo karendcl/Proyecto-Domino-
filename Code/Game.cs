@@ -10,14 +10,14 @@ public class Game : IRules, ICloneable<Game>
     public int MaxDouble { get; set; }
     public int Players { get; set; }
     public int TokensForEach { get; set; }
-    public IJudge<IPlayer, Token> judge { get; set; }
+    public Judge judge { get; set; }
 
     //public WinnersList<IPlayer,
-    public IValidPlay validPlay { get { return judge.valid; } }//El juegador no debe conocer si el juez es corrupto o no
-
+    public IValidPlay<IBoard, Token, (bool, List<(bool, List<int>)>)> validPlay { get { return judge.valid; } }//El juegador no debe conocer si el juez es corrupto o no
+                                                                                                               //Meter esto en un Wrapped
     private Observer observer { get; set; }//quitar
 
-    public Game(IBoard board, IPlayer[] players, bool direction, int max, int plays, int rep, IJudge<IPlayer, Token> judge, bool draw)
+    public Game(IBoard board, IPlayer[] players, bool direction, int max, int plays, int rep, Judge judge, bool draw)
     {
         this.board = board;
         this.player = players.ToList();
@@ -127,16 +127,13 @@ public class Game : IRules, ICloneable<Game>
 
     public virtual List<IPlayer> Winner()
     {
-        return this.judge.winCondition.Winner(this.player, this.judge);
+        return this.judge.winCondition.Winner(this.player, this.judge.howtogetscore);
     }
 
     public bool PlayAGame()
     {
-
-        //Control que todo se pase por referencia
-        // Debug.Assert(game.board.board.Count>1,"Problemas con valores de referencia");
-
-        IJudge<IPlayer, Token> judge = this.judge;
+        // IJudge<IPlayer, Token,(bool,List<(bool,List<int>)>)> judge = this.judge;
+        Judge judge = this.judge;
         List<IPlayer> player = this.player;
         IBoard board = this.board;
 
@@ -155,16 +152,21 @@ public class Game : IRules, ICloneable<Game>
 
                 observer.Clean();
 
-                Token Token1 = Turno(player[i]);  //la ficha que se va a jugar                     
+                IPlayer playerNow = player[i];
 
-                if (Token1 is null || !judge.ValidPlay(this.board, Token1))
+                Token Token1 = Turno(playerNow);  //la ficha que se va a jugar                     
+
+                (bool IsValid, List<(bool LadoAPoner, List<int> Cara)> list) valid = this.judge.valid.ValidPlay(board, token);
+
+
+                if (Token1 is null || !valid.IsValid)
                 { //si es nulo, el jugador se ha pasado
                     this.SwapDirection(i);
                 }
 
                 if (Token1 != null) //si no es nulo, entonces si lleva
                 {
-                    if (this.judge.ValidPlay(this.board, Token1))
+                    if (valid.IsValid)
                     { //si es valido
                         int index = -1;
 
@@ -190,6 +192,7 @@ public class Game : IRules, ICloneable<Game>
     private Token Turno(IPlayer player)
     {
         return player.BestPlay(this);
+        //Otorgar aca que si el juez lo deja jugar
     }
     public Game Clone()
     {

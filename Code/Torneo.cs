@@ -13,7 +13,7 @@ public class Championship
     public ChampionJudge judge { get; private set; }
     public IWinCondition<Game, IPlayer> winChampion { get; private set; }
     public IStopGame<Game, IPlayer> stopChampion { get; private set; }
-    public IValidPlay validChampion { get; private set; }
+    public IValidPlay<Game, IPlayer, List<IPlayer>> validChampion { get; private set; }
     public IGetScore<IPlayer> Score { get; private set; }
 
 
@@ -37,11 +37,8 @@ public class Championship
         Run();
     }
 
-
-
     public void Run()
     {
-
         Games = observer.SelectGameTypes(Games);
 
         for (int i = 0; i < Games.Length; i++)
@@ -50,12 +47,25 @@ public class Championship
 
             game.PlayAGame();
 
-            System.Console.WriteLine("Termino el juego {0}", i + 1);
-            Thread.Sleep(1000);
+            if (judge.EndGame(game))
+            {
+                ChampionOver();
+                break;
+            }
 
             if (!ContinueGames()) { observer.WriteStats(game); break; }
-            observer.WriteStats(game);
+
+            GameOver(game, i);
         }
+        ChampionOver();
+    }
+
+    private void ControlThePlayers()
+    {
+
+    }
+    private void ChampionOver()
+    {
         int o = 1;
         foreach (var gamed in Games) //Esto esta clableado 
         {
@@ -71,11 +81,20 @@ public class Championship
         }
 
     }
+    private void GameOver(Game game, int i)
+    {
+        System.Console.WriteLine("Termino el juego {0}", i + 1);
+        Thread.Sleep(1000);
 
-    public bool ContinueGames()
+
+        observer.WriteStats(game);
+    }
+    private bool ContinueGames()
     {
         return observer.Msg("Desea seguir jugando?, si / no");
     }
+
+
 
 
 }
@@ -86,10 +105,8 @@ public class Championship
 
 
 
-
-
 public class Msg
 {
-
+    string msg;
 }
 

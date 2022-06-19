@@ -3,7 +3,7 @@ namespace Game;
 //El observer es el encargado de establecer el contacto entre el backend y el frontend
 public class Observer
 {
-    #region Variables globales
+    #region Variables globales 
 
     int cadauno = 0;
     int cantplay = 0;
@@ -22,8 +22,6 @@ public class Observer
         }
         return false;
     }
-
-
 
     public void PaintInConsole(Msg mgs)
     {
@@ -77,6 +75,122 @@ public class Observer
         Console.WriteLine(board.ToString());
         Thread.Sleep(1000);
     }
+
+    #region Create a Champion
+
+    public Championship CreateAChampion()
+    {
+        int cantPartidas = CantPartidas();
+        ChampionJudge judge = ChooseChampionJudge();
+        List<IPlayer> players = ChampionPlayers();
+
+        return new Championship(cantPartidas, judge, players);
+    }
+
+    private ChampionJudge ChooseChampionJudge()
+
+    {
+        IStopGame<Game, IPlayer> stop = ChooseStopChampion();
+        IWinCondition<Game, IPlayer> win = ChooseWinCondition();
+        IValidPlayChampion<Game, IPlayer> valid = ChooseValidChampion();
+        IGetScore<IPlayer> score = ChooseChampionGetScore();
+        return new ChampionJudge(stop, win, valid, score);
+    }
+
+
+
+    private IValidPlayChampion<Game, IPlayer> ChooseValidChampion()
+    {
+        return new ValidChampion();
+    }
+    private IWinCondition<Game, IPlayer> ChooseWinCondition()
+    {
+        System.Console.WriteLine("Que porcentaje desea que se acabe el torneo");
+        int x = -1;
+        int.TryParse(Console.ReadLine()!, out x);
+        return new WinChampion(x);
+    }
+    private IGetScore<IPlayer> ChooseChampionGetScore()
+    {
+        System.Console.WriteLine("Se crea por defecto");
+
+        return new ScoreChampionNormal(null);
+
+
+    }
+
+    private IStopGame<Game, IPlayer> ChooseStopChampion()
+    {
+        int x = -1;
+        if (Msg("Desea que se acabe el campeonato por una que un jugador tiene mas que una cant de puntos? "))
+        {
+            System.Console.WriteLine("Escriba la cantidad de puntos maximos a tener por un jugador");
+
+            int.TryParse(Console.ReadLine()!, out x);
+            return new StopChampion(x);
+        }
+        return new StopChampion(x);
+
+    }
+    private int CantPartidas()
+    {
+        int x = 0;
+        while (x < 1)
+        {
+            System.Console.WriteLine("Cuantas partidas desea jugar");
+            x = int.Parse(Console.ReadLine()!);
+        }
+        return x;
+    }
+    private List<IPlayer> ChampionPlayers()
+    {
+        if (Msg("Desea tener jugadores a nivel de torneo"))
+        {
+            return ChoosePlayers().ToList<IPlayer>();
+        }
+        return new List<IPlayer>() { };
+
+    }
+    private IPlayer[] ChoosePlayers()
+    {
+        IPlayer[] players = new Player[cantplay];
+
+        for (int i = 0; i < cantplay; i++)
+        {
+            Console.Clear();
+
+            int a = -1;
+
+            while (a > 3 || a < 0)
+            {
+                Console.WriteLine("Elija la estrategia para el Player {0}. \n \n ➤ Escriba 0 para un jugador semi inteligente. \n ➤ Escriba 1 para jugador botagorda. \n ➤ Escriba 2 para jugador random. ", i + 1);
+
+
+                int.TryParse(Console.ReadLine()!, out a);
+                //a = 2;
+            }
+
+            switch (a)
+            {
+                case 0:
+                    players[i] = new Player(new List<Token>(), i + 1, new SemiSmart());
+                    break;
+
+                case 1:
+                    players[i] = new Player(new List<Token>(), i + 1, new BGStrategy());
+                    break;
+
+                case 2:
+                    players[i] = new Player(new List<Token>(), i + 1, new RandomStrategy());
+                    break;
+            }
+        }
+
+        return players;
+    }
+
+    #endregion
+
     #region  Create Game
     //Elegir tipo de juego
     private IStopGame<IPlayer, Token> ChooseStopGame(bool ConfGame = false)
@@ -227,43 +341,7 @@ public class Observer
         return judge;
     }
 
-    private IPlayer[] ChoosePlayers()
-    {
-        IPlayer[] players = new Player[cantplay];
 
-        for (int i = 0; i < cantplay; i++)
-        {
-            Console.Clear();
-
-            int a = -1;
-
-            while (a > 3 || a < 0)
-            {
-                Console.WriteLine("Elija la estrategia para el Player {0}. \n \n ➤ Escriba 0 para un jugador semi inteligente. \n ➤ Escriba 1 para jugador botagorda. \n ➤ Escriba 2 para jugador random. ", i + 1);
-
-
-                int.TryParse(Console.ReadLine()!, out a);
-                //a = 2;
-            }
-
-            switch (a)
-            {
-                case 0:
-                    players[i] = new Player(new List<Token>(), i + 1, new SemiSmart());
-                    break;
-
-                case 1:
-                    players[i] = new Player(new List<Token>(), i + 1, new BGStrategy());
-                    break;
-
-                case 2:
-                    players[i] = new Player(new List<Token>(), i + 1, new RandomStrategy());
-                    break;
-            }
-        }
-
-        return players;
-    }
 
     private Game ChooseAGame(bool ConfGame = false)//Seleccionar un modo de juego
     {

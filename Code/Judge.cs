@@ -21,7 +21,7 @@ public class Judge : IJudge<IPlayer, Token>
     }
     public virtual bool ValidPlay(IBoard board, Token token)
     {
-        int side = 0;
+
 
         return this.valid.ValidPlay(board, token);
     }
@@ -125,3 +125,36 @@ public class Judge : IJudge<IPlayer, Token>
 
 }
 
+
+
+#region  Champion
+
+
+public class ChampionJudge
+{
+    public IStopGame<Game, IPlayer> stopcriteria { get; set; }
+    public IWinCondition<Game, IPlayer> winCondition { get; set; }
+    public IValidPlayChampion<Game, IPlayer> valid { get; set; }
+    public IGetScore<IPlayer> howtogetscore { get; set; }
+
+    public ChampionJudge(IStopGame<Game, IPlayer> stopcriteria, IWinCondition<Game, IPlayer> winCondition, IValidPlayChampion<Game, IPlayer> valid, IGetScore<IPlayer> howtogetscore)
+    {
+        this.howtogetscore = howtogetscore;
+        this.stopcriteria = stopcriteria;
+        this.valid = valid;
+        this.winCondition = winCondition;
+    }
+    public bool EndGame(Game game)
+    {
+        if (stopcriteria.MeetsCriteria(game, howtogetscore)) return true;
+        return false;
+    }
+    //Verificar antes de comenzar otro juego 
+    public bool ValidPlay(Game game, IPlayer player)
+    {
+        return valid.ValidPlay(game, player);
+    }
+}
+
+
+#endregion

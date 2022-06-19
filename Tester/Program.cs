@@ -20,7 +20,8 @@ public class Program
         int.TryParse(Console.ReadLine()!, out cantPlays);
         // cantPlays=2;
 
-        Championship championship = new Championship(cantPlays);
+        Observer observer = new Observer();
+        observer.CreateAChampion();
     }
 
 }

@@ -18,3 +18,24 @@ public class DoubleScore : IGetScore<Token>
         return result;
     }
 }
+
+
+//Champion
+
+public class ScoreChampionNormal : IGetScore<IPlayer>, IRellenable<IGetScore<IPlayer>, Game>
+{
+    private Game game { get; set; }
+    public ScoreChampionNormal(Game game)
+    {
+        this.game = game;
+    }
+    public int Score(IPlayer item)
+    {
+        return game.judge.PlayerScore(item);
+    }
+
+    public IGetScore<IPlayer> Rellenar(Game item)
+    {
+        return new ScoreChampionNormal(item);
+    }
+}

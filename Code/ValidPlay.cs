@@ -20,8 +20,6 @@ public abstract class ValidPlayClass : IValidPlay
 
     public abstract bool Match(int Part1, int part2);
 
-
-
     public virtual bool FirstPlay(IBoard board)
     {
         if (board.board == null || board.board.Count == 0) return true;
@@ -84,3 +82,21 @@ public class SmallerValidPlay : ValidPlayClass
         return (part2 > Part1);
     }
 }
+
+
+#region Champion
+
+public class ValidChampion : IValidPlayChampion<Game, IPlayer>
+{
+    public bool ValidPlay(Game game, IPlayer players)
+    {
+        foreach (var player in game.player)
+        {
+            if (player.hand.Count > 0) return true;
+        }
+        return false;
+    }
+}
+
+
+#endregion

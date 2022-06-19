@@ -92,3 +92,8 @@ public interface ICloneable<T> : ICloneable
     new T Clone();
     Object ICloneable.Clone() => Clone()!;
 }
+
+public interface IRellenable<out T1, in T2>
+{
+    T1 Rellenar(T2 item);
+}

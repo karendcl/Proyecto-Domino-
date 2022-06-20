@@ -91,6 +91,6 @@ public interface ICloneable<T> : ICloneable
 
 public interface ICloneable<T1, T2> : ICloneable<T1>
 {
-    new T1 Clone(T2 item);
+    T1 Clone(T2 item);
 
 }

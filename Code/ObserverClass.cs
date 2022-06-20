@@ -15,7 +15,7 @@ public class Observer
     public bool Msg(string msg)
     {
         Console.WriteLine(msg);
-        string playing = Console.ReadLine()!;
+        string playing = Console.ReadLine()!.ToLower();
         if (playing[0] == 's')
         {
             return true;
@@ -381,24 +381,7 @@ public class Observer
             return Games;
         }
 
-        for (int i = 0; i < Games.Length; i++)
-        {
-
-            if (i > 0 && Msg("Desea que el juego tenga las mismas configuaraciones que el anterior? si/no"))
-            {
-                int x = i - 1;
-                Games[i] = Games[x].Clone();//Clona la partida para que no existan problemas de referencia
-
-                // Debug.Assert(Games[i].board.board.Count == 0, "Se clono correctamente");
-            }
-            else
-            {
-                Games[i] = ChooseAGame(true);
-            }
-
-            //  Debug.Assert(Games[i] != null, "No es null");
-        }
-
+      
         return Games;
     }
     #endregion 

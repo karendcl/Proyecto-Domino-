@@ -1,5 +1,5 @@
 namespace Game;
-
+#region  Game
 public class ClassicScore : IGetScore<Token>
 {
 
@@ -19,10 +19,9 @@ public class DoubleScore : IGetScore<Token>
     }
 }
 
-
+#endregion
 //Champion
-
-public delegate int Score(Game game, IPlayer item);
+#region  Champion
 
 public class ScoreChampionNormal : IGetScore<(Game game, IPlayer player)>
 {
@@ -34,5 +33,5 @@ public class ScoreChampionNormal : IGetScore<(Game game, IPlayer player)>
 
 }
 
-
+#endregion
 

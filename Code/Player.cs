@@ -16,11 +16,6 @@ public class Player : IPlayer
         this.strategy = strategy;
     }
 
-    public virtual Token FirstToken(Game game)
-    {
-        var r = new Random();
-        return hand.ElementAt(r.Next(0, hand.Count));
-    }
 
     public override string ToString()
     {
@@ -76,11 +71,14 @@ public class Player : IPlayer
 
     public bool Equals(IPlayer? other)
     {
+        if (other is null) return false;
         return (this.Id == other.Id);
     }
 
     public bool Equals(Player? other)
     {
+        if (other is null) return false;
+
         return (this.Id == other.Id && this.strategy == other.strategy);
     }
 
@@ -91,7 +89,7 @@ public class Player : IPlayer
     }
 }
 
-
+/*
 public class HumanPlayer : Player
 {
     public HumanPlayer(List<Token> Tokens, int id, IPlayerStrategy strategy) : base(Tokens, id, strategy)
@@ -134,3 +132,4 @@ public class HumanPlayer : Player
         return new HumanPlayer(this.hand, this.Id, this.strategy);
     }
 }
+*/

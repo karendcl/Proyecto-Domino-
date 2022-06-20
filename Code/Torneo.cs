@@ -23,8 +23,6 @@ public class Championship
 
     #endregion
 
-
-
     Observer observer = new Observer();
     public Championship(int cantTorneos, ChampionJudge judge, List<IPlayer> players)
     {
@@ -32,10 +30,7 @@ public class Championship
         this.Games = new Game[cantTorneos];
         this.GloblaPlayers = players;
         this.judge = judge;
-        // this.winChampion = winChampion;
-        // this.stopChampion = stopChampion;
-        // this.validChampion = validChampion;
-        // this.Score = Score;
+
         Run();
     }
 

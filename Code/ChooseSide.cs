@@ -28,6 +28,13 @@ public class ChooseStrategyWrapped : IEquatable<ChooseStrategyWrapped>
     {
         if (side >= this.side.Count) { return (false, null)!; }
         ChooseSideWrapped temp = this.side[side];
+        if (!temp.canChoose)
+        {
+            for (int i = 0; i < this.side.Count; i++)
+            {
+                if (this.side[i].canChoose) { temp = this.side[i]; }
+            }
+        }
         return (temp.canChoose, temp);
     }
 

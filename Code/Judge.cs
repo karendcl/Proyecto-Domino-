@@ -183,12 +183,12 @@ public class ControlPlayer
 
 public class ChampionJudge
 {
-    public IStopGame<Game, IPlayer> stopcriteria { get; set; }
+    public IStopGame<Game, (Game, IPlayer)> stopcriteria { get; set; }
     public IWinCondition<Game, IPlayer> winCondition { get; set; }
     public IValidPlay<Game, IPlayer, List<IPlayer>> valid { get; set; }
-    public IGetScore<IPlayer> howtogetscore { get; set; }
+    public IGetScore<(Game, IPlayer)> howtogetscore { get; set; }
 
-    public ChampionJudge(IStopGame<Game, IPlayer> stopcriteria, IWinCondition<Game, IPlayer> winCondition, IValidPlay<Game, IPlayer, List<IPlayer>> valid, IGetScore<IPlayer> howtogetscore)
+    public ChampionJudge(IStopGame<Game, (Game, IPlayer)> stopcriteria, IWinCondition<Game, IPlayer> winCondition, IValidPlay<Game, IPlayer, List<IPlayer>> valid, IGetScore<(Game, IPlayer)> howtogetscore)
     {
         this.howtogetscore = howtogetscore;
         this.stopcriteria = stopcriteria;
@@ -197,7 +197,6 @@ public class ChampionJudge
     }
     public bool EndGame(Game game)
     {
-
         if (stopcriteria.MeetsCriteria(game, howtogetscore)) return true;
         return false;
     }

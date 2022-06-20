@@ -22,32 +22,16 @@ public class DoubleScore : IGetScore<Token>
 
 //Champion
 
+public delegate int Score(Game game, IPlayer item);
 
-
-public class ScoreChampionNormal : IGetScore<IPlayer>, ICloneable<ScoreChampionNormal, Game>
+public class ScoreChampionNormal : IGetScore<(Game game, IPlayer player)>
 {
-    private Game game { get; set; }
-    public ScoreChampionNormal(Game game)
+    public int Score((Game game, IPlayer player) item)
     {
-        this.game = game;
-    }
-    public int Score(IPlayer item)
-    {
-        return game.judge.PlayerScore(item);
+        Game game = item.game;
+        return game.judge.PlayerScore(item.player);
     }
 
-
-
-    public ScoreChampionNormal Clone(Game item)
-    {
-        this.game = item;
-        return this;
-    }
-
-    public ScoreChampionNormal Clone()
-    {
-        return new ScoreChampionNormal(this.game.Clone());
-    }
 }
 
 

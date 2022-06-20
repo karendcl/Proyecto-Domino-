@@ -15,7 +15,7 @@ public class Championship
     public IWinCondition<Game, IPlayer> winChampion { get; private set; }
     public IStopGame<Game, IPlayer> stopChampion { get; private set; }
     public IValidPlay<Game, IPlayer, List<IPlayer>> validChampion { get; private set; }
-    public IGetScore<IPlayer> Score { get; private set; }
+    public IGetScore<(Game, IPlayer)> Score { get; private set; }
 
     private Game[] Games { get; set; }
     //jugadores a nivel de torneo 

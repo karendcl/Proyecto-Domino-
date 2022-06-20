@@ -92,10 +92,10 @@ public class Observer
     private ChampionJudge ChooseChampionJudge()
 
     {
-        IStopGame<Game, IPlayer> stop = ChooseStopChampion();
+        IStopGame<Game, (Game, IPlayer)> stop = ChooseStopChampion();
         IWinCondition<Game, IPlayer> win = ChooseWinCondition();
         IValidPlay<Game, IPlayer, List<IPlayer>> valid = ChooseValidChampion();
-        IGetScore<IPlayer> score = ChooseChampionGetScore();
+        IGetScore<(Game, IPlayer)> score = ChooseChampionGetScore();
         return new ChampionJudge(stop, win, valid, score);
     }
 
@@ -112,16 +112,16 @@ public class Observer
         int.TryParse(Console.ReadLine()!, out x);
         return new WinChampion(x);
     }
-    private IGetScore<IPlayer> ChooseChampionGetScore()
+    private IGetScore<(Game, IPlayer)> ChooseChampionGetScore()
     {
         System.Console.WriteLine("Se crea por defecto");
 
-        return new ScoreChampionNormal(null);
+        return new ScoreChampionNormal();
 
 
     }
 
-    private IStopGame<Game, IPlayer> ChooseStopChampion()
+    private IStopGame<Game, (Game, IPlayer)> ChooseStopChampion()
     {
         int x = -1;
         if (Msg("Desea que se acabe el campeonato por una que un jugador tiene mas que una cant de puntos? "))

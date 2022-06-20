@@ -12,6 +12,7 @@ public class ChooseStrategyWrapped : IEquatable<ChooseStrategyWrapped>
     public ChooseStrategyWrapped(IBoard board, Token token, bool FirstPlay = false)
     {
         this.FirstPlay = FirstPlay;
+        this.CanMatch = FirstPlay;
         this.board = board;
         this.side = new List<ChooseSideWrapped>() { };
         this.token = token;

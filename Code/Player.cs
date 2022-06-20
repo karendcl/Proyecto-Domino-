@@ -34,38 +34,39 @@ public class Player : IPlayer
         return a;
     }
 
-    public List<Token> PossiblePlays(IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay, IBoard board)// Plays posibles
+    public List<Token> PossiblePlays(WatchPlayer watchPlayer)// Plays posibles
     {
+
         var CanPlay = new List<Token>();
 
         foreach (var item in hand)
         {   //Cambie aca porque el jugador no debe saber si el juez es corrupto
 
-            if (validPlay.ValidPlay(board, item).CanMatch) CanPlay.Add(item);
+            if (watchPlayer.validPlay.ValidPlay(watchPlayer.board, item).CanMatch) CanPlay.Add(item);
         }
 
         return CanPlay;
     }
 
-    public virtual Token BestPlay(IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay,IGetScore<Token>howtogetscore, IBoard board)
+    public virtual Token BestPlay(WatchPlayer watchPlayer)
     {
-        var posibles = PossiblePlays(validPlay, board);
+        var posibles = PossiblePlays(watchPlayer);
         if (posibles.Count == 0) return null!;
 
         int[] scores = new int[posibles.Count];
 
         for (int i = 0; i < scores.Length; i++)
         {
-            scores[i] += strategy.Evaluate(posibles[i], hand,howtogetscore);
+            scores[i] += strategy.Evaluate(posibles[i], hand, watchPlayer);
         }
 
         int index = Array.IndexOf(scores, scores.Max());
         return posibles[index];
     }
 
-    public virtual int ChooseSide(ChooseStrategyWrapped choose, IBoard board)
+    public virtual int ChooseSide(ChooseStrategyWrapped choose, WatchPlayer watchPlayer)
     {
-        return strategy.ChooseSide(choose, board);
+        return strategy.ChooseSide(choose, watchPlayer);
     }
 
     public virtual IPlayer Clone()
@@ -82,6 +83,12 @@ public class Player : IPlayer
     {
         return (this.Id == other.Id && this.strategy == other.strategy);
     }
+
+
+    public int Evaluate(Token token, List<Token> hand, WatchPlayer watch)
+    {
+        return this.strategy.Evaluate(token, hand, watch);
+    }
 }
 
 
@@ -96,7 +103,7 @@ public class HumanPlayer : Player
         return index < -1 || index >= hand.Count;
     }
 
-    public override Token BestPlay(Game game)
+    public override Token BestPlay(WatchPlayer watchPlayer)
     {
         int ToPlay = -2;
 
@@ -105,8 +112,8 @@ public class HumanPlayer : Player
             Console.WriteLine("Escriba el indice de la Token a jugar. Comenzando desde 0. Si no lleva escriba -1");
             ToPlay = int.Parse(Console.ReadLine()!);
             if (ToPlay == -1) return null!;
-
-            while (!game.judge.ValidPlay(game.board, this.hand[ToPlay]))
+            ChooseStrategyWrapped choose = watchPlayer.validPlay.ValidPlay(watchPlayer.board, this.hand[ToPlay]);
+            while (!choose.CanMatch)
             {
                 Console.WriteLine("No haga trampa! Escriba otra Token");
                 ToPlay = int.Parse(Console.ReadLine()!);
@@ -115,7 +122,7 @@ public class HumanPlayer : Player
         return this.hand[ToPlay];
     }
 
-    public override int ChooseSide(Game game)
+    public override int ChooseSide(ChooseStrategyWrapped choose, WatchPlayer watchPlayer)//Modificar
     {
         Console.WriteLine("Escriba 0 para jugar alante y 1 para jugar atras");
 

@@ -22,7 +22,9 @@ public class DoubleScore : IGetScore<Token>
 
 //Champion
 
-public class ScoreChampionNormal : IGetScore<IPlayer>, IRellenable<IGetScore<IPlayer>, Game>
+
+
+public class ScoreChampionNormal : IGetScore<IPlayer>, ICloneable<ScoreChampionNormal, Game>
 {
     private Game game { get; set; }
     public ScoreChampionNormal(Game game)
@@ -34,8 +36,19 @@ public class ScoreChampionNormal : IGetScore<IPlayer>, IRellenable<IGetScore<IPl
         return game.judge.PlayerScore(item);
     }
 
-    public IGetScore<IPlayer> Rellenar(Game item)
+
+
+    public ScoreChampionNormal Clone(Game item)
     {
-        return new ScoreChampionNormal(item);
+        this.game = item;
+        return this;
+    }
+
+    public ScoreChampionNormal Clone()
+    {
+        return new ScoreChampionNormal(this.game.Clone());
     }
 }
+
+
+

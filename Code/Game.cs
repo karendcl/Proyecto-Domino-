@@ -13,8 +13,8 @@ public class Game : IRules, ICloneable<Game>
     public Judge judge { get; set; }
 
     //public WinnersList<IPlayer,
-    public IValidPlay<IBoard, Token, (bool, List<(bool, List<int>)>)> validPlay { get { return judge.valid; } }//El juegador no debe conocer si el juez es corrupto o no
-                                                                                                               //Meter esto en un Wrapped
+
+    //Meter esto en un Wrapped
     private Observer observer { get; set; }//quitar
 
     public Game(IBoard board, IPlayer[] players, bool direction, int max, int plays, int rep, Judge judge, bool draw)
@@ -32,12 +32,12 @@ public class Game : IRules, ICloneable<Game>
         AssignTokens();
     }
 
-    public void AddPlayer(Player player)
+    public void AddPlayer(IPlayer player)
     {
         this.player.Add(player);
     }
 
-    public bool DeletePlayer(Player player)
+    public bool DeletePlayer(IPlayer player)
     {
         if (this.player.Count == 1) return false;
 
@@ -127,7 +127,7 @@ public class Game : IRules, ICloneable<Game>
 
     public virtual List<IPlayer> Winner()
     {
-        return this.judge.winCondition.Winner(this.player, this.judge.howtogetscore);
+        return this.judge.Winner(this.player);
     }
 
     public bool PlayAGame()
@@ -143,7 +143,7 @@ public class Game : IRules, ICloneable<Game>
             {
                 if (judge.EndGame(this)) break;
 
-
+                WatchPlayer watch = judge.RunWatchPlayer(board.Clone(this.board.board));
                 // Console.WriteLine(player[i].ToString());
                 observer.PaintPlayerInConsole(player[i]);
                 // Console.WriteLine(game.board.ToString());
@@ -154,15 +154,19 @@ public class Game : IRules, ICloneable<Game>
 
                 IPlayer playerNow = player[i];
 
-                Token Token1 = Turno(playerNow);  //la ficha que se va a jugar                     
-
-                ChooseStrategyWrapped valid = this.judge.valid.ValidPlay(board, token);
-
+                Token Token1 = Turno(playerNow, watch);  //la ficha que se va a jugar                     
+                if (Token1 == null)
+                {
+                    this.SwapDirection(i);
+                    continue;
+                }
+                ChooseStrategyWrapped valid = this.judge.ValidPlay(playerNow, board, Token1);
 
                 if (Token1 is null || !valid.CanMatch)
                 { //si es nulo, el jugador se ha pasado
                     this.SwapDirection(i);
                 }
+
 
                 if (Token1 != null) //si no es nulo, entonces si lleva
                 {
@@ -171,27 +175,27 @@ public class Game : IRules, ICloneable<Game>
                         int index = 0;
 
 
-                        index = player[i].ChooseSide(valid,board.Clone());
-                        //Enviar clonado para que no pueda ser el jugador quien cambie nada
+                        index = player[i].ChooseSide(valid, watch);
 
 
-                        this.judge.AddTokenToBoard(Token1, this.board, index);
-                        player[i].hand.Remove(Token1); //se elimina la ficha de la mano del jugador
+
+                        bool control = this.judge.AddTokenToBoard(playerNow, Token1, this.board, index);
+                        if (control) { player[i].hand.Remove(Token1); }
+                        //se elimina la ficha de la mano del jugador
                     }
                 }
 
-                Thread.Sleep(500);
+                Thread.Sleep(1500);
             }
-
 
         }
         return true;
 
     }
 
-    private Token Turno(IPlayer player)
+    private Token Turno(IPlayer player, WatchPlayer watch)
     {
-        return player.BestPlay(this);
+        return player.BestPlay(watch);
         //Otorgar aca que si el juez lo deja jugar
     }
     public Game Clone()

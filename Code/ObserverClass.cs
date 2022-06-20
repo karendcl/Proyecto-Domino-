@@ -67,6 +67,7 @@ public class Observer
         Clean();
         System.Console.WriteLine(player.ToString());
         Thread.Sleep(1000);
+
     }
 
     public void PaintBord(IBoard board)
@@ -74,6 +75,7 @@ public class Observer
         Clean();
         Console.WriteLine(board.ToString());
         Thread.Sleep(1000);
+
     }
 
     #region Create a Champion
@@ -92,14 +94,14 @@ public class Observer
     {
         IStopGame<Game, IPlayer> stop = ChooseStopChampion();
         IWinCondition<Game, IPlayer> win = ChooseWinCondition();
-        IValidPlayChampion<Game, IPlayer> valid = ChooseValidChampion();
+        IValidPlay<Game, IPlayer, List<IPlayer>> valid = ChooseValidChampion();
         IGetScore<IPlayer> score = ChooseChampionGetScore();
         return new ChampionJudge(stop, win, valid, score);
     }
 
 
 
-    private IValidPlayChampion<Game, IPlayer> ChooseValidChampion()
+    private IValidPlay<Game, IPlayer, List<IPlayer>> ChooseValidChampion()
     {
         return new ValidChampion();
     }
@@ -138,7 +140,7 @@ public class Observer
         while (x < 1)
         {
             System.Console.WriteLine("Cuantas partidas desea jugar");
-            x = int.Parse(Console.ReadLine()!);
+            int.TryParse(Console.ReadLine(), out x);
         }
         return x;
     }
@@ -283,9 +285,9 @@ public class Observer
         return winCondition;
     }
 
-    public IValidPlay ChooseValidPlay(bool ConfGame = false)
+    public IValidPlay<IBoard, Token, ChooseStrategyWrapped> ChooseValidPlay(bool ConfGame = false)
     {
-        IValidPlay validPlay = new ClassicValidPlay();
+        IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay = new ClassicValidPlay();
         int val = 0;
 
         while (val < 1 || val > 3)
@@ -315,10 +317,10 @@ public class Observer
     }
 
 
-    private IJudge<IPlayer, Token> ChooseJugde(IStopGame<IPlayer, Token> stopcondition, IGetScore<Token> HowTogetScore, IWinCondition<IPlayer, Token> winCondition, IValidPlay validPlay, bool ConfGame = false)
+    private Judge ChooseJugde(IStopGame<IPlayer, Token> stopcondition, IGetScore<Token> HowTogetScore, IWinCondition<IPlayer, Token> winCondition, IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay, bool ConfGame = false)
     {
-        IJudge<IPlayer, Token> judge = new Judge(stopcondition, HowTogetScore, winCondition, validPlay);
-
+        //IJudge<IPlayer, Token,> judge = new Judge(stopcondition, HowTogetScore, winCondition, validPlay);
+        Judge judge = new Judge(stopcondition, HowTogetScore, winCondition, validPlay);
         Console.WriteLine("Desea que cambie la direccion del juego cada vez que alguien se pase?, si o no");
         char change = 's';
         if (ConfGame) { change = Console.ReadLine()![0]; }
@@ -350,8 +352,9 @@ public class Observer
         IStopGame<IPlayer, Token> stopcondition = ChooseStopGame(ConfGame);
         IGetScore<Token> HowTogetScore = ChooseGetScore(ConfGame);
         IWinCondition<IPlayer, Token> winCondition = ChooseWinCondition(ConfGame);
-        IValidPlay validPlay = ChooseValidPlay(ConfGame);
-        IJudge<IPlayer, Token> judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
+        IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay = ChooseValidPlay(ConfGame);
+        //IJudge<IPlayer, Token> judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
+        Judge judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
         IPlayer[] players = ChoosePlayers();
         return new Game(new Board(new List<Token>()), players, false, max, cantplay, cadauno, judge, true);
     }

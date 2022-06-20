@@ -8,17 +8,17 @@ public interface IWinCondition<TCriterio, TToken>
 
 public interface IPlayerStrategy
 {
-    int Evaluate(Token token, List<Token> hand, IGetScore<Token> howtogetscore);
-    int ChooseSide(ChooseStrategyWrapped choose, IBoard board);
+    int Evaluate(Token token, List<Token> hand, WatchPlayer watch);
+    int ChooseSide(ChooseStrategyWrapped choose, WatchPlayer watch);
 }
 
 public interface IGetScore<TToken>
 {   //Puede ser un token o un juego
     int Score(TToken item);//hacer uno en torneo que sume todo lo de los metodos
 }
-public interface IBoard : ICloneable<IBoard>
+public interface IBoard : ICloneable<IBoard>, ICloneable<IBoard, List<Token>>
 {
-    List<Token> board { get; set; }
+    List<Token> board { get; }
     void AddTokenToBoard(Token Token, int side);
     Token First();
     Token Last();
@@ -37,7 +37,7 @@ public interface IPlayer : IPlayerStrategy, ICloneable<IPlayer>, IEquatable<IPla
     IPlayerStrategy strategy { get; set; }
 
     //quitar estos y poner un Play para poner un jugador humano 
-    public Token BestPlay(Game game);
+    public Token BestPlay(WatchPlayer watch);
     public int TotalScore { get; set; }
 
 }
@@ -89,7 +89,8 @@ public interface ICloneable<T> : ICloneable
     Object ICloneable.Clone() => Clone()!;
 }
 
-public interface IRellenable<out T1, in T2>
+public interface ICloneable<T1, T2> : ICloneable<T1>
 {
-    T1 Rellenar(T2 item);
+    new T1 Clone(T2 item);
+
 }

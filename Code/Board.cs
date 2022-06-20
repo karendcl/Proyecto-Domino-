@@ -2,7 +2,7 @@ namespace Game;
 
 public class Board : IBoard
 {
-    public List<Token> board { get; set; }
+    public List<Token> board { get; protected set; }
 
     public Board(List<Token> a)
     {
@@ -108,5 +108,12 @@ public class Board : IBoard
     {
         return new Board(new List<Token>() { });
     }
+    public IBoard Clone(List<Token> CopyTokens)
+    {
+        this.board = CopyTokens;
+        return this;
+    }
+
 }
+
 

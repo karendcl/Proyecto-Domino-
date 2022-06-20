@@ -72,5 +72,7 @@ public class StopChampion : IStopGame<Game, IPlayer>
             else { int i = Players.IndexOf(item); acc[i] += cant; }
         }
     }
+
+
 }
 #endregion

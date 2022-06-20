@@ -8,6 +8,7 @@ namespace Game;
 //Torneo Se encarga de crear los juegos y procesarlos
 public class Championship
 {
+    #region Global
     public int Champions { get; private set; }
 
     public ChampionJudge judge { get; private set; }
@@ -16,11 +17,12 @@ public class Championship
     public IValidPlay<Game, IPlayer, List<IPlayer>> validChampion { get; private set; }
     public IGetScore<IPlayer> Score { get; private set; }
 
-
-
-    private Game[] Games;
+    private Game[] Games { get; set; }
     //jugadores a nivel de torneo 
-    List<IPlayer> Players;
+    public List<IPlayer> GloblaPlayers { get; private set; }
+
+    #endregion
+
 
 
     Observer observer = new Observer();
@@ -28,7 +30,7 @@ public class Championship
     {
         this.Champions = cantTorneos;
         this.Games = new Game[cantTorneos];
-        this.Players = players;
+        this.GloblaPlayers = players;
         this.judge = judge;
         // this.winChampion = winChampion;
         // this.stopChampion = stopChampion;

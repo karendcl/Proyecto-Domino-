@@ -67,6 +67,9 @@ public abstract class ValidPlayClass : IValidPlay<IBoard, Token, ChooseStrategyW
         choose.Run();
         return choose;
     }
+
+
+
 }
 #endregion
 
@@ -78,6 +81,9 @@ public class ClassicValidPlay : ValidPlayClass
     {
         return (part2.Equals(Part1));
     }
+
+
+
 }
 
 public class BiggerValidPlay : ValidPlayClass

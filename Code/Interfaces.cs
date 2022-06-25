@@ -81,6 +81,13 @@ public interface IJudge<TCriterio, TToken, TWrapped>
 }
 
 
+public interface ITokenizable
+{
+    public string Description { get; set; }
+
+
+    public double ComponentValue { get; }
+}
 
 
 public interface ICloneable<T> : ICloneable

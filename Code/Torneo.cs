@@ -38,11 +38,13 @@ public class Championship
     {
         Games = observer.SelectGameTypes(Games);
 
-        for (int i = 0; i < Games.Length; i++)
+        
+
+        for (int i = 0; i<Games.Length; i++)
         {
             Game game = Games[i];
 
-            game.PlayAGame();
+    game.PlayAGame();
 
             if (judge.EndGame(game))
             {
@@ -58,38 +60,38 @@ public class Championship
     }
 
     private void ControlThePlayers()
-    {
+{
 
-    }
-    private void ChampionOver()
+}
+private void ChampionOver()
+{
+    int o = 1;
+    foreach (var gamed in Games) //Esto esta clableado 
     {
-        int o = 1;
-        foreach (var gamed in Games) //Esto esta clableado 
+        System.Console.WriteLine("partida {0}", o++);
+        foreach (var winner in gamed.Winner())
         {
-            System.Console.WriteLine("partida {0}", o++);
-            foreach (var winner in gamed.Winner())
-            {
-                Console.WriteLine("Player {0}", winner.Id);
-            }
-            System.Console.WriteLine("Presiona una tecla para ver la sgt partida");
-            Console.ReadKey();
-            System.Console.WriteLine("////////////////////////////////////");
-
+            Console.WriteLine("Player {0}", winner.Id);
         }
+        System.Console.WriteLine("Presiona una tecla para ver la sgt partida");
+        Console.ReadKey();
+        System.Console.WriteLine("////////////////////////////////////");
 
     }
-    private void GameOver(Game game, int i)
-    {
-        System.Console.WriteLine("Termino el juego {0}", i + 1);
-        Thread.Sleep(1000);
+
+}
+private void GameOver(Game game, int i)
+{
+    System.Console.WriteLine("Termino el juego {0}", i + 1);
+    Thread.Sleep(1000);
 
 
-        observer.WriteStats(game);
-    }
-    private bool ContinueGames()
-    {
-        return observer.Msg("Desea seguir jugando?, si / no");
-    }
+    observer.WriteStats(game);
+}
+private bool ContinueGames()
+{
+    return observer.Msg("Desea seguir jugando?, si / no");
+}
 
 
 

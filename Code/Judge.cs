@@ -2,12 +2,12 @@ namespace Game;
 
 public class Judge
 {
-    private IStopGame<IPlayer, Token> stopcriteria { get; set; }
-    protected IGetScore<Token> howtogetscore { get; set; }
+    protected virtual IStopGame<IPlayer, Token> stopcriteria { get; set; }
+    protected virtual IGetScore<Token> howtogetscore { get; set; }
 
 
-    protected IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition { get; set; }
-    protected IValidPlay<IBoard, Token, ChooseStrategyWrapped> valid { get; set; }
+    protected virtual IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition { get; set; }
+    protected virtual IValidPlay<IBoard, Token, ChooseStrategyWrapped> valid { get; set; }
 
     // public WatchPlayer watchPlayer { get; private set; }
     protected IPlayer playernow { get; set; } = null!;

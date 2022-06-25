@@ -252,9 +252,9 @@ public class Observer
         return HowTogetScore;
     }
 
-    public IWinCondition<IPlayer, Token> ChooseWinCondition(bool ConfGame = false)
+    public IWinCondition<(IPlayer player, List<Token> hand), Token> ChooseWinCondition(bool ConfGame = false)
     {
-        IWinCondition<IPlayer, Token> winCondition = new MinScore();
+        IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition = new MinScore();
 
         int winConditionn = 0;
 
@@ -317,7 +317,7 @@ public class Observer
     }
 
 
-    private Judge ChooseJugde(IStopGame<IPlayer, Token> stopcondition, IGetScore<Token> HowTogetScore, IWinCondition<IPlayer, Token> winCondition, IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay, bool ConfGame = false)
+    private Judge ChooseJugde(IStopGame<IPlayer, Token> stopcondition, IGetScore<Token> HowTogetScore, IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition, IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay, bool ConfGame = false)
     {
         //IJudge<IPlayer, Token,> judge = new Judge(stopcondition, HowTogetScore, winCondition, validPlay);
         Judge judge = new Judge(stopcondition, HowTogetScore, winCondition, validPlay);
@@ -351,7 +351,7 @@ public class Observer
 
         IStopGame<IPlayer, Token> stopcondition = ChooseStopGame(ConfGame);
         IGetScore<Token> HowTogetScore = ChooseGetScore(ConfGame);
-        IWinCondition<IPlayer, Token> winCondition = ChooseWinCondition(ConfGame);
+        IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition = ChooseWinCondition(ConfGame);
         IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay = ChooseValidPlay(ConfGame);
         //IJudge<IPlayer, Token> judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
         Judge judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
@@ -381,7 +381,7 @@ public class Observer
             return Games;
         }
 
-      
+
         return Games;
     }
     #endregion 

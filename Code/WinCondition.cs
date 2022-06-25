@@ -1,19 +1,19 @@
 
 namespace Game;
 
-public abstract class WinCondition : IWinCondition<IPlayer, Token>
+public abstract class WinCondition : IWinCondition<(IPlayer player, List<Token> hand), Token>
 {
 
-    public virtual List<IPlayer> Winner(List<IPlayer> players, IGetScore<Token> howtogetscore)
+    public virtual List<IPlayer> Winner(List<(IPlayer player, List<Token> hand)> players, IGetScore<Token> howtogetscore)
     {
 
         int count = 0;
         var result = new List<IPlayer>();
         int[] scores = new int[players.Count];
 
-        foreach (var player in players)
+        foreach (var (player, hand) in players)
         {
-            if (player.hand.Count == 0)
+            if (hand.Count == 0)
             {
                 result.Add(player);
             }
@@ -33,7 +33,7 @@ public abstract class WinCondition : IWinCondition<IPlayer, Token>
 
     }
 
-    public abstract List<IPlayer> FinalWinner(int[] scores, List<IPlayer> players);
+    public abstract List<IPlayer> FinalWinner(int[] scores, List<(IPlayer player, List<Token> hand)> players);
 
 
 
@@ -41,37 +41,8 @@ public abstract class WinCondition : IWinCondition<IPlayer, Token>
 }
 public class MinScore : WinCondition
 {
-    public override List<IPlayer> Winner(List<IPlayer> players, IGetScore<Token> howtogetscore)
-    {
 
-        int count = 0;
-        var result = new List<IPlayer>();
-        int[] scores = new int[players.Count];
-
-        foreach (var player in players)
-        {
-            if (player.hand.Count == 0)
-            {
-                result.Add(player);
-            }
-
-            foreach (var Token in player.hand)
-            {
-                scores[count] += howtogetscore.Score(Token);
-            }
-            count++;
-        }
-
-        if (result.Count != 0) return result;
-
-        return FinalWinner(scores, players);
-
-
-
-
-    }
-
-    public override List<IPlayer> FinalWinner(int[] scores, List<IPlayer> players)
+    public override List<IPlayer> FinalWinner(int[] scores, List<(IPlayer player, List<Token> hand)> players)
     {
         var result = new List<IPlayer>();
 
@@ -81,7 +52,7 @@ public class MinScore : WinCondition
         {
             if (scores[i] == score)
             {
-                result.Add(players[i]);
+                result.Add(players[i].player);
             }
         }
 
@@ -92,7 +63,7 @@ public class MinScore : WinCondition
 public class MaxScore : WinCondition
 {
 
-    public override List<IPlayer> FinalWinner(int[] scores, List<IPlayer> players)
+    public override List<IPlayer> FinalWinner(int[] scores, List<(IPlayer player, List<Token> hand)> players)
     {
         var result = new List<IPlayer>();
 
@@ -102,7 +73,7 @@ public class MaxScore : WinCondition
         {
             if (scores[i] == score)
             {
-                result.Add(players[i]);
+                result.Add(players[i].player);
             }
         }
 
@@ -118,7 +89,7 @@ public class Specificscore : WinCondition
         this.score = score;
     }
 
-    public override List<IPlayer> FinalWinner(int[] scores, List<IPlayer> players)
+    public override List<IPlayer> FinalWinner(int[] scores, List<(IPlayer player, List<Token> hand)> players)
     {
         var result = new List<IPlayer>();
 
@@ -128,7 +99,7 @@ public class Specificscore : WinCondition
         {
             if (scores[i] == score)
             {
-                result.Add(players[i]);
+                result.Add(players[i].player);
             }
         }
 

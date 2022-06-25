@@ -27,16 +27,16 @@ public abstract class ValidPlayClass : IValidPlay<IBoard, Token, ChooseStrategyW
     {
 
 
-        ChooseSideWrapped choose = new ChooseSideWrapped();
+        ChooseSideWrapped choose = new ChooseSideWrapped(0);
         List<int> macth = new List<int>() { };
         //if (FirstPlay(board)) return true;
         if (Match(token.Part1, board.First().Part1))
         {
-            choose.AddSide(0);
+            choose.AddSide(1);//Girar la ficha
         }
         if (Match(token.Part2, board.First().Part1))
         {
-            choose.AddSide(1);
+            choose.AddSide(0);//No GirarLaFicha
         }
         choose.Run();
         return choose;
@@ -52,17 +52,17 @@ public abstract class ValidPlayClass : IValidPlay<IBoard, Token, ChooseStrategyW
 
     protected virtual ChooseSideWrapped ValidPlayBack(IBoard board, Token token)
     {
-        ChooseSideWrapped choose = new ChooseSideWrapped();
+        ChooseSideWrapped choose = new ChooseSideWrapped(1);
 
         // if (FirstPlay(board)) return true;
         if (Match(token.Part1, board.Last().Part2))
         {
-            choose.AddSide(0);
+            choose.AddSide(0);//No girar
         }
 
         if (Match(token.Part2, board.Last().Part2))
         {
-            choose.AddSide(1);
+            choose.AddSide(1);//Girar
         }
         choose.Run();
         return choose;

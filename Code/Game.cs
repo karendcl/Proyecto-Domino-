@@ -12,10 +12,40 @@ public class Game : IRules, ICloneable<Game>
     public int TokensForEach { get; set; }
     public Judge judge { get; set; }
 
+    private Dictionary<int, GamePlayerHand<Token>> PlayersHands = new Dictionary<int, GamePlayerHand<Token>>() { };
+
     //public WinnersList<IPlayer,
 
     //Meter esto en un Wrapped
     private Observer observer { get; set; }//quitar
+
+    public bool TestGame(IBoard board)
+    {
+        if (board.board.Count < 1) { return true; }
+        for (int i = 0; i < board.board.Count; i++)
+        {
+            if (i > 0)
+            {
+                Token anterior = board.board[i - 1];
+                Token c = board.board[i];
+
+                if (anterior.Part2 != c.Part1)
+                {
+                    System.Console.WriteLine("nO MACHEA BIEN");
+
+                    System.Console.WriteLine();
+
+                    System.Console.WriteLine(board.ToString());
+
+                    Console.ReadKey();
+                    return false;
+
+                }
+            }
+
+        }
+        return true;
+    }
 
     public Game(IBoard board, IPlayer[] players, bool direction, int max, int plays, int rep, Judge judge, bool draw)
     {
@@ -52,9 +82,11 @@ public class Game : IRules, ICloneable<Game>
 
         foreach (var play in player)
         {
-            play.hand = RepartirTokens(PosiblesTokens);
+            List<Token> temp = RepartirTokens(PosiblesTokens);
+            GamePlayerHand<Token> hand = new GamePlayerHand<Token>(temp.ToList<Token>());
+            PlayersHands.TryAdd(play.Id, hand);
+            play.hand = temp;
         }
-
     }
 
     public List<Token> RepartirTokens(List<Token> PosiblesTokens)
@@ -127,21 +159,61 @@ public class Game : IRules, ICloneable<Game>
 
     public virtual List<IPlayer> Winner()
     {
-        return this.judge.Winner(this.player);
+        List<(IPlayer player, List<Token> hand)> temp = MatchHandAndPlayer();
+        return this.judge.Winner(temp);
     }
 
+    protected virtual List<(IPlayer player, List<Token> hand)> MatchHandAndPlayer()
+    {
+        List<(IPlayer player, List<Token> hand)> temp = new List<(IPlayer player, List<Token> hand)>() { };
+        foreach (var item in this.player)
+        {
+            int id = item.Id;
+            if (PlayersHands.ContainsKey(id))
+            {
+                GamePlayerHand<Token> hands = PlayersHands[id];
+
+                (IPlayer player, List<Token> hand) Player = (item, hands.hand);
+                temp.Add(Player);
+            }
+
+
+        }
+        return temp;
+    }
+
+    private GamePlayerHand<Token> PullAPlayerAndHand(IPlayer player)
+    {
+        if (PlayersHands.ContainsKey(player.Id)) { return PlayersHands[player.Id]; }
+        return null!;
+    }
     public bool PlayAGame()
     {
         // IJudge<IPlayer, Token,(bool,List<(bool,List<int>)>)> judge = this.judge;
         Judge judge = this.judge;
         List<IPlayer> player = this.player;
+
         IBoard board = this.board;
 
-        while (!judge.EndGame(this)) //mientras no se acabe el juego
+        Func<List<(IPlayer, List<Token>)>, IBoard, bool> EndGame = (player, board) => judge.EndGame(player, board.Clone(this.board.board));
+
+        while (!EndGame(MatchHandAndPlayer(), board)) //mientras no se acabe el juego
         {
             for (int i = 0; i < this.player.Count; i++) //turno de cada jugador
             {
-                if (judge.EndGame(this)) break;
+                TestGame(board);
+                List<(IPlayer player, List<Token> hand)> Match = MatchHandAndPlayer();
+
+                IPlayer playerNow = player[i];
+
+                GamePlayerHand<Token> playerHand = PullAPlayerAndHand(playerNow);
+
+                if (playerHand == null) { continue; }
+
+
+
+
+                if (EndGame(Match, board)) break;
 
                 WatchPlayer watch = judge.RunWatchPlayer(board.Clone(this.board.board));
                 // Console.WriteLine(player[i].ToString());
@@ -152,7 +224,7 @@ public class Game : IRules, ICloneable<Game>
 
                 observer.Clean();
 
-                IPlayer playerNow = player[i];
+
 
                 Token Token1 = Turno(playerNow, watch);  //la ficha que se va a jugar                     
                 if (Token1 == null)
@@ -179,9 +251,9 @@ public class Game : IRules, ICloneable<Game>
 
 
 
-                        bool control = this.judge.AddTokenToBoard(playerNow, Token1, this.board, index);
-                        if (control) { player[i].hand.Remove(Token1); }
-                        //se elimina la ficha de la mano del jugador
+                        bool control = this.judge.AddTokenToBoard(playerNow, playerHand, Token1, this.board, index);
+                        playerNow.hand = playerHand.hand;
+                        //Actualizar la mano del jugador
                     }
                 }
 

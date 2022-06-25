@@ -57,13 +57,14 @@ public class ChooseStrategyWrapped : IEquatable<ChooseStrategyWrapped>
 
 public sealed class ChooseSideWrapped
 {
+    public int index { get; private set; }
     public bool canChoose { get; private set; } = false;
 
     public List<int> WhereCanMacht { get; private set; }
 
-    internal ChooseSideWrapped()
+    internal ChooseSideWrapped(int index)
     {
-
+        this.index = index;
         this.WhereCanMacht = new List<int>() { };
 
     }

@@ -18,19 +18,7 @@ public class Judge
         this.valid = valid;
         this.validTokenFornow = new List<ChooseStrategyWrapped>() { };
     }
-    public virtual bool ValidSettings(int TokensForEach, int MaxDoble, int players)
-    {
-        int totalamount = 0;
 
-        if (TokensForEach == 0 || MaxDoble == 0 || players == 0) return false;
-
-        for (int i = 0; i <= MaxDoble + 1; i++)
-        {
-            totalamount += i;
-        }
-
-        return (TokensForEach * players > totalamount) ? false : true;
-    }
     public virtual WatchPlayer RunWatchPlayer(IBoard board)
     {
         return new WatchPlayer(this.howtogetscore, this.stopcriteria, this.valid, this.winCondition, board);

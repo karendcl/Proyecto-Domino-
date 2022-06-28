@@ -46,7 +46,11 @@ public interface IPlayer : IPlayerStrategy, ICloneable<IPlayer>, IEquatable<IPla
 
 }
 
+public interface ICorrupcion
+{
+    bool MakeCorruption();
 
+}
 
 public interface IValidPlay<TGame, TPlayer, TCriterio>
 {
@@ -77,12 +81,13 @@ public interface IJudge<TCriterio, TToken, TWrapped>
 }
 
 
-public interface ITokenizable
+public interface ITokenizable<T> where T : IEnumerable<T>, IEquatable<T>
 {
-    public string Description { get; set; }
+    public string Description { get; }
+
+    public List<T> Components { get; set; }
 
 
-    public double ComponentValue { get; }
 }
 
 

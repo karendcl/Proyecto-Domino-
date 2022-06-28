@@ -19,13 +19,7 @@ public class Token : ICloneable<Token>
         return "[" + Part1 + "|" + Part2 + "] ";
     }
 
-    public bool IsMatch(Token other)
-    {
-        return (this.Part1.Equals(other.Part1)) ||
-               (this.Part1.Equals(other.Part2)) ||
-               (this.Part2.Equals(other.Part2)) ||
-               (this.Part2.Equals(other.Part1));
-    }
+
 
     public bool Contains(int a)
     {
@@ -104,12 +98,7 @@ public class RandomToken : Token
 }
 
 
-public class VectorTokenNode<ITokenizable>
-{
-    public List<ITokenizable> value { get; private set; }
-
-
-}
+/*
 
 public class Pinguino : IComparable<Pinguino>, ITokenizable
 {
@@ -146,7 +135,58 @@ public class Pinguino : IComparable<Pinguino>, ITokenizable
         if (this.age < other.age) return -1;
         return 0;
     }
+
+
 }
+*/
+
+/*
+public class EnergyGenerator : ITokenizable<EnergyGenerator>
+{
+    public string name { get; set; }
+
+    public int minPotenci { get; protected set; }
+    public int maxPotenci { get; protected set; }
+
+    public string Description { get => "Termoeléctrica"; }
+
+    public double ComponentValue => PotencialKnow();
+
+    string ITokenizable<EnergyGenerator>.Description { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+    public double PotencialKnow()
+    {
+        Random random = new Random();
+        int x = random.Next(-1, 1);
+        return x * random.Next(minPotenci, maxPotenci);
+
+    }
+
+
+
+    public EnergyGenerator(string name, int minPotenci, int maxPotenci)
+    {
+        this.name = name;
+        this.minPotenci = minPotenci;
+        this.maxPotenci = maxPotenci;
+
+    }
+
+}*/
+
+
+public class TokenVector<T>
+{
+    //El generador se asegura que todos tengan igual cant de componentes como el de mayor dimension
+    public List<T> Component { get; set; }
+
+    public int Dimension { get; set; }
+
+}
+
+
+
+
 
 
 

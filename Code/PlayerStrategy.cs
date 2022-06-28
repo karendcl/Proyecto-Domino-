@@ -39,7 +39,8 @@ public class SemiSmart : IPlayerStrategy
 
         foreach (var item in hand)
         {
-            if (item.IsMatch(token)) valor++;
+            ChooseStrategyWrapped choose = watch.validPlay.ValidPlay(watch.board, token);
+            if (choose.CanMatch) valor++;
         }
 
         if (token.IsDouble()) valor++;

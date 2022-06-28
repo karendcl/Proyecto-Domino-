@@ -182,7 +182,7 @@ public class Judge
 }
 
 
-public class CorruptionJugde : Judge
+public class CorruptionJugde : Judge, ICorrupcion
 {
     protected Random random { get; set; }
     public CorruptionJugde(IStopGame<IPlayer, Token> stop, IGetScore<Token> getscore, IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition, IValidPlay<IBoard, Token, ChooseStrategyWrapped> valid) : base(stop, getscore, winCondition, valid)
@@ -191,7 +191,7 @@ public class CorruptionJugde : Judge
 
     }
 
-    public bool MakeCorrupcion()
+    public bool MakeCorruption()
     {
         int x = random.Next(0, 100);
         if (x > 50)
@@ -203,7 +203,7 @@ public class CorruptionJugde : Judge
     }
     public override bool AddTokenToBoard(IPlayer player, GamePlayerHand<Token> hand, Token token, IBoard board, int side)
     {
-        if (MakeCorrupcion())
+        if (MakeCorruption())
         {
             if (random.Next(0, 27) > Math.E / 2) { PlayAlante(null!, token, board.First, board); }
             else
@@ -244,10 +244,10 @@ public class CorruptionJugde : Judge
 
 public class ChampionJudge
 {
-    public IStopGame<Game, (Game, IPlayer)> stopcriteria { get; set; }
-    public IWinCondition<Game, (Game, IPlayer)> winCondition { get; set; }
-    public IValidPlay<Game, IPlayer, List<IPlayer>> valid { get; set; }
-    public IGetScore<(Game, IPlayer)> howtogetscore { get; set; }
+    protected virtual IStopGame<Game, (Game, IPlayer)> stopcriteria { get; set; }
+    protected virtual IWinCondition<Game, (Game, IPlayer)> winCondition { get; set; }
+    protected virtual IValidPlay<Game, IPlayer, List<IPlayer>> valid { get; set; }
+    protected virtual IGetScore<(Game, IPlayer)> howtogetscore { get; set; }
 
     public ChampionJudge(IStopGame<Game, (Game, IPlayer)> stopcriteria, IWinCondition<Game, (Game, IPlayer)> winCondition, IValidPlay<Game, IPlayer, List<IPlayer>> valid, IGetScore<(Game, IPlayer)> howtogetscore)
     {
@@ -256,31 +256,69 @@ public class ChampionJudge
         this.valid = valid;
         this.winCondition = winCondition;
     }
-    public bool EndGame(Game game)
+    public virtual bool EndGame(Game game)
     {
         if (stopcriteria.MeetsCriteria(game, howtogetscore)) return true;
         return false;
     }
     //Verificar antes de comenzar otro juego 
-    public List<IPlayer> ValidPlay(Game game, IPlayer player)//Los que continuan
+    public virtual List<IPlayer> ValidPlay(Game game, IPlayer player)//Los que continuan
     {
         return valid.ValidPlay(game, player);
     }
 
-    public virtual bool ValidSettings(int TokensForEach, int MaxDoble, int players)
+    public virtual List<IPlayer> Winners(List<Game> criterios)
     {
-        int totalamount = 0;
-
-        if (TokensForEach == 0 || MaxDoble == 0 || players == 0) return false;
-
-        for (int i = 0; i <= MaxDoble + 1; i++)
-        {
-            totalamount += i;
-        }
-
-        return (TokensForEach * players > totalamount) ? false : true;
+        return this.winCondition.Winner(criterios, this.howtogetscore);
     }
+
 }
 
+
+
+public class CorruptionChampionJugde : ChampionJudge, ICorrupcion
+{
+    public CorruptionChampionJugde(IStopGame<Game, (Game, IPlayer)> stopcriteria, IWinCondition<Game, (Game, IPlayer)> winCondition, IValidPlay<Game, IPlayer, List<IPlayer>> valid, IGetScore<(Game, IPlayer)> howtogetscore) : base(stopcriteria, winCondition, valid, howtogetscore)
+    {
+    }
+
+    public bool MakeCorruption()
+    {
+        Random random = new Random();
+        int x = random.Next(0, 100);
+        if (x > 50)
+        {
+            return true;
+        }
+        return false;
+
+    }
+
+    public override bool EndGame(Game game)
+    {
+        if (MakeCorruption())
+        {
+            return !base.EndGame(game);
+        }
+        return base.EndGame(game);
+    }
+
+    public override List<IPlayer> ValidPlay(Game game, IPlayer player)
+    {
+        if (MakeCorruption())
+        {
+            List<IPlayer> valid = base.ValidPlay(game, player);
+            Random random = new Random();
+            int c = random.Next(0, 100);
+            if (c <= 50 && valid.Contains(player)) { valid.Remove(player); return valid; }
+
+            return new List<IPlayer>() { player };
+        }
+
+        return base.ValidPlay(game, player);
+    }
+
+
+}
 
 #endregion

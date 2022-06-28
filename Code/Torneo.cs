@@ -51,7 +51,7 @@ public class Championship
                 break;
             }
 
-            if (!ContinueGames()) { /*observer.WriteStats(game);*/ ChampionPrint(players, this.judge.winCondition.Winner(Games, this.judge.howtogetscore)); break; }
+            if (!ContinueGames()) { /*observer.WriteStats(game);*/ ChampionPrint(players, this.judge.Winners(Games)); break; }
 
             GameOver(game, gameStatus, i);
 
@@ -119,7 +119,7 @@ public class Championship
 
 
 
-    protected List<IPlayer> ChampionWinners() => this.judge.winCondition.Winner(this.FinishGames.ToList<Game>(), this.judge.howtogetscore);
+    protected List<IPlayer> ChampionWinners() => this.judge.Winners(this.FinishGames.ToList<Game>());
 
 
 

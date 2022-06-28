@@ -140,9 +140,7 @@ private void PrintGameChange(GameStatus gameStatus)
     Console.Clear();
     System.Console.WriteLine(gameStatus.actualPlayer);
     Thread.Sleep(2000);
-    Console.Clear();
-    System.Console.WriteLine(gameStatus.PlayerActualHand);
-    Thread.Sleep(1500);
+    Console.Clear();  ++++++++++++++++++++++++
     Console.Clear();
 
 
@@ -630,7 +628,8 @@ public class ChampionStart
 
         for (int i = 0; i < cantPlayers; i++)
         {
-            if (this.BooleanAsk("Desea que el jugador numero" + " " + i + 1 + " " + "juegue? Si/no"))
+            int r = i + 1;
+            if (this.BooleanAsk("Desea que el jugador numero" + " " + r.ToString() + " " + "juegue? Si/no"))
             {
                 players.Add(ChoosePlayers(i + 1));
             }
@@ -721,7 +720,7 @@ public class ChampionStart
         while (score < 1 || score > 2)
         {
             score = 1;
-            if (ConfGame)
+            if (!ConfGame)
             {
                 do
                 {
@@ -749,12 +748,13 @@ public class ChampionStart
         IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition = new MinScore();
 
         int winConditionn = 0;
-
-        do
+        if (!ConfGame)
         {
-            winConditionn = this.Asksint("Una vez acabe el juego, quien ganaria? \n \n 1. El que tenga mas puntos \n 2. El que tenga menos puntos \n 3. El que tenga una catidad de puntos especificos");
-        } while (winConditionn < 1 || winConditionn > 3);
-
+            do
+            {
+                winConditionn = this.Asksint("Una vez acabe el juego, quien ganaria? \n \n 1. El que tenga mas puntos \n 2. El que tenga menos puntos \n 3. El que tenga una catidad de puntos especificos");
+            } while (winConditionn < 1 || winConditionn > 3);
+        }
 
         switch (winConditionn)
         {
@@ -784,10 +784,17 @@ public class ChampionStart
 
         while (val < 1 || val > 3)
         {
-            val = this.Asksint("Que jugada seria valida? \n\n 1. Clasico  \n 2. Solo si el nuemero es menor \n 3. Solo si el numero es mayor");
+            if (!ConfGame)
+            {
+                val = this.Asksint("Que jugada seria valida? \n\n 1. Clasico  \n 2. Solo si el nuemero es menor \n 3. Solo si el numero es mayor");
+
+            }
+            else
+            {
+                val = 1;
+            }
 
 
-            if (ConfGame) val = int.Parse(Console.ReadLine()!);
 
             switch (val)
             {
@@ -832,7 +839,7 @@ public class ChampionStart
 
     private Game ChooseAGame(bool ConfGame = false, bool ChampionPlayers = false)//Seleccionar un modo de juego
     {
-        if (ConfGame && this.BooleanAsk("Quiere Jugar con las configuraciones predeterminadas")) { ConfGame = true; }//Sleccionar si se quiere modo de juego normal
+        if (ConfGame) { ConfGame = true; }//Sleccionar si se quiere modo de juego normal
 
         IStopGame<IPlayer, Token> stopcondition = ChooseStopGame(ConfGame);
         IGetScore<Token> HowTogetScore = ChooseGetScore(ConfGame);
@@ -853,29 +860,29 @@ public class ChampionStart
         PlayersCoach coach = new PlayersCoach(tt);
 
         Game[] Games = new Game[CantPartidas];
-
+        bool ConfGame = false;
         if (this.BooleanAsk("Quiere Jugar todos los partidos con las configuraciones predeterminadas"))
+        { ConfGame = true; }
+        for (int i = 0; i < Games.Length; i++)
         {
-            for (int i = 0; i < Games.Length; i++)
+            if (i > 0 && this.BooleanAsk("Desea que el juego tenga las mismas configuaraciones que el anterior"))
             {
-                if (i > 0 && this.BooleanAsk("Desea que el juego tenga las mismas configuaraciones que el anterior"))
-                {
-                    int x = i - 1;
-                    Games[i] = Games[x].Clone();//Clona la partida para que no existan problemas de referencia
-                    coach.CloneLastGame(i);
+                int x = i - 1;
+                Games[i] = Games[x].Clone();//Clona la partida para que no existan problemas de referencia
+                coach.CloneLastGame(i);
 
-                }
-                else
-                {
-                    Games[i] = ChooseAGame();
-                    coach.AddPlayers(i, ChampionPlayers(this.cantPlayers));
-                }
             }
-            return (coach, Games.ToList<Game>());
+            else
+            {
+                Games[i] = ChooseAGame(ConfGame);
+                coach.AddPlayers(i, ChampionPlayers(this.cantPlayers));
+            }
         }
-
-
         return (coach, Games.ToList<Game>());
+
+
+
+        // return (coach, Games.ToList<Game>());
     }
     #endregion
 
@@ -901,24 +908,28 @@ public class observador
 
     public int IntResponses(string arg)
     {
+        Console.Clear();
         System.Console.WriteLine(arg);
         int x = -1;
         int.TryParse(Console.ReadLine(), out x);
+        Console.Clear();
         return x;
     }
 
     public bool BoolResponses(string arg)
     {
-
+        Console.Clear();
         string x = string.Empty;
         bool b = (x == string.Empty || x == null);
         bool a = true;
         do
         {
+            Console.Clear();
             System.Console.WriteLine(arg + "  ?" + " Sí/No");
             x = Console.ReadLine()!.ToLower();
             a = (x[0] == 's' || x[0] == 'n');
         } while (!a);
+        Console.Clear();
         if (x[0] == 's') return true;
         return false;
     }

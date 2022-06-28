@@ -190,11 +190,6 @@ public class GameStatus
 }
 
 
-
-
-
-
-
 public class PlayerStrats : IEquatable<PlayerStrats>
 {
     public IPlayer player { get; protected set; }
@@ -228,13 +223,6 @@ public class PlayerStrats : IEquatable<PlayerStrats>
         return temp;
     }
 }
-
-
-
-
-
-
-
 
 
 public sealed class RulesGame<TPlayer, TToken, TBoard>

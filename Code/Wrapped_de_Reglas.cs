@@ -1,6 +1,25 @@
 
 namespace Game;
 
+public sealed class RulesGame<TPlayer, TToken, TBoard>
+{
+    public IStopGame<TPlayer, TToken> stopcriteria { get; private set; }
+    public IGetScore<TToken> howtogetscore { get; private set; }
+    public IWinCondition<TPlayer, TToken> winCondition { get; private set; }
+    public IValidPlay<TBoard, TToken, ChooseStrategyWrapped> valid { get; private set; }
+
+    public RulesGame(IStopGame<TPlayer, TToken> stop, IGetScore<TToken> getscore, IWinCondition<TPlayer, TToken> winCondition, IValidPlay<TBoard, TToken, ChooseStrategyWrapped> valid)
+
+
+    {
+        this.stopcriteria = stop;
+        this.howtogetscore = getscore;
+        this.winCondition = winCondition;
+        this.valid = valid;
+    }
+
+}
+
 public class WatchPlayer
 {
     public IGetScore<Token> howtogetscore { get; private set; }

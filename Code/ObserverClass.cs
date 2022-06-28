@@ -6,12 +6,14 @@ public class Observer
     #region Variables globales 
 
     int cadauno = 0;
-    int cantplay = 0;
+    int cantplay = 0;//Cant De jugadores
     int max = 0;
 
 
     #endregion
     //Se encarga de publicar en consola los msg
+    private Action<string>? Message;
+
     public bool Msg(string msg)
     {
         Console.WriteLine(msg);
@@ -23,9 +25,10 @@ public class Observer
         return false;
     }
 
-    public void PaintInConsole(Msg mgs)
+    public void Start()
     {
-
+        Championship champion = this.CreateAChampion();
+        champion.status += this.PrintChampionStatus;
     }
     public bool InteractConsole(string Msg)
     {
@@ -35,6 +38,8 @@ public class Observer
         if (temp[0] == 's' || temp[0] == 'y') return true;
         return false;
     }
+
+    /*
     public void WriteStats(Game game)
     {
         Console.BackgroundColor = ConsoleColor.Green;
@@ -42,7 +47,7 @@ public class Observer
         Console.Clear();
         Console.WriteLine("Game Over");
 
-        Console.WriteLine(" {0} \n \n Scores of this game:", game.board.ToString());
+        Console.WriteLine(" {0} \n \n Scores of this game:", game.board.ToString()!);
 
         foreach (var play in game.player)
         {
@@ -77,6 +82,91 @@ public class Observer
         Thread.Sleep(1000);
 
     }
+    */
+
+    #region  neww
+
+    public Championship champion { get; set; }
+
+    public ChampionStatus championStatus { get; set; }
+
+    public void PrintChampionStatus(ChampionStatus championStatus)
+    {
+        GameStatus gameStatus = championStatus.gameStatus;
+        if (championStatus.ItsAnGameStatus)
+        {
+
+            PrintGameChange(gameStatus);
+
+        }
+        else if (championStatus.ItsAFinishGame)
+        {
+            PrintFinishGame(gameStatus);
+        }
+        if (championStatus.FinishChampion)
+        {
+
+        }
+
+
+
+
+    }
+
+    public void PrintFinishChampion(ChampionStatus championStatus)
+    {
+        foreach (var item in championStatus.playerStrats)
+        {
+            System.Console.WriteLine(item.player + " Puntuacion " + item.punctuation);
+        }
+
+
+        System.Console.WriteLine("Ganadores del Torneo");
+
+        foreach (var item in championStatus.Winners)
+        {
+            System.Console.WriteLine(item);
+        }
+    }
+
+
+    private void PrintGameChange(GameStatus gameStatus)
+    {
+
+        System.Console.WriteLine(gameStatus.board);
+        Thread.Sleep(1500);
+        Console.Clear();
+        System.Console.WriteLine(gameStatus.actualPlayer);
+        Thread.Sleep(2000);
+        Console.Clear();
+        System.Console.WriteLine(gameStatus.PlayerActualHand);
+        Thread.Sleep(1500);
+        Console.Clear();
+
+
+    }
+
+    private void PrintFinishGame(GameStatus gameStatus)
+    {
+        foreach (var item in gameStatus.playerStrats)
+        {
+            System.Console.WriteLine(item);
+            Thread.Sleep(1500);
+            Console.Clear();
+        }
+
+        System.Console.WriteLine("Ganadores de la partida");
+
+        foreach (var item in gameStatus.winners)
+        {
+            System.Console.WriteLine(item);
+            Thread.Sleep(500);
+            Console.Clear();
+        }
+
+    }
+
+    #endregion
 
     #region Create a Champion
 
@@ -84,16 +174,16 @@ public class Observer
     {
         int cantPartidas = CantPartidas();
         ChampionJudge judge = ChooseChampionJudge();
-        List<IPlayer> players = ChampionPlayers();
-
-        return new Championship(cantPartidas, judge, players);
+        //  PlayersCoach players = ChampionPlayers(true);
+        (PlayersCoach players, List<Game> games) games = SelectGameTypes(cantPartidas);
+        return new Championship(cantPartidas, judge, games.players, games.games);
     }
 
     private ChampionJudge ChooseChampionJudge()
 
     {
         IStopGame<Game, (Game, IPlayer)> stop = ChooseStopChampion();
-        IWinCondition<Game, IPlayer> win = ChooseWinCondition();
+        IWinCondition<Game, (Game, IPlayer)> win = ChooseWinCondition();
         IValidPlay<Game, IPlayer, List<IPlayer>> valid = ChooseValidChampion();
         IGetScore<(Game, IPlayer)> score = ChooseChampionGetScore();
         return new ChampionJudge(stop, win, valid, score);
@@ -105,7 +195,7 @@ public class Observer
     {
         return new ValidChampion();
     }
-    private IWinCondition<Game, IPlayer> ChooseWinCondition()
+    private IWinCondition<Game, (Game, IPlayer)> ChooseWinCondition()
     {
         System.Console.WriteLine("Que porcentaje desea que se acabe el torneo");
         int x = -1;
@@ -144,51 +234,59 @@ public class Observer
         }
         return x;
     }
+
+
     private List<IPlayer> ChampionPlayers()
     {
-        if (Msg("Desea tener jugadores a nivel de torneo"))
+        // if (Msg("Desea que todos jugadores juegen todo el torneo"))
+
+        List<IPlayer> players = new List<IPlayer>() { };
+
+        for (int i = 0; i < this.cantplay; i++)
         {
-            return ChoosePlayers().ToList<IPlayer>();
-        }
-        return new List<IPlayer>() { };
-
-    }
-    private IPlayer[] ChoosePlayers()
-    {
-        IPlayer[] players = new Player[cantplay];
-
-        for (int i = 0; i < cantplay; i++)
-        {
-            Console.Clear();
-
-            int a = -1;
-
-            while (a > 3 || a < 0)
+            if (Msg("Desea que el jugador numero" + " " + i + " " + "juegue? Si/no"))
             {
-                Console.WriteLine("Elija la estrategia para el Player {0}. \n \n ➤ Escriba 0 para un jugador semi inteligente. \n ➤ Escriba 1 para jugador botagorda. \n ➤ Escriba 2 para jugador random. ", i + 1);
-
-
-                int.TryParse(Console.ReadLine()!, out a);
-                //a = 2;
-            }
-
-            switch (a)
-            {
-                case 0:
-                    players[i] = new Player(new List<Token>(), i + 1, new SemiSmart());
-                    break;
-
-                case 1:
-                    players[i] = new Player(new List<Token>(), i + 1, new BGStrategy());
-                    break;
-
-                case 2:
-                    players[i] = new Player(new List<Token>(), i + 1, new RandomStrategy());
-                    break;
+                players.Add(ChoosePlayers(i));
             }
         }
+
 
         return players;
+
+    }
+    private IPlayer ChoosePlayers(int id)
+    {//Devuelve los players
+
+        IPlayer player = new Player(id);
+
+        int a = -1;
+
+        while (a > 3 || a < 0)
+        {
+            Console.WriteLine("Elija la estrategia para el Player {0}. \n \n ➤ Escriba 0 para un jugador semi inteligente. \n ➤ Escriba 1 para jugador botagorda. \n ➤ Escriba 2 para jugador random. ", id);
+
+
+            int.TryParse(Console.ReadLine()!, out a);
+            //a = 2;
+        }
+
+        switch (a)
+        {
+            case 0:
+                player.AddStrategy(new SemiSmart());
+                break;
+
+            case 1:
+                player.AddStrategy(new BGStrategy());
+                break;
+
+            case 2:
+                player.AddStrategy(new RandomStrategy());
+                break;
+        }
+
+
+        return player;
     }
 
     #endregion
@@ -345,7 +443,7 @@ public class Observer
 
 
 
-    private Game ChooseAGame(bool ConfGame = false)//Seleccionar un modo de juego
+    private Game ChooseAGame(bool ConfGame = false, bool ChampionPlayers = false)//Seleccionar un modo de juego
     {
         if (ConfGame && Msg("Quiere Jugar con las configuraciones predeterminadas? Si/No")) { ConfGame = true; }//Sleccionar si se quiere modo de juego normal
 
@@ -355,13 +453,22 @@ public class Observer
         IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay = ChooseValidPlay(ConfGame);
         //IJudge<IPlayer, Token> judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
         Judge judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
-        IPlayer[] players = ChoosePlayers();
-        return new Game(new Board(new List<Token>()), players, false, max, cantplay, cadauno, judge, true);
+        //IPlayer[] players = ChoosePlayers();
+        return new Game(false, max, cantplay, judge);
     }
 
     //Crea los modos de juego
-    public Game[] SelectGameTypes(Game[] Games)
+    public (PlayersCoach, List<Game>) SelectGameTypes(int CantPartidas)
     {
+        List<IPlayer> tt = new List<IPlayer>() { };
+        for (int i = 0; i < this.cantplay; i++)
+        {
+            tt.Add(new Player(i));
+        }
+        PlayersCoach coach = new PlayersCoach(tt);
+
+        Game[] Games = new Game[CantPartidas];
+
         if (Msg("Quiere Jugar todos los partidos con las configuraciones predeterminadas? Si/No"))
         {
             for (int i = 0; i < Games.Length; i++)
@@ -370,21 +477,107 @@ public class Observer
                 {
                     int x = i - 1;
                     Games[i] = Games[x].Clone();//Clona la partida para que no existan problemas de referencia
+                    coach.CloneLastGame(i);
 
-                    // Debug.Assert(Games[i].board.board.Count == 0, "Se clono correctamente");
                 }
                 else
                 {
                     Games[i] = ChooseAGame();
+                    coach.AddPlayers(i, ChampionPlayers());
                 }
             }
-            return Games;
+            return (coach, Games.ToList<Game>());
         }
 
 
-        return Games;
+        return (coach, Games.ToList<Game>());
     }
     #endregion 
 }
 
+
+public class observador
+{
+    public Championship champion { get; set; }
+
+    public ChampionStatus championStatus { get; set; }
+
+    public void PrintChampionStatus(ChampionStatus championStatus)
+    {
+        GameStatus gameStatus = championStatus.gameStatus;
+        if (championStatus.ItsAnGameStatus)
+        {
+
+            PrintGameChange(gameStatus);
+
+        }
+        else if (championStatus.ItsAFinishGame)
+        {
+            PrintFinishGame(gameStatus);
+        }
+        if (championStatus.FinishChampion)
+        {
+
+        }
+
+
+
+
+    }
+
+    public void PrintFinishChampion(ChampionStatus championStatus)
+    {
+        foreach (var item in championStatus.playerStrats)
+        {
+            System.Console.WriteLine(item.player + " Puntuacion " + item.punctuation);
+        }
+
+
+        System.Console.WriteLine("Ganadores del Torneo");
+
+        foreach (var item in championStatus.Winners)
+        {
+            System.Console.WriteLine(item);
+        }
+    }
+
+
+    private void PrintGameChange(GameStatus gameStatus)
+    {
+
+        System.Console.WriteLine(gameStatus.board);
+        Thread.Sleep(1500);
+        Console.Clear();
+        System.Console.WriteLine(gameStatus.actualPlayer);
+        Thread.Sleep(2000);
+        Console.Clear();
+        System.Console.WriteLine(gameStatus.PlayerActualHand);
+        Thread.Sleep(1500);
+        Console.Clear();
+
+
+    }
+
+    private void PrintFinishGame(GameStatus gameStatus)
+    {
+        foreach (var item in gameStatus.playerStrats)
+        {
+            System.Console.WriteLine(item);
+            Thread.Sleep(1500);
+            Console.Clear();
+        }
+
+        System.Console.WriteLine("Ganadores de la partida");
+
+        foreach (var item in gameStatus.winners)
+        {
+            System.Console.WriteLine(item);
+            Thread.Sleep(500);
+            Console.Clear();
+        }
+
+    }
+
+
+}
 

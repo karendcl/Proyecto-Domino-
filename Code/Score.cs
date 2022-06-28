@@ -23,12 +23,12 @@ public class DoubleScore : IGetScore<Token>
 //Champion
 #region  Champion
 
-public class ScoreChampionNormal : IGetScore<(Game game, IPlayer player)>
+public class ScoreChampionNormal : IGetScore<(Game, IPlayer)>
 {
-    public int Score((Game game, IPlayer player) item)
+    public int Score((Game, IPlayer) item)
     {
-        Game game = item.game;
-        return game.judge.PlayerScore(item.player);
+        Game game = item.Item1;
+        return game.judge.PlayerScore(item.Item2);
     }
 
 }

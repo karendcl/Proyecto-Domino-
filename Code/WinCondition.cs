@@ -109,7 +109,7 @@ public class Specificscore : WinCondition
 
 #region  Champion
 
-public class WinChampion : IWinCondition<Game, IPlayer>
+public class WinChampion : IWinCondition<Game, (Game, IPlayer)>
 {// Espresar en fraccion el porcentaje de ganadas del total del torneo
 
     // public double Porcent { get; private set; }
@@ -121,7 +121,7 @@ public class WinChampion : IWinCondition<Game, IPlayer>
         this.cantwins = new List<int>() { };
         // this.Porcent = porcentWins;
     }
-    public List<IPlayer> Winner(List<Game> games, IGetScore<IPlayer> howtogetscore)
+    public List<IPlayer> Winner(List<Game> games, IGetScore<(Game, IPlayer)> howtogetscore)
     {                                              ///Agregar una que utiize esta 
         List<IPlayer> winners = new List<IPlayer>() { };
         foreach (var game in games)

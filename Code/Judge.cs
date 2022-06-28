@@ -5,13 +5,10 @@ public class Judge
     protected virtual IStopGame<IPlayer, Token> stopcriteria { get; set; }
     protected virtual IGetScore<Token> howtogetscore { get; set; }
 
-
     protected virtual IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition { get; set; }
     protected virtual IValidPlay<IBoard, Token, ChooseStrategyWrapped> valid { get; set; }
-
-    // public WatchPlayer watchPlayer { get; private set; }
-    protected IPlayer playernow { get; set; } = null!;
-    protected List<ChooseStrategyWrapped> validTokenFornow;
+    protected virtual IPlayer playernow { get; set; } = null!;
+    protected virtual List<ChooseStrategyWrapped> validTokenFornow { get; set; }
     //Guarda las fichas que son validas en un momento x
     public Judge(IStopGame<IPlayer, Token> stop, IGetScore<Token> getscore, IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition, IValidPlay<IBoard, Token, ChooseStrategyWrapped> valid)
     {
@@ -34,11 +31,11 @@ public class Judge
 
         return (TokensForEach * players > totalamount) ? false : true;
     }
-    public WatchPlayer RunWatchPlayer(IBoard board)
+    public virtual WatchPlayer RunWatchPlayer(IBoard board)
     {
         return new WatchPlayer(this.howtogetscore, this.stopcriteria, this.valid, this.winCondition, board);
     }
-    public bool PlayerMeetsStopCriteria(IPlayer player)
+    protected virtual bool PlayerMeetsStopCriteria(IPlayer player)
     {
         return this.stopcriteria.MeetsCriteria(player, this.howtogetscore);
     }
@@ -89,7 +86,7 @@ public class Judge
     }
 
 
-    public int PlayerScore(IPlayer player)
+    public virtual int PlayerScore(IPlayer player)
     {
         int result = 0;
 
@@ -103,7 +100,7 @@ public class Judge
     }
 
     // -1,1
-    private bool CheckHand(IPlayer player, GamePlayerHand<Token> hand, Token token)
+    protected virtual bool CheckHand(IPlayer player, GamePlayerHand<Token> hand, Token token)
     {
         if (player.hand.Count != hand.hand.Count) { return false; }
 
@@ -139,25 +136,19 @@ public class Judge
         (bool Bool, ChooseSideWrapped Elije) d = temp.ControlSide(side);
         if (!d.Bool) { return false; }
 
-        Token first = board.First();
-        Token last = board.Last();
+        Token first = board.First;
+        Token last = board.Last;
         side = d.Elije.index;//Da el indice donde es Valido 
         if (side == 0) { PlayAlante(d.Elije, token, first, board); } else { PlayAtras(d.Elije, token, last, board); }
         hand.AddLastPlay(token);// Se le quita de la mano
 
-        Diagnostics diagnostics = new Diagnostics();
 
-        bool xxx = diagnostics.TestGame(board);
-        if (!xxx)
-        {
-            System.Console.WriteLine(side);
-        }
 
         return true;
 
     }
 
-    public List<IPlayer> Winner(List<(IPlayer player, List<Token> hand)> players)
+    public virtual List<IPlayer> Winner(List<(IPlayer player, List<Token> hand)> players)
     {
         List<(IPlayer player, List<Token> hand)> temp = new List<(IPlayer player, List<Token> hand)>() { };
         foreach (var (player, hand) in players)
@@ -168,7 +159,7 @@ public class Judge
         return this.winCondition.Winner(temp, this.howtogetscore);
     }
 
-    private bool ItsThePlayerHand(IPlayer player, List<Token> hand)
+    protected virtual bool ItsThePlayerHand(IPlayer player, List<Token> hand)
     {
         List<Token> phand = player.hand;
         if (hand.Count != player.hand.Count) { return false; }
@@ -181,19 +172,19 @@ public class Judge
 
 
 
-    public void PlayAlante(ChooseSideWrapped where, Token token, Token first, IBoard board)
+    public virtual void PlayAlante(ChooseSideWrapped where, Token token, Token first, IBoard board)
     {
 
         if (where.WhereCanMacht.Contains(1)) { token.SwapToken(); }
 
 
-        board.board.Insert(0, token);
+        board.AddTokenToBoard(token, 0);
     }
 
-    public void PlayAtras(ChooseSideWrapped where, Token token, Token last, IBoard board)
+    public virtual void PlayAtras(ChooseSideWrapped where, Token token, Token last, IBoard board)
     {
         if (where.WhereCanMacht.Contains(1)) { token.SwapToken(); }
-        board.board.Add(token);
+        board.AddTokenToBoard(token, 1);
 
     }
 
@@ -202,27 +193,63 @@ public class Judge
 
 }
 
-public class ControlPlayer
+
+public class CorruptionJugde : Judge
 {
-    public IPlayer player { get; private set; }
-
-    public List<HistorialPlayer> TokenToPlayNow { get; private set; }
-
-    public bool CanPlay { get; private set; } = false;
-
-    public ControlPlayer(IPlayer player)
+    protected Random random { get; set; }
+    public CorruptionJugde(IStopGame<IPlayer, Token> stop, IGetScore<Token> getscore, IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition, IValidPlay<IBoard, Token, ChooseStrategyWrapped> valid) : base(stop, getscore, winCondition, valid)
     {
-        this.player = player;
-        this.TokenToPlayNow = new List<HistorialPlayer>() { };
+        this.random = new Random();
 
     }
 
-    public class HistorialPlayer
+    public bool MakeCorrupcion()
     {
+        int x = random.Next(0, 100);
+        if (x > 50)
+        {
+            return true;
+        }
+        return false;
+
+    }
+    public override bool AddTokenToBoard(IPlayer player, GamePlayerHand<Token> hand, Token token, IBoard board, int side)
+    {
+        if (MakeCorrupcion())
+        {
+            if (random.Next(0, 27) > Math.E / 2) { PlayAlante(null!, token, board.First, board); }
+            else
+            {
+                PlayAtras(null!, token, board.Last, board);
+            }
+
+        }
+        return base.AddTokenToBoard(player, hand, token, board, side);
+    }
+
+    public override void PlayAlante(ChooseSideWrapped where, Token token, Token first, IBoard board)
+    {
+        if (first.Part1 == token.Part1)
+        {
+            token.SwapToken();
+
+        }
+        board.AddTokenToBoard(token, 0);
 
     }
 
+    public override void PlayAtras(ChooseSideWrapped where, Token token, Token last, IBoard board)
+    {
+        if (token.Part2 == last.Part2)
+        {
+            token.SwapToken();
+        }
+        board.AddTokenToBoard(token, 1);
+
+    }
 }
+
+
 
 #region  Champion
 
@@ -230,11 +257,11 @@ public class ControlPlayer
 public class ChampionJudge
 {
     public IStopGame<Game, (Game, IPlayer)> stopcriteria { get; set; }
-    public IWinCondition<Game, IPlayer> winCondition { get; set; }
+    public IWinCondition<Game, (Game, IPlayer)> winCondition { get; set; }
     public IValidPlay<Game, IPlayer, List<IPlayer>> valid { get; set; }
     public IGetScore<(Game, IPlayer)> howtogetscore { get; set; }
 
-    public ChampionJudge(IStopGame<Game, (Game, IPlayer)> stopcriteria, IWinCondition<Game, IPlayer> winCondition, IValidPlay<Game, IPlayer, List<IPlayer>> valid, IGetScore<(Game, IPlayer)> howtogetscore)
+    public ChampionJudge(IStopGame<Game, (Game, IPlayer)> stopcriteria, IWinCondition<Game, (Game, IPlayer)> winCondition, IValidPlay<Game, IPlayer, List<IPlayer>> valid, IGetScore<(Game, IPlayer)> howtogetscore)
     {
         this.howtogetscore = howtogetscore;
         this.stopcriteria = stopcriteria;

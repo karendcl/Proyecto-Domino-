@@ -20,8 +20,8 @@ public interface IBoard : ICloneable<IBoard>, ICloneable<IBoard, List<Token>>
 {
     List<Token> board { get; }
     void AddTokenToBoard(Token Token, int side);
-    Token First();
-    Token Last();
+    Token First { get; }
+    Token Last { get; }
 }
 
 public interface IStopGame<TCriterio, TToken>
@@ -30,11 +30,15 @@ public interface IStopGame<TCriterio, TToken>
     bool MeetsCriteria(TCriterio criterio, IGetScore<TToken> howtogetscore);
 }
 
-public interface IPlayer : IPlayerStrategy, ICloneable<IPlayer>, IEquatable<IPlayer>
+public interface IPlayer : IPlayerStrategy, ICloneable<IPlayer>, IEquatable<IPlayer>, IEqualityComparer<IPlayer>
 {
-    public List<Token> hand { get; set; }
-    public int Id { get; set; }
-    IPlayerStrategy strategy { get; set; }
+    public List<Token> hand { get; }
+    public int Id { get; }
+    IPlayerStrategy strategy { get; }
+
+    public void AddStrategy(IPlayerStrategy strategy);
+
+    public void AddHand(List<Token> hand);
 
     //quitar estos y poner un Play para poner un jugador humano 
     public Token BestPlay(WatchPlayer watch);
@@ -42,14 +46,6 @@ public interface IPlayer : IPlayerStrategy, ICloneable<IPlayer>, IEquatable<IPla
 
 }
 
-public interface IRules
-{
-    bool SwitchDirection { get; set; }
-    bool DrawToken { get; set; }
-    int MaxDouble { get; set; }
-    int Players { get; set; }
-    int TokensForEach { get; set; }
-}
 
 
 public interface IValidPlay<TGame, TPlayer, TCriterio>

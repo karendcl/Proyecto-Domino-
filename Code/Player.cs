@@ -1,21 +1,33 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Game;
 
 public class Player : IPlayer
 {
-    public List<Token> hand { get; set; }
-    public int Id { get; set; }
-    public int TotalScore { get; set; }
+    public virtual List<Token> hand { get; protected set; } = new List<Token>() { };
+    public virtual int Id { get; }
+    public virtual int TotalScore { get; set; }
+    public virtual IPlayerStrategy strategy { get { return ChooseStrategy(); } }
 
-    public IPlayerStrategy strategy { get; set; }
-
-    public Player(List<Token> Tokens, int id, IPlayerStrategy strategy)
+    public virtual List<IPlayerStrategy> strategias { get; protected set; } = new List<IPlayerStrategy>() { };
+    public Player(int id)
     {
-        this.hand = Tokens;
         this.Id = id;
         this.TotalScore = 0;
-        this.strategy = strategy;
     }
 
+    public void AddStrategy(IPlayerStrategy strategy)
+    {
+        this.strategias.Add(strategy);
+
+    }
+
+
+
+    public void AddHand(List<Token> Tokens)
+    {
+        this.hand = Tokens;
+    }
 
     public override string ToString()
     {
@@ -29,7 +41,7 @@ public class Player : IPlayer
         return a;
     }
 
-    public List<Token> PossiblePlays(WatchPlayer watchPlayer)// Plays posibles
+    protected List<Token> PossiblePlays(WatchPlayer watchPlayer)// Plays posibles
     {
 
         var CanPlay = new List<Token>();
@@ -59,6 +71,16 @@ public class Player : IPlayer
         return posibles[index];
     }
 
+    public IPlayerStrategy ChooseStrategy()
+    {
+
+        int count = this.strategias.Count;
+        if (count == 1) return strategias[0];
+        Random random = new Random();
+        int index = random.Next(0, count - 1);
+        return this.strategias[index];
+    }
+
     public virtual int ChooseSide(ChooseStrategyWrapped choose, WatchPlayer watchPlayer)
     {
         return strategy.ChooseSide(choose, watchPlayer);
@@ -66,7 +88,12 @@ public class Player : IPlayer
 
     public virtual IPlayer Clone()
     {
-        return new Player(new List<Token>(), this.Id, this.strategy);
+        IPlayer temp = new Player(this.Id);
+        foreach (var item in strategias)
+        {
+            temp.AddStrategy(item);
+        }
+        return temp;
     }
 
     public bool Equals(IPlayer? other)
@@ -87,10 +114,23 @@ public class Player : IPlayer
     {
         return this.strategy.Evaluate(token, hand, watch);
     }
+
+    public bool Equals(IPlayer? x, IPlayer? y)
+    {
+        if (x == null || y == null) return false;
+        if (x.Id == y.Id) return true;
+
+        return false;
+    }
+
+    public int GetHashCode([DisallowNull] IPlayer obj)
+    {
+        return obj.GetHashCode();
+    }
 }
 
 /*
-public class HumanPlayer : Player
+public class HumanPlayer : Player,IJugeable
 {
     public HumanPlayer(List<Token> Tokens, int id, IPlayerStrategy strategy) : base(Tokens, id, strategy)
     {

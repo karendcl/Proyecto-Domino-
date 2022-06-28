@@ -1,94 +1,61 @@
 namespace Game;
 
-public class Game : IRules, ICloneable<Game>
+public class Game : ICloneable<Game>
 {
 
-    public IBoard board { get; set; }
-    public bool DrawToken { get; set; }
-    public List<IPlayer> player { get; set; }
+    public IBoard? board { get; protected set; }
+    public List<IPlayer>? player { get; protected set; }
     public bool SwitchDirection { get; set; }
     public int MaxDouble { get; set; }
     public int Players { get; set; }
     public int TokensForEach { get; set; }
     public Judge judge { get; set; }
 
+    protected List<GamePlayerHand<Token>> hands { get { return this.PlayersHands.Values.ToList<GamePlayerHand<Token>>(); } }
+
+    protected List<PlayerStrats> playerStrats = new List<PlayerStrats>() { };
+    protected List<(IPlayer, GamePlayerHand<Token>)> Hands { get; set; } = new List<(IPlayer, GamePlayerHand<Token>)>() { };
+
+    public event Action<GameStatus>? GameStatus;
+
+
+
     private Dictionary<int, GamePlayerHand<Token>> PlayersHands = new Dictionary<int, GamePlayerHand<Token>>() { };
 
-    //public WinnersList<IPlayer,
-
-    //Meter esto en un Wrapped
-    private Observer observer { get; set; }//quitar
-
-    public bool TestGame(IBoard board)
+    public Game(bool direction, int max, int rep, Judge judge)
     {
-        if (board.board.Count < 1) { return true; }
-        for (int i = 0; i < board.board.Count; i++)
-        {
-            if (i > 0)
-            {
-                Token anterior = board.board[i - 1];
-                Token c = board.board[i];
-
-                if (anterior.Part2 != c.Part1)
-                {
-                    System.Console.WriteLine("nO MACHEA BIEN");
-
-                    System.Console.WriteLine();
-
-                    System.Console.WriteLine(board.ToString());
-
-                    Console.ReadKey();
-                    return false;
-
-                }
-            }
-
-        }
-        return true;
-    }
-
-    public Game(IBoard board, IPlayer[] players, bool direction, int max, int plays, int rep, Judge judge, bool draw)
-    {
-        this.board = board;
-        this.player = players.ToList();
         this.SwitchDirection = direction;
         this.MaxDouble = max;
-        this.Players = plays;
+
         this.TokensForEach = rep;
         this.judge = judge;
-        this.DrawToken = draw;
-        this.observer = new Observer();
+
+
         // GenerarTokens();
-        AssignTokens();
+
     }
 
-    public void AddPlayer(IPlayer player)
-    {
-        this.player.Add(player);
-    }
 
-    public bool DeletePlayer(IPlayer player)
-    {
-        if (this.player.Count == 1) return false;
-
-        this.player.Remove(player);
-        return true;
-    }
 
     public void AssignTokens()
     {
 
         List<Token> PosiblesTokens = GenerarTokens();
 
-        foreach (var play in player)
+        foreach (var player in player)
         {
             List<Token> temp = RepartirTokens(PosiblesTokens);
-            GamePlayerHand<Token> hand = new GamePlayerHand<Token>(temp.ToList<Token>());
-            PlayersHands.TryAdd(play.Id, hand);
-            play.hand = temp;
+            GamePlayerHand<Token> hand = new GamePlayerHand<Token>(player.Id, temp.ToList<Token>());
+            PlayersHands.TryAdd(player.Id, hand);
+            AddToHands(player, hand);
+            player.AddHand(temp);
         }
     }
 
+    private void AddToHands(IPlayer player, GamePlayerHand<Token> hand)
+    {
+        this.Hands.Add((player, hand));
+    }
     public List<Token> RepartirTokens(List<Token> PosiblesTokens)
     {
         int cantidadDisponible = PosiblesTokens.Count;
@@ -187,13 +154,15 @@ public class Game : IRules, ICloneable<Game>
         if (PlayersHands.ContainsKey(player.Id)) { return PlayersHands[player.Id]; }
         return null!;
     }
-    public bool PlayAGame()
+    public GameStatus PlayAGame(IBoard board, List<IPlayer> players)
     {
-        // IJudge<IPlayer, Token,(bool,List<(bool,List<int>)>)> judge = this.judge;
+        this.board = board;
+        this.player = players;//Añadir al juego los jugadores y el tablero
+
         Judge judge = this.judge;
         List<IPlayer> player = this.player;
+        AssignTokens();
 
-        IBoard board = this.board;
 
         Func<List<(IPlayer, List<Token>)>, IBoard, bool> EndGame = (player, board) => judge.EndGame(player, board.Clone(this.board.board));
 
@@ -201,7 +170,7 @@ public class Game : IRules, ICloneable<Game>
         {
             for (int i = 0; i < this.player.Count; i++) //turno de cada jugador
             {
-                TestGame(board);
+
                 List<(IPlayer player, List<Token> hand)> Match = MatchHandAndPlayer();
 
                 IPlayer playerNow = player[i];
@@ -210,21 +179,11 @@ public class Game : IRules, ICloneable<Game>
 
                 if (playerHand == null) { continue; }
 
-
-
-
                 if (EndGame(Match, board)) break;
 
                 WatchPlayer watch = judge.RunWatchPlayer(board.Clone(this.board.board));
-                // Console.WriteLine(player[i].ToString());
-                observer.PaintPlayerInConsole(player[i]);
-                // Console.WriteLine(game.board.ToString());
 
-                observer.PaintBord(board);
-
-                observer.Clean();
-
-
+                this.Print(playerNow, this.board, playerHand);
 
                 Token Token1 = Turno(playerNow, watch);  //la ficha que se va a jugar                     
                 if (Token1 == null)
@@ -251,9 +210,11 @@ public class Game : IRules, ICloneable<Game>
 
 
 
+                        Func<IPlayer, GamePlayerHand<Token>, Token, IBoard, int, bool> AddPTokenToBoard = (player, playerHand, Token1, board, index) => judge.AddTokenToBoard(player, playerHand, Token1, board, index);
                         bool control = this.judge.AddTokenToBoard(playerNow, playerHand, Token1, this.board, index);
-                        playerNow.hand = playerHand.hand;
+                        playerNow.AddHand(playerHand.hand);
                         //Actualizar la mano del jugador
+                        this.Print(playerNow, this.board, playerHand);
                     }
                 }
 
@@ -261,30 +222,48 @@ public class Game : IRules, ICloneable<Game>
             }
 
         }
-        return true;
+        GameStatus status = EndGameStatus();
+        return status;
 
     }
 
+    protected GameStatus EndGameStatus()
+    {
+        foreach (var item in this.playerStrats)
+        {
+            int score = this.judge.PlayerScore(item.player);
+            item.AddPuntuation(score);
+        }
+        GameStatus status = new GameStatus(this.playerStrats, this.hands, board, true);
+        List<IPlayer> winners = this.Winner();
+        status.AddWinners(winners);
+        this.GameStatus.Invoke(status);
+        return status;
+
+    }
+
+    private void Print(IPlayer player, IBoard board, GamePlayerHand<Token> hand)
+    {
+        PlayerStrats playerStrats = new PlayerStrats(player);
+
+        this.playerStrats.Remove(playerStrats);
+        this.playerStrats.Add(playerStrats);
+
+        GameStatus status = new GameStatus(this.playerStrats, this.hands, board);
+        this.GameStatus.Invoke(status);
+        // Observer.Invoke(player.Clone(), board.Clone(this.board.board), hand.Clone());
+    }
     private Token Turno(IPlayer player, WatchPlayer watch)
     {
         return player.BestPlay(watch);
         //Otorgar aca que si el juez lo deja jugar
     }
-    public Game Clone()
-    {
-        List<IPlayer> list = this.player;
-        IPlayer[] tempPlayers = new IPlayer[list.Count];
+    public Game Clone() => new Game(this.SwitchDirection, this.MaxDouble, this.TokensForEach, this.judge);
 
-        for (int i = 0; i < list.Count; i++)
-        {
-            tempPlayers[i] = list[i].Clone();
-        }
 
-        return new Game(new Board(new List<Token>()), tempPlayers, this.SwitchDirection, this.MaxDouble, this.Players, this.TokensForEach, this.judge, this.DrawToken);
-    }
+
+
 
 }
-
-
 
 

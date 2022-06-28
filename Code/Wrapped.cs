@@ -116,15 +116,7 @@ public class ChampionStatus
     public List<PlayerStrats> playerStrats { get; protected set; }
     public bool HaveAWinner { get; protected set; }
     public List<IPlayer> Winners { get; protected set; }//Ganadores a nivel de torneo
-    public bool ItsAnGameStatus
-    {
-        get
-        {
-            if (this.gameStatus == null) { return false; }
-
-            return this.gameStatus.ItsAFinishGame;
-        }
-    }
+    public bool ItsAnGameStatus { get; protected set; } = false;
 
     public bool ItsAFinishGame
     {
@@ -149,6 +141,7 @@ public class ChampionStatus
     public void AddGameStatus(GameStatus Know)
     {
         this.gameStatus = Know;
+        this.ItsAnGameStatus = true;
     }
 
 

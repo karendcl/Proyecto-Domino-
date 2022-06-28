@@ -21,7 +21,7 @@ public class Championship
     protected List<IPlayer> Winners { get { return this.ChampionWinners(); } }
     public bool ItsChampionOver { get; protected set; }
     protected List<PlayerStrats> playerStrats { get; set; } = new List<PlayerStrats>() { };
-    protected List<IPlayer> AllPlayers { get; set; }
+    protected List<IPlayer> AllPlayers { get { return GlobalPlayers.AllPlayers; } }
     #endregion
 
     public Championship(int cantTorneos, ChampionJudge judge, PlayersCoach players, List<Game> games)
@@ -31,7 +31,7 @@ public class Championship
         this.GlobalPlayers = players;
         this.judge = judge;
 
-        Run();
+
     }
 
     public void Run()
@@ -40,6 +40,7 @@ public class Championship
         for (int i = 0; i < Games.Count; i++)
         {
             Game game = Games[i];
+            game.GameStatus += PrintGames;
             List<IPlayer> players = GlobalPlayers.GetNextTeam();
             GameStatus gameStatus = game.PlayAGame(new Board(), players);
 
@@ -69,6 +70,7 @@ public class Championship
     {
         this.GamesStatus.Push(gameStatus);
         ChampionStatus championStatus = CreateAChampionStatus();
+        championStatus.AddGameStatus(gameStatus);
         this.status.Invoke(championStatus);
     }
     #endregion

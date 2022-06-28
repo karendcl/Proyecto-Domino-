@@ -21,7 +21,7 @@ public class Program
         // cantPlays=2;
 
         Observer observer = new Observer();
-        observer.CreateAChampion();
+        observer.Start();
     }
 
 }

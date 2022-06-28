@@ -29,6 +29,7 @@ public class Observer
     {
         Championship champion = this.CreateAChampion();
         champion.status += this.PrintChampionStatus;
+        champion.Run();
     }
     public bool InteractConsole(string Msg)
     {
@@ -105,7 +106,7 @@ public class Observer
         }
         if (championStatus.FinishChampion)
         {
-
+            PrintFinishChampion(championStatus);
         }
 
 
@@ -454,7 +455,7 @@ public class Observer
         //IJudge<IPlayer, Token> judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
         Judge judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
         //IPlayer[] players = ChoosePlayers();
-        return new Game(false, max, cantplay, judge);
+        return new Game(false, max, cadauno, judge);
     }
 
     //Crea los modos de juego

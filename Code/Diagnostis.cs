@@ -12,7 +12,7 @@ public class Diagnostics
                 Token anterior = board.board[i - 1];
                 Token c = board.board[i];
 
-                if (anterior.Part2 != c.Part1)
+                if (anterior[1] != c[0])
                 {
                     System.Console.WriteLine("nO MACHEA BIEN");
 
@@ -26,7 +26,10 @@ public class Diagnostics
                 }
             }
 
+
+
         }
         return true;
     }
 }
+

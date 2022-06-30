@@ -1,3 +1,5 @@
+using System.Collections;
+
 namespace Game;
 
 
@@ -28,6 +30,24 @@ public interface IStopGame<TCriterio, TToken>
 {                    // Puede ser un jugador 
                      // Puede ser un Juego para parar el torneo
     bool MeetsCriteria(TCriterio criterio, IGetScore<TToken> howtogetscore);
+}
+
+public interface ITokenizable : IComparable<ITokenizable>,IEquatable<ITokenizable>
+{
+    string Paint();
+    string Description { get; }
+    double ComponentValue { get; }
+
+}
+
+
+public interface ITokenManager
+{
+    protected int TokensForEach { get; set; }
+    public List<Token> Elements { get; protected set; }
+
+    public GamePlayerHand<Token> AssignTokens(IPlayer player);
+    public IComparer<Token> Comparer { get; }
 }
 
 public interface IPlayer : IPlayerStrategy, ICloneable<IPlayer>, IEquatable<IPlayer>, IEqualityComparer<IPlayer>

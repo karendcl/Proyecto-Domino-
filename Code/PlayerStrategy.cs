@@ -27,7 +27,7 @@ public class BGStrategy : IPlayerStrategy
     public int ChooseSide(ChooseStrategyWrapped choose, WatchPlayer watch)
     {
         if (watch.board.board is null || watch.board.board.Count == 0) return 0;
-        return (watch.board.board.First().Part1 > watch.board.board.Last().Part2) ? 1 : 0;
+        return (watch.board.board.First().First.ComponentValue > watch.board.board.Last().Last.ComponentValue/*.Part2*/) ? 1 : 0;
     }
 }
 
@@ -54,6 +54,7 @@ public class SemiSmart : IPlayerStrategy
     {
         IBoard board = watch.board;
         if (board.board is null || board.board.Count == 0) return 0;
-        return (board.board.First().Part1 > board.board.Last().Part2) ? 1 : 0;
+
+        return (board.board.First().First.ComponentValue > board.board.Last().Last.ComponentValue/*.Part2*/) ? 1 : 0;
     }
 }

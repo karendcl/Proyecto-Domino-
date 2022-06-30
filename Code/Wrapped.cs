@@ -4,8 +4,8 @@ public class GamePlayerHand<TToken> : ICloneable<GamePlayerHand<TToken>>, IEquat
 {
     public int PlayerId { get; protected set; }
     public bool IPlayed { get { return FichasJugadas.Count < 1 ? true : false; } }
-    public List<TToken> hand { get; private set; }
-    public Stack<TToken> FichasJugadas { get; private set; } = new Stack<TToken>() { };
+    public List<TToken> hand { get; protected set; }
+    public Stack<TToken> FichasJugadas { get; protected set; } = new Stack<TToken>() { };
 
     public bool ContainsToken(TToken token)
     {
@@ -88,7 +88,7 @@ public class PlayersCoach
         return true;
     }
 
-    private List<IPlayer> ClonePlayers(List<IPlayer> list)
+    protected List<IPlayer> ClonePlayers(List<IPlayer> list)
     {
         List<IPlayer> temp = new List<IPlayer>() { };
         foreach (var item in list)
@@ -136,6 +136,7 @@ public class ChampionStatus
         this.Winners = Winners;
         this.playerStrats = Players;
         this.FinishChampion = FinishChampion;
+        this.gameStatus = new GameStatus(new List<PlayerStrats>() { }, new List<GamePlayerHand<Token>>() { }, new Board());
     }
 
     public void AddGameStatus(GameStatus Know)
@@ -171,14 +172,14 @@ public class GameStatus
         this.playerStrats = playerStrats;
         this.ItsAFinishGame = ItsAFinishGame;
     }
-    private IPlayer SetActualIplayer()
+    protected IPlayer SetActualIplayer()
     {
         int count = this.playerStrats.Count;
         if (count < 0) return null!;
         return this.playerStrats[count - 1].player.Clone();
     }
 
-    private GamePlayerHand<Token> SetActualPlayerHand()
+    protected GamePlayerHand<Token> SetActualPlayerHand()
     {
         int count = this.Hands.Count;
         if (count < 0) return null!;
@@ -227,10 +228,10 @@ public class PlayerStrats : IEquatable<PlayerStrats>
 
 public sealed class RulesGame<TPlayer, TToken, TBoard>
 {
-    public IStopGame<TPlayer, TToken> stopcriteria { get; private set; }
-    public IGetScore<TToken> howtogetscore { get; private set; }
-    public IWinCondition<TPlayer, TToken> winCondition { get; private set; }
-    public IValidPlay<TBoard, TToken, ChooseStrategyWrapped> valid { get; private set; }
+    public IStopGame<TPlayer, TToken> stopcriteria { get; protected set; }
+    public IGetScore<TToken> howtogetscore { get; protected set; }
+    public IWinCondition<TPlayer, TToken> winCondition { get; protected set; }
+    public IValidPlay<TBoard, TToken, ChooseStrategyWrapped> valid { get; protected set; }
 
     public RulesGame(IStopGame<TPlayer, TToken> stop, IGetScore<TToken> getscore, IWinCondition<TPlayer, TToken> winCondition, IValidPlay<TBoard, TToken, ChooseStrategyWrapped> valid)
 
@@ -246,11 +247,11 @@ public sealed class RulesGame<TPlayer, TToken, TBoard>
 
 public class WatchPlayer
 {
-    public IGetScore<Token> howtogetscore { get; private set; }
-    public IStopGame<IPlayer, Token> stopCondition { get; private set; }
-    public IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay { get; private set; }
-    public IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition { get; private set; }
-    public IBoard board { get; private set; }
+    public IGetScore<Token> howtogetscore { get; protected set; }
+    public IStopGame<IPlayer, Token> stopCondition { get; protected set; }
+    public IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay { get; protected set; }
+    public IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition { get; protected set; }
+    public IBoard board { get; protected set; }
     //Despues hacer una interfaz tipo Ipasable 
     public WatchPlayer(IGetScore<Token> howtogetscore, IStopGame<IPlayer, Token> stopCondition, IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay, IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition, IBoard board)
     {

@@ -4,7 +4,6 @@ public class Judge
 {
     protected virtual IStopGame<IPlayer, Token> stopcriteria { get; set; }
     protected virtual IGetScore<Token> howtogetscore { get; set; }
-
     protected virtual IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition { get; set; }
     protected virtual IValidPlay<IBoard, Token, ChooseStrategyWrapped> valid { get; set; }
     protected virtual IPlayer playernow { get; set; } = null!;
@@ -143,7 +142,7 @@ public class Judge
         {
             if (ItsThePlayerHand(player, hand)) { temp.Add((player, hand)); }
         }
-        if (temp.Count < 1) { return null!; }
+        if (temp.Count < 1) { return new List<IPlayer>() { }; }
         return this.winCondition.Winner(temp, this.howtogetscore);
     }
 
@@ -163,16 +162,31 @@ public class Judge
     public virtual void PlayAlante(ChooseSideWrapped where, Token token, Token first, IBoard board)
     {
 
-        if (where.WhereCanMacht.Contains(1)) { token.SwapToken(); }
+        if (where.DontSwap)
+        {/* token.SwapToken();*/
+            board.AddTokenToBoard(token, 0);
 
+            return;
+
+        }
+
+        token.SwapToken(where.WhereCanMacht);
 
         board.AddTokenToBoard(token, 0);
     }
 
     public virtual void PlayAtras(ChooseSideWrapped where, Token token, Token last, IBoard board)
     {
-        if (where.WhereCanMacht.Contains(1)) { token.SwapToken(); }
-        board.AddTokenToBoard(token, 1);
+        if (where.DontSwap)
+        {
+            board.AddTokenToBoard(token, 1); return;
+
+        }
+
+        token.SwapToken(where.WhereCanMacht);
+
+        board.AddTokenToBoard(token, 1); return;
+
 
     }
 
@@ -217,9 +231,9 @@ public class CorruptionJugde : Judge, ICorrupcion
 
     public override void PlayAlante(ChooseSideWrapped where, Token token, Token first, IBoard board)
     {
-        if (first.Part1 == token.Part1)
+        if (first[0] == token[0])  /*first.Part1 == token.Part1*/
         {
-            token.SwapToken();
+            token.SwapToken(0, 1);
 
         }
         board.AddTokenToBoard(token, 0);
@@ -228,9 +242,10 @@ public class CorruptionJugde : Judge, ICorrupcion
 
     public override void PlayAtras(ChooseSideWrapped where, Token token, Token last, IBoard board)
     {
-        if (token.Part2 == last.Part2)
+        if (token[1] == token[1])  //token.Part2 == last.Part2
         {
-            token.SwapToken();
+            token.SwapToken(0, 1);
+
         }
         board.AddTokenToBoard(token, 1);
 
@@ -246,10 +261,10 @@ public class ChampionJudge
 {
     protected virtual IStopGame<Game, (Game, IPlayer)> stopcriteria { get; set; }
     protected virtual IWinCondition<Game, (Game, IPlayer)> winCondition { get; set; }
-    protected virtual IValidPlay<Game, IPlayer, List<IPlayer>> valid { get; set; }
+    protected virtual IValidPlay<List<GameStatus>, IPlayer, bool> valid { get; set; }
     protected virtual IGetScore<(Game, IPlayer)> howtogetscore { get; set; }
 
-    public ChampionJudge(IStopGame<Game, (Game, IPlayer)> stopcriteria, IWinCondition<Game, (Game, IPlayer)> winCondition, IValidPlay<Game, IPlayer, List<IPlayer>> valid, IGetScore<(Game, IPlayer)> howtogetscore)
+    public ChampionJudge(IStopGame<Game, (Game, IPlayer)> stopcriteria, IWinCondition<Game, (Game, IPlayer)> winCondition, IValidPlay<List<GameStatus>, IPlayer, bool> valid, IGetScore<(Game, IPlayer)> howtogetscore)
     {
         this.howtogetscore = howtogetscore;
         this.stopcriteria = stopcriteria;
@@ -262,7 +277,7 @@ public class ChampionJudge
         return false;
     }
     //Verificar antes de comenzar otro juego 
-    public virtual List<IPlayer> ValidPlay(Game game, IPlayer player)//Los que continuan
+    public virtual bool ValidPlay(List<GameStatus> game, IPlayer player)//Los que continuan
     {
         return valid.ValidPlay(game, player);
     }
@@ -278,7 +293,7 @@ public class ChampionJudge
 
 public class CorruptionChampionJugde : ChampionJudge, ICorrupcion
 {
-    public CorruptionChampionJugde(IStopGame<Game, (Game, IPlayer)> stopcriteria, IWinCondition<Game, (Game, IPlayer)> winCondition, IValidPlay<Game, IPlayer, List<IPlayer>> valid, IGetScore<(Game, IPlayer)> howtogetscore) : base(stopcriteria, winCondition, valid, howtogetscore)
+    public CorruptionChampionJugde(IStopGame<Game, (Game, IPlayer)> stopcriteria, IWinCondition<Game, (Game, IPlayer)> winCondition, IValidPlay<List<GameStatus>, IPlayer, bool> valid, IGetScore<(Game, IPlayer)> howtogetscore) : base(stopcriteria, winCondition, valid, howtogetscore)
     {
     }
 
@@ -303,16 +318,16 @@ public class CorruptionChampionJugde : ChampionJudge, ICorrupcion
         return base.EndGame(game);
     }
 
-    public override List<IPlayer> ValidPlay(Game game, IPlayer player)
+    public override bool ValidPlay(List<GameStatus> game, IPlayer player)
     {
         if (MakeCorruption())
         {
-            List<IPlayer> valid = base.ValidPlay(game, player);
+            bool x = base.ValidPlay(game, player);
             Random random = new Random();
             int c = random.Next(0, 100);
-            if (c <= 50 && valid.Contains(player)) { valid.Remove(player); return valid; }
+            if (c <= 50 && x) { return false; ; }
 
-            return new List<IPlayer>() { player };
+            return true;
         }
 
         return base.ValidPlay(game, player);

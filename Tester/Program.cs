@@ -9,6 +9,7 @@ public class Program
 {
     public static void Main(string[] args)
     {
+
         /* System.Console.WriteLine("Desea Empezar una nueva partida");
          // string msg= Console.ReadLine()!;
          string msg = "si";
@@ -25,7 +26,6 @@ public class Program
         Events events = new Events();
 
         observador obs = new observador();
-
 
         ChampionStart start = new ChampionStart(obs);
 

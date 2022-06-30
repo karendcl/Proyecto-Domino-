@@ -5,15 +5,21 @@ public class ClassicScore : IGetScore<Token>
 
     public int Score(Token token)
     {
-        return token.Part1.GetHashCode() + token.Part2.GetHashCode();
+        int score = 0;
+        foreach (var item in token.Component)
+        {
+            score += (int)item.ComponentValue;
+        }
+        return score;
     }
 }
 
-public class DoubleScore : IGetScore<Token>
+public class DoubleScore : ClassicScore
 {
     public int Score(Token token)
     {
-        int result = token.Part1 + token.Part2;
+        int result = base.Score(token);
+
         if (token.IsDouble()) result *= 2;
         return result;
     }

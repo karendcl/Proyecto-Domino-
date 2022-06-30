@@ -12,16 +12,18 @@ public class Championship
     public event Action<ChampionStatus> status;
     public event Func<string, bool> Choose;
     public int Champions { get; protected set; }
-    public ChampionJudge judge { get; private set; }
+    public ChampionJudge judge { get; protected set; }
     public List<Game> Games { get; protected set; }
     public PlayersCoach GlobalPlayers { get; protected set; }
     protected bool HaveAWinner { get; set; }
-    protected Stack<Game> FinishGames = new Stack<Game>() { };
+    protected List<Game> FinishGames = new List<Game>() { };
     protected Stack<GameStatus> GamesStatus = new Stack<GameStatus>() { };
     protected List<IPlayer> Winners { get { return this.ChampionWinners(); } }
     public bool ItsChampionOver { get; protected set; }
     protected List<PlayerStrats> playerStrats { get; set; } = new List<PlayerStrats>() { };
     protected List<IPlayer> AllPlayers { get { return GlobalPlayers.AllPlayers; } }
+
+
     #endregion
 
     public Championship(int cantTorneos, ChampionJudge judge, PlayersCoach players, List<Game> games)
@@ -30,8 +32,6 @@ public class Championship
         this.Games = games;
         this.GlobalPlayers = players;
         this.judge = judge;
-
-
     }
 
     public void Run()
@@ -42,6 +42,7 @@ public class Championship
             Game game = Games[i];
             game.GameStatus += PrintGames;
             List<IPlayer> players = GlobalPlayers.GetNextTeam();
+
             GameStatus gameStatus = game.PlayAGame(new Board(), players);
 
             if (judge.EndGame(game))
@@ -51,7 +52,7 @@ public class Championship
                 break;
             }
 
-            if (!ContinueGames()) { /*observer.WriteStats(game);*/ ChampionPrint(players, this.judge.Winners(Games)); break; }
+            if (!ContinueGames()) { ChampionPrint(); break; }
 
             GameOver(game, gameStatus, i);
 
@@ -60,21 +61,21 @@ public class Championship
     }
 
     #region Mandar informacion de los partidos
-    private void GameOver(Game game, GameStatus gameStatus, int i)
+    protected void GameOver(Game game, GameStatus gameStatus, int i)
     {
-        this.FinishGames.Push(game);
+        this.GamesStatus.Push(gameStatus);
+        this.FinishGames.Add(game);
         this.PrintGames(gameStatus);
     }
 
-    private void PrintGames(GameStatus gameStatus)
+    protected void PrintGames(GameStatus gameStatus)
     {
-        this.GamesStatus.Push(gameStatus);
+
         ChampionStatus championStatus = CreateAChampionStatus();
         championStatus.AddGameStatus(gameStatus);
         this.status.Invoke(championStatus);
     }
     #endregion
-
 
 
     protected ChampionStatus CreateAChampionStatus()
@@ -127,7 +128,7 @@ public class Championship
     //  observer.WriteStats(game);
     protected bool ContinueGames() => Choose.Invoke(("Desea seguir jugando?, si / no"));
 
-    protected void ChampionPrint(List<IPlayer> Players, List<IPlayer> Winners)
+    protected void ChampionPrint()
     {
         ChampionStatus championStatus = this.CreateAChampionStatus();
         this.status.Invoke(championStatus);

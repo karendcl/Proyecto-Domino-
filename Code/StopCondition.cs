@@ -38,13 +38,13 @@ public class CertainScore : IStopGame<IPlayer, Token>
 
 public class StopChampion : IStopGame<Game, (Game, IPlayer)>
 {
-    private int Point { get; set; }
+    protected int Point { get; set; }
     public List<IPlayer> Players { get; set; }
     public List<int> acc { get; set; }
 
     public bool CheckCriteria()
     {
-        return Point < 0 ? true : false;
+        return this.Point < 0 ? true : false;
     }
     public StopChampion(int porcentOfpoints = -1)//No lleve acumulado mas puntos que x cantidad
     {
@@ -56,15 +56,15 @@ public class StopChampion : IStopGame<Game, (Game, IPlayer)>
     //Se asume que estan todos los jugadores desde un inicio en caso contrario se añade 
     public bool MeetsCriteria(Game game, IGetScore<(Game, IPlayer)> howtogetscore)
     {
-        if (CheckCriteria()) return true;
+        if (CheckCriteria()) return false;
         this.score(game, howtogetscore);
-        foreach (var item in acc) { if (item > Point) { return false; } }
-        return true;
+        foreach (var item in acc) { if (item > Point) { return true; } }
+        return false;
     }
 
-    private void score(Game game, IGetScore<(Game, IPlayer)> howtogetscore)
+    protected void score(Game game, IGetScore<(Game, IPlayer)> howtogetscore)
     {
-        List<IPlayer> temp = game.player;
+        List<IPlayer> temp = game.player!;
         foreach (var item in temp)
         {
             int cant = howtogetscore.Score((game, item));

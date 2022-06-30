@@ -110,16 +110,16 @@ public class Specificscore : WinCondition
 #region  Champion
 
 public class WinChampion : IWinCondition<Game, (Game, IPlayer)>
-{// Espresar en fraccion el porcentaje de ganadas del total del torneo
+{//En total de ganadas 
 
-    // public double Porcent { get; private set; }
-    public List<WIPlayer<IPlayer>> players { get; private set; }
-    public List<int> cantwins { get; private set; }
+    public double Porcent { get; protected set; }
+    public List<WIPlayer<IPlayer>> players { get; protected set; }
+    public List<int> cantwins { get; protected set; }
     public WinChampion(double porcentWins)
     {
         this.players = new List<WIPlayer<IPlayer>>() { };
         this.cantwins = new List<int>() { };
-        // this.Porcent = porcentWins;
+        this.Porcent = porcentWins;
     }
     public List<IPlayer> Winner(List<Game> games, IGetScore<(Game, IPlayer)> howtogetscore)
     {                                              ///Agregar una que utiize esta 
@@ -130,14 +130,15 @@ public class WinChampion : IWinCondition<Game, (Game, IPlayer)>
 
             for (int i = 0; i < winners.Count; i++)
             {
-                WIPlayer<IPlayer> temp = new WIPlayer<IPlayer>(winners[i], i);
+                WIPlayer<IPlayer> temp = new WIPlayer<IPlayer>(winners[i], 1);
                 if (!players.Contains(temp)) { players.Add(temp); }
-                else { int x = players.IndexOf(temp); players[x].Puntuation += temp.Puntuation; }
+                else { int x = players.IndexOf(temp); players[x].AddScore(temp.Puntuation); }
             }
         }
         players.Sort(new WIPlayer_Comparer());
 
-        players.Reverse();
+
+
 
         List<IPlayer> list = new List<IPlayer>() { };
         for (int i = 0; i < players.Count; i++)
@@ -148,10 +149,14 @@ public class WinChampion : IWinCondition<Game, (Game, IPlayer)>
         return list;
     }
 
+
+
+
+
     public class WIPlayer<T> : IEquatable<WIPlayer<T>> where T : IEquatable<T>
     {
-        public T player { get; private set; }
-        public int Puntuation { get; set; }
+        public virtual T player { get; protected set; }
+        public virtual int Puntuation { get; protected set; }
 
         public WIPlayer(T player, int Puntuation)
         {
@@ -160,13 +165,18 @@ public class WinChampion : IWinCondition<Game, (Game, IPlayer)>
         }
 
 
-
-        public bool Equals(WIPlayer<T>? other)
+        public virtual void AddScore(int score)
+        {
+            this.Puntuation += score;
+        }
+        public virtual bool Equals(WIPlayer<T>? other)
         {
             if (other == null || this == null) { return false; }
             return this.player.Equals(other.player);
         }
     }
+
+
 
     protected internal class WIPlayer_Comparer : IComparer<WIPlayer<IPlayer>>
     {

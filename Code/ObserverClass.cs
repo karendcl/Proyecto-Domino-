@@ -37,7 +37,7 @@ public class ChampionStart
     public event Func<string, int>? Asksint;
 
     public event Func<string, bool>? BooleanAsk;
-    public event Action<ChampionStatus>? PrintChampionStatus;
+    // public event Action<ChampionStatus>? PrintChampionStatus;
 
 
     public bool Run()
@@ -73,16 +73,16 @@ public class ChampionStart
     protected ChampionJudge ChooseChampionJudge()
 
     {
-        IStopGame<Game, (Game, IPlayer)> stop = ChooseStopChampion();
-        IWinCondition<Game, (Game, IPlayer)> win = ChooseWinCondition();
-        IValidPlay<List<GameStatus>, IPlayer, bool> valid = ChooseValidChampion();
-        IGetScore<(Game, IPlayer)> score = ChooseChampionGetScore();
+        IStopGame<Game, (Game, Player)> stop = ChooseStopChampion();
+        IWinCondition<Game, (Game, Player)> win = ChooseWinCondition();
+        IValidPlay<List<GameStatus>, Player, bool> valid = ChooseValidChampion();
+        IGetScore<(Game, Player)> score = ChooseChampionGetScore();
         return new ChampionJudge(stop, win, valid, score);
     }
 
 
 
-    protected IValidPlay<List<GameStatus>, IPlayer, bool> ChooseValidChampion()
+    protected IValidPlay<List<GameStatus>, Player, bool> ChooseValidChampion()
     {
         //1 Forma por puntuacion especifica de % de derrortas 
         string Porcent = "Por un % de veces que se queda por debajo del 50% en la lista ";
@@ -115,7 +115,7 @@ public class ChampionStart
 
 
     }
-    protected IWinCondition<Game, (Game, IPlayer)> ChooseWinCondition()
+    protected IWinCondition<Game, (Game, Player)> ChooseWinCondition()
     {
         int x = -1;
         do
@@ -125,13 +125,13 @@ public class ChampionStart
 
         return new WinChampion(x);
     }
-    protected IGetScore<(Game, IPlayer)> ChooseChampionGetScore()
+    protected IGetScore<(Game, Player)> ChooseChampionGetScore()
     {
         // System.Console.WriteLine("Se crea por defecto");
         return new ScoreChampionNormal();
     }
 
-    protected IStopGame<Game, (Game, IPlayer)> ChooseStopChampion()
+    protected IStopGame<Game, (Game, Player)> ChooseStopChampion()
     {
         int x = -1;
         if (this.BooleanAsk("Desea que se acabe el campeonato puntuación máxima? "))
@@ -154,11 +154,11 @@ public class ChampionStart
         return x;
 
     }
-    protected List<IPlayer> ChampionPlayers(int cantPlayers)
+    protected List<Player> ChampionPlayers(int cantPlayers)
     {
 
 
-        List<IPlayer> players = new List<IPlayer>() { };
+        List<Player> players = new List<Player>() { };
 
         for (int i = 0; i < cantPlayers; i++)
         {
@@ -173,10 +173,10 @@ public class ChampionStart
         return players;
 
     }
-    protected IPlayer ChoosePlayers(int id)
+    protected Player ChoosePlayers(int id)
     {//Devuelve los players
 
-        IPlayer player = new Player(id);
+        Player player = new Player(id);
 
         int a = -1;
 
@@ -208,9 +208,9 @@ public class ChampionStart
 
     #region  Create Game
     //Elegir tipo de juego
-    protected IStopGame<IPlayer, Token> ChooseStopGame(bool ConfGame = false)
+    protected IStopGame<Player, Token> ChooseStopGame(bool ConfGame = false)
     {
-        IStopGame<IPlayer, Token> stopcondition = new Classic();
+        IStopGame<Player, Token> stopcondition = new Classic();
 
         int stop = 0;
         if (ConfGame)
@@ -277,9 +277,9 @@ public class ChampionStart
         return HowTogetScore;
     }
 
-    public IWinCondition<(IPlayer player, List<Token> hand), Token> ChooseWinCondition(bool ConfGame = false)
+    public IWinCondition<(Player player, List<Token> hand), Token> ChooseWinCondition(bool ConfGame = false)
     {
-        IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition = new MinScore();
+        IWinCondition<(Player player, List<Token> hand), Token> winCondition = new MinScore();
 
         int winConditionn = 0;
         if (!ConfGame)
@@ -311,9 +311,9 @@ public class ChampionStart
         return winCondition;
     }
 
-    public IValidPlay<IBoard, Token, ChooseStrategyWrapped> ChooseValidPlay(IEqualityComparer<Token> equalityComparer, IComparer<Token> Comparer, bool ConfGame = false)
+    public IValidPlay<Board, Token, ChooseStrategyWrapped> ChooseValidPlay(IEqualityComparer<Token> equalityComparer, IComparer<Token> Comparer, bool ConfGame = false)
     {
-        IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay = new ClassicValidPlay(equalityComparer, Comparer);
+        IValidPlay<Board, Token, ChooseStrategyWrapped> validPlay = new ClassicValidPlay(equalityComparer, Comparer);
         int val = 0;
 
         while (val < 1 || val > 3)
@@ -350,7 +350,7 @@ public class ChampionStart
     }
 
 
-    protected Judge ChooseJugde(IStopGame<IPlayer, Token> stopcondition, IGetScore<Token> HowTogetScore, IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition, IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay, bool ConfGame = false)
+    protected Judge ChooseJugde(IStopGame<Player, Token> stopcondition, IGetScore<Token> HowTogetScore, IWinCondition<(Player player, List<Token> hand), Token> winCondition, IValidPlay<Board, Token, ChooseStrategyWrapped> validPlay, bool ConfGame = false)
     {
 
         Judge judge = new Judge(stopcondition, HowTogetScore, winCondition, validPlay);
@@ -401,17 +401,17 @@ public class ChampionStart
     {
         if (ConfGame) { ConfGame = true; }//Sleccionar si se quiere modo de juego normal
 
-        IStopGame<IPlayer, Token> stopcondition = ChooseStopGame(ConfGame);
+        IStopGame<Player, Token> stopcondition = ChooseStopGame(ConfGame);
 
         IGetScore<Token> HowTogetScore = ChooseGetScore(ConfGame);
 
-        IWinCondition<(IPlayer player, List<Token> hand), Token> winCondition = ChooseWinCondition(ConfGame);
+        IWinCondition<(Player player, List<Token> hand), Token> winCondition = ChooseWinCondition(ConfGame);
 
         IComparer<Token> tokenComparer = ChooseATokenComparerCriteria();
 
         IEqualityComparer<Token> equalityComparer = ChooseATokenEqualityCriteria();
 
-        IValidPlay<IBoard, Token, ChooseStrategyWrapped> validPlay = ChooseValidPlay(equalityComparer, tokenComparer, ConfGame);
+        IValidPlay<Board, Token, ChooseStrategyWrapped> validPlay = ChooseValidPlay(equalityComparer, tokenComparer, ConfGame);
 
         Judge judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
 
@@ -423,7 +423,7 @@ public class ChampionStart
     //Crea los modos de juego
     public (PlayersCoach, List<Game>) SelectGameTypes(int CantPartidas)
     {
-        List<IPlayer> tt = new List<IPlayer>() { };
+        List<Player> tt = new List<Player>() { };
         for (int i = 0; i < this.cantPlayers; i++)
         {
             tt.Add(new Player(i));
@@ -498,11 +498,11 @@ public class observador
             Console.Clear();
             System.Console.WriteLine(arg + "  ?" + " Sí/No");
             x = Console.ReadLine()!.ToLower();
-            if(x!=null)
+            if (x != null)
             {
                 a = (x[0] == 's' || x[0] == 'n');
             }
-            
+
         } while (!a);
         Console.Clear();
         if (x[0] == 's') return true;

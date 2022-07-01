@@ -3,8 +3,8 @@ namespace Game;
 public class Game : ICloneable<Game>
 {
 
-    public IBoard? board { get; protected set; }
-    public List<IPlayer>? player { get; protected set; }
+    public Board? board { get; protected set; }
+    public List<Player>? player { get; protected set; }
     public bool SwitchDirection { get; set; }
     public int MaxDouble { get; set; }
     public int Players { get; set; }
@@ -12,12 +12,8 @@ public class Game : ICloneable<Game>
     public Judge judge { get; set; }
 
     protected List<GamePlayerHand<Token>> hands { get { return this.PlayersHands.Values.ToList<GamePlayerHand<Token>>(); } }
-
     protected List<PlayerStrats> playerStrats = new List<PlayerStrats>() { };
-
-
     public virtual event Action<GameStatus>? GameStatus;
-
     protected TokensManager Manager { get; set; }
 
     protected Dictionary<int, GamePlayerHand<Token>> PlayersHands { get; set; }
@@ -42,7 +38,7 @@ public class Game : ICloneable<Game>
     {
         string a = "Resultados del juego:  \n";
 
-        a += board.ToString();
+        a += board!.ToString();
 
         return a;
     }
@@ -54,13 +50,13 @@ public class Game : ICloneable<Game>
 
         if (SwitchDirection)
         {
-            IPlayer[] players = new Player[this.Players];
+            Player[] players = new Player[this.Players];
 
             for (int i = 0; i < players.Length; i++)
             {
                 if (player == 0) player = players.Length;
 
-                players[i] = this.player[player - 1];
+                players[i] = this.player![player - 1];
                 player--;
             }
 
@@ -69,17 +65,15 @@ public class Game : ICloneable<Game>
         }
     }
 
-    public virtual List<IPlayer> Winner()
+    public virtual List<Player> Winner()
     {
-        List<(IPlayer player, List<Token> hand)> temp = MatchHandAndPlayer();
+        List<(Player player, List<Token> hand)> temp = MatchHandAndPlayer();
         return this.judge.Winner(temp);
     }
 
-    protected void AssingTokens(List<IPlayer> players)
+    protected void AssingTokens(List<Player> players)
     {
         Dictionary<int, GamePlayerHand<Token>> PlayersHands = new Dictionary<int, GamePlayerHand<Token>>() { };
-
-        //List<GamePlayerHand<Token>> result = new List<GamePlayerHand<Token>>() { };
 
         foreach (var item in players)
         {
@@ -91,17 +85,17 @@ public class Game : ICloneable<Game>
         this.PlayersHands = PlayersHands;
     }
 
-    protected virtual List<(IPlayer player, List<Token> hand)> MatchHandAndPlayer()
+    protected virtual List<(Player player, List<Token> hand)> MatchHandAndPlayer()
     {
-        List<(IPlayer player, List<Token> hand)> temp = new List<(IPlayer player, List<Token> hand)>() { };
-        foreach (var item in this.player)
+        List<(Player player, List<Token> hand)> temp = new List<(Player player, List<Token> hand)>() { };
+        foreach (var item in this.player!)
         {
             int id = item.Id;
             if (PlayersHands.ContainsKey(id))
             {
                 GamePlayerHand<Token> hands = PlayersHands[id];
 
-                (IPlayer player, List<Token> hand) Player = (item, hands.hand);
+                (Player player, List<Token> hand) Player = (item, hands.hand);
                 temp.Add(Player);
             }
 
@@ -110,32 +104,32 @@ public class Game : ICloneable<Game>
         return temp;
     }
 
-    private GamePlayerHand<Token> PullAPlayerAndHand(IPlayer player)
+    private GamePlayerHand<Token> PullAPlayerAndHand(Player player)
     {
         if (PlayersHands.ContainsKey(player.Id)) { return PlayersHands[player.Id]; }
         return null!;
     }
-    public GameStatus PlayAGame(IBoard board, List<IPlayer> players)
+    public GameStatus PlayAGame(Board board, List<Player> players)
     {
         this.AssingTokens(players);
         this.board = board;
         this.player = players;//Añadir al juego los jugadores y el tablero
 
         Judge judge = this.judge;
-        List<IPlayer> player = this.player;
+        List<Player> player = this.player;
 
 
 
-        Func<List<(IPlayer, List<Token>)>, IBoard, bool> EndGame = (player, board) => judge.EndGame(player, board.Clone(this.board.board));
+        Func<List<(Player, List<Token>)>, Board, bool> EndGame = (player, board) => judge.EndGame(player, board.Clone(this.board.board));
 
         while (!EndGame(MatchHandAndPlayer(), board)) //mientras no se acabe el juego
         {
             for (int i = 0; i < this.player.Count; i++) //turno de cada jugador
             {
 
-                List<(IPlayer player, List<Token> hand)> Match = MatchHandAndPlayer();
+                List<(Player player, List<Token> hand)> Match = MatchHandAndPlayer();
 
-                IPlayer playerNow = player[i];
+                Player playerNow = player[i];
 
                 GamePlayerHand<Token> playerHand = PullAPlayerAndHand(playerNow);
 
@@ -172,13 +166,13 @@ public class Game : ICloneable<Game>
 
 
 
-                        Func<IPlayer, GamePlayerHand<Token>, Token, IBoard, int, bool> AddPTokenToBoard = (player, playerHand, Token1, board, index) => judge.AddTokenToBoard(player, playerHand, Token1, board, index);
+                        Func<Player, GamePlayerHand<Token>, Token, Board, int, bool> AddPTokenToBoard = (player, playerHand, Token1, board, index) => judge.AddTokenToBoard(player, playerHand, Token1, board, index);
                         bool control = this.judge.AddTokenToBoard(playerNow, playerHand, Token1, this.board, index);
                         playerNow.AddHand(playerHand.hand);
                         //Actualizar la mano del jugador
                         this.Print(playerNow, this.board, playerHand);
                         Diagnostics diagnostics = new Diagnostics();
-                        diagnostics.TestGame(this.board);
+
                     }
                 }
 
@@ -198,15 +192,15 @@ public class Game : ICloneable<Game>
             int score = this.judge.PlayerScore(item.player);
             item.AddPuntuation(score);
         }
-        GameStatus status = new GameStatus(this.playerStrats, this.hands, board, true);
-        List<IPlayer> winners = this.Winner();
+        GameStatus status = new GameStatus(this.playerStrats, this.hands, board!, true);
+        List<Player> winners = this.Winner();
         status.AddWinners(winners);
-        this.GameStatus.Invoke(status);
+        this.GameStatus!.Invoke(status);
         return status;
 
     }
 
-    private void Print(IPlayer player, IBoard board, GamePlayerHand<Token> hand)
+    private void Print(Player player, Board board, GamePlayerHand<Token> hand)
     {
         PlayerStrats playerStrats = new PlayerStrats(player);
 
@@ -214,10 +208,10 @@ public class Game : ICloneable<Game>
         this.playerStrats.Add(playerStrats);
 
         GameStatus status = new GameStatus(this.playerStrats, this.hands, board);
-        this.GameStatus.Invoke(status);
+        this.GameStatus!.Invoke(status);
 
     }
-    private Token Turno(IPlayer player, WatchPlayer watch)
+    private Token Turno(Player player, WatchPlayer watch)
     {
         return player.BestPlay(watch);
         //Otorgar aca que si el juez lo deja jugar

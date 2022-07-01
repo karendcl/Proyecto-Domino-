@@ -1,14 +1,15 @@
 
 namespace Game;
 
-public abstract class WinCondition : IWinCondition<(IPlayer player, List<Token> hand), Token>
+public abstract class WinCondition : IWinCondition<(Player player, List<Token> hand), Token>
 {
+    public virtual string Description => "Game WinCondition";
 
-    public virtual List<IPlayer> Winner(List<(IPlayer player, List<Token> hand)> players, IGetScore<Token> howtogetscore)
+    public virtual List<Player> Winner(List<(Player player, List<Token> hand)> players, IGetScore<Token> howtogetscore)
     {
 
         int count = 0;
-        var result = new List<IPlayer>();
+        var result = new List<Player>();
         int[] scores = new int[players.Count];
 
         foreach (var (player, hand) in players)
@@ -33,7 +34,7 @@ public abstract class WinCondition : IWinCondition<(IPlayer player, List<Token> 
 
     }
 
-    public abstract List<IPlayer> FinalWinner(int[] scores, List<(IPlayer player, List<Token> hand)> players);
+    public abstract List<Player> FinalWinner(int[] scores, List<(Player player, List<Token> hand)> players);
 
 
 
@@ -42,9 +43,10 @@ public abstract class WinCondition : IWinCondition<(IPlayer player, List<Token> 
 public class MinScore : WinCondition
 {
 
-    public override List<IPlayer> FinalWinner(int[] scores, List<(IPlayer player, List<Token> hand)> players)
+    public override string Description => "MinScore";
+    public override List<Player> FinalWinner(int[] scores, List<(Player player, List<Token> hand)> players)
     {
-        var result = new List<IPlayer>();
+        var result = new List<Player>();
 
         int score = scores.Min();
 
@@ -62,10 +64,10 @@ public class MinScore : WinCondition
 
 public class MaxScore : WinCondition
 {
-
-    public override List<IPlayer> FinalWinner(int[] scores, List<(IPlayer player, List<Token> hand)> players)
+    public override string Description => "MaxScore";
+    public override List<Player> FinalWinner(int[] scores, List<(Player player, List<Token> hand)> players)
     {
-        var result = new List<IPlayer>();
+        var result = new List<Player>();
 
         int score = scores.Min();
 
@@ -83,15 +85,16 @@ public class MaxScore : WinCondition
 
 public class Specificscore : WinCondition
 {
+    public override string Description => "Specificscore";
     int score { get; set; }
     public Specificscore(int score)
     {
         this.score = score;
     }
 
-    public override List<IPlayer> FinalWinner(int[] scores, List<(IPlayer player, List<Token> hand)> players)
+    public override List<Player> FinalWinner(int[] scores, List<(Player player, List<Token> hand)> players)
     {
-        var result = new List<IPlayer>();
+        var result = new List<Player>();
 
         int score = scores.Min();
 
@@ -109,38 +112,41 @@ public class Specificscore : WinCondition
 
 #region  Champion
 
-public class WinChampion : IWinCondition<Game, (Game, IPlayer)>
+public class WinChampion : IWinCondition<Game, (Game, Player)>
 {//En total de ganadas 
 
     public double Porcent { get; protected set; }
-    public List<WIPlayer<IPlayer>> players { get; protected set; }
+    public List<WPlayer<Player>> players { get; protected set; }
     public List<int> cantwins { get; protected set; }
+
+    public string Description => " Champion Win Condition Jugde";
+
     public WinChampion(double porcentWins)
     {
-        this.players = new List<WIPlayer<IPlayer>>() { };
+        this.players = new List<WPlayer<Player>>() { };
         this.cantwins = new List<int>() { };
         this.Porcent = porcentWins;
     }
-    public List<IPlayer> Winner(List<Game> games, IGetScore<(Game, IPlayer)> howtogetscore)
+    public List<Player> Winner(List<Game> games, IGetScore<(Game, Player)> howtogetscore)
     {                                              ///Agregar una que utiize esta 
-        List<IPlayer> winners = new List<IPlayer>() { };
+        List<Player> winners = new List<Player>() { };
         foreach (var game in games)
         {
             winners = game.Winner();
 
             for (int i = 0; i < winners.Count; i++)
             {
-                WIPlayer<IPlayer> temp = new WIPlayer<IPlayer>(winners[i], 1);
+                WPlayer<Player> temp = new WPlayer<Player>(winners[i], 1);
                 if (!players.Contains(temp)) { players.Add(temp); }
                 else { int x = players.IndexOf(temp); players[x].AddScore(temp.Puntuation); }
             }
         }
-        players.Sort(new WIPlayer_Comparer());
+        players.Sort(new WPlayer_Comparer());
 
 
 
 
-        List<IPlayer> list = new List<IPlayer>() { };
+        List<Player> list = new List<Player>() { };
         for (int i = 0; i < players.Count; i++)
         {
             list.Add(players[i].player);
@@ -153,12 +159,12 @@ public class WinChampion : IWinCondition<Game, (Game, IPlayer)>
 
 
 
-    public class WIPlayer<T> : IEquatable<WIPlayer<T>> where T : IEquatable<T>
+    public class WPlayer<T> : IEquatable<WPlayer<T>> where T : IEquatable<T>
     {
         public virtual T player { get; protected set; }
         public virtual int Puntuation { get; protected set; }
 
-        public WIPlayer(T player, int Puntuation)
+        public WPlayer(T player, int Puntuation)
         {
             this.player = player;
             this.Puntuation = Puntuation;
@@ -169,7 +175,7 @@ public class WinChampion : IWinCondition<Game, (Game, IPlayer)>
         {
             this.Puntuation += score;
         }
-        public virtual bool Equals(WIPlayer<T>? other)
+        public virtual bool Equals(WPlayer<T>? other)
         {
             if (other == null || this == null) { return false; }
             return this.player.Equals(other.player);
@@ -178,9 +184,9 @@ public class WinChampion : IWinCondition<Game, (Game, IPlayer)>
 
 
 
-    protected internal class WIPlayer_Comparer : IComparer<WIPlayer<IPlayer>>
+    protected internal class WPlayer_Comparer : IComparer<WPlayer<Player>>
     {
-        public int Compare(WIPlayer<IPlayer>? x, WIPlayer<IPlayer>? y)
+        public int Compare(WPlayer<Player>? x, WPlayer<Player>? y)
         {
             if (x == null || y == null) { throw new NullReferenceException("null"); }
             if (x?.Puntuation < y?.Puntuation)

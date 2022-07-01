@@ -152,7 +152,7 @@ public class NormalInt : ITokenizable
     public NormalInt(int value) { this.ComponentValue = value; }
     public int CompareTo(ITokenizable? obj)
     {
-        return this.ComponentValue.CompareTo(obj.ComponentValue);
+        return this.ComponentValue.CompareTo(obj?.ComponentValue);
     }
 
     public string Paint()
@@ -306,8 +306,9 @@ public class Token : IEquatable<Token>, ICloneable<Token>
         return true;
     }
 
-    public bool SwapToken(List<(int, int)> change)
+    public bool SwapToken(HashSet<(int, int)> change)
     {
+
         bool x = false;
         foreach (var item in change)
         {
@@ -411,8 +412,11 @@ public class IEquatablePorPedazos : IEqualityComparer<Token>
 {
     public bool Equals(Token? x, Token? y)
     {
-        List<ITokenizable> list = (x.Component.Count > y.Component.Count) ? x.Component : y.Component;
-        foreach (var (xComponent, yComponent) in x.Component.Zip(y.Component))
+        if (x == null || y == null) return false;
+
+        List<ITokenizable> list = (x!.Component.Count > y!.Component.Count) ? x?.Component : y.Component;
+
+        foreach (var (xComponent, yComponent) in x?.Component.Zip(y?.Component))
         {
             if (!xComponent.Equals(yComponent)) return false;
         }

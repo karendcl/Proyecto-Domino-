@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Game;
 
-public class Player : IPlayer
+public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<Player>, IDescriptible
 {
     public virtual List<Token> hand { get; protected set; } = new List<Token>() { };
     public virtual int Id { get; }
@@ -10,21 +10,22 @@ public class Player : IPlayer
     public virtual IPlayerStrategy strategy { get { return ChooseStrategy(); } }
 
     public virtual List<IPlayerStrategy> strategias { get; protected set; } = new List<IPlayerStrategy>() { };
+
+    public virtual string Description => "Computer Player";
+
     public Player(int id)
     {
         this.Id = id;
         this.TotalScore = 0;
     }
 
-    public void AddStrategy(IPlayerStrategy strategy)
+    public virtual void AddStrategy(IPlayerStrategy strategy)
     {
         this.strategias.Add(strategy);
 
     }
 
-
-
-    public void AddHand(List<Token> Tokens)
+    public virtual void AddHand(List<Token> Tokens)
     {
         this.hand = Tokens;
     }
@@ -41,7 +42,7 @@ public class Player : IPlayer
         return a;
     }
 
-    protected List<Token> PossiblePlays(WatchPlayer watchPlayer)// Plays posibles
+    protected virtual List<Token> PossiblePlays(WatchPlayer watchPlayer)// Plays posibles
     {
 
         var CanPlay = new List<Token>();
@@ -71,7 +72,7 @@ public class Player : IPlayer
         return posibles[index];
     }
 
-    public IPlayerStrategy ChooseStrategy()
+    protected virtual IPlayerStrategy ChooseStrategy()
     {
 
         int count = this.strategias.Count;
@@ -80,15 +81,14 @@ public class Player : IPlayer
         int index = random.Next(0, count - 1);
         return this.strategias[index];
     }
-
     public virtual int ChooseSide(ChooseStrategyWrapped choose, WatchPlayer watchPlayer)
     {
         return strategy.ChooseSide(choose, watchPlayer);
     }
 
-    public virtual IPlayer Clone()
+    public virtual Player Clone()
     {
-        IPlayer temp = new Player(this.Id);
+        Player temp = new Player(this.Id);
         foreach (var item in strategias)
         {
             temp.AddStrategy(item);
@@ -96,26 +96,18 @@ public class Player : IPlayer
         return temp;
     }
 
-    public bool Equals(IPlayer? other)
+    public virtual bool Equals(Player? other)
     {
         if (other is null) return false;
         return (this.Id == other.Id);
     }
 
-    public bool Equals(Player? other)
-    {
-        if (other is null) return false;
-
-        return (this.Id == other.Id && this.strategy == other.strategy);
-    }
 
 
-    public int Evaluate(Token token, List<Token> hand, WatchPlayer watch)
-    {
-        return this.strategy.Evaluate(token, hand, watch);
-    }
 
-    public bool Equals(IPlayer? x, IPlayer? y)
+
+
+    public virtual bool Equals(Player? x, Player? y)
     {
         if (x == null || y == null) return false;
         if (x.Id == y.Id) return true;
@@ -123,53 +115,36 @@ public class Player : IPlayer
         return false;
     }
 
-    public int GetHashCode([DisallowNull] IPlayer obj)
+    public virtual int GetHashCode([DisallowNull] Player obj)
     {
         return obj.GetHashCode();
     }
+
+
 }
 
-/*
-public class HumanPlayer : Player,IJugeable
+public class CorruptionPlayer : Player
 {
-    public HumanPlayer(List<Token> Tokens, int id, IPlayerStrategy strategy) : base(Tokens, id, strategy)
-    {
-    }
+    public CorruptionPlayer(int id) : base(id) { }
 
-    public bool OutRange(int index)
-    {
-        return index < -1 || index >= hand.Count;
-    }
+    public override string Description => " Computer corruption player";
 
     public override Token BestPlay(WatchPlayer watchPlayer)
     {
-        int ToPlay = -2;
+        int[] scores = new int[this.hand.Count];
 
-        while (OutRange(ToPlay))
+        for (int i = 0; i < scores.Length; i++)
         {
-            Console.WriteLine("Escriba el indice de la Token a jugar. Comenzando desde 0. Si no lleva escriba -1");
-            ToPlay = int.Parse(Console.ReadLine()!);
-            if (ToPlay == -1) return null!;
-            ChooseStrategyWrapped choose = watchPlayer.validPlay.ValidPlay(watchPlayer.board, this.hand[ToPlay]);
-            while (!choose.CanMatch)
-            {
-                Console.WriteLine("No haga trampa! Escriba otra Token");
-                ToPlay = int.Parse(Console.ReadLine()!);
-            }
+            scores[i] += strategy.Evaluate(this.hand[i], hand, watchPlayer);
         }
-        return this.hand[ToPlay];
+
+        int index = Array.IndexOf(scores, scores.Max());
+        return this.hand[index];
+
     }
 
-    public override int ChooseSide(ChooseStrategyWrapped choose, WatchPlayer watchPlayer)//Modificar
-    {
-        Console.WriteLine("Escriba 0 para jugar alante y 1 para jugar atras");
 
-        return int.Parse(Console.ReadLine()!);
-    }
-
-    public override IPlayer Clone()
-    {
-        return new HumanPlayer(this.hand, this.Id, this.strategy);
-    }
 }
-*/
+
+
+

@@ -1,6 +1,6 @@
 namespace Game;
 
-public class Board : IBoard
+public class Board
 {
     public List<Token> board { get; protected set; }
 
@@ -46,11 +46,11 @@ public class Board : IBoard
         else { this.board.Add(token); }
     }
 
-    public IBoard Clone()
+    public Board Clone()
     {
         return new Board();
     }
-    public IBoard Clone(List<Token> CopyTokens)
+    public Board Clone(List<Token> CopyTokens)
     {
         this.board = CopyTokens;
         return this;

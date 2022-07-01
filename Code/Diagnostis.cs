@@ -2,7 +2,7 @@ namespace Game;
 
 public class Diagnostics
 {
-    public bool TestGame(IBoard board)
+    public bool TestGame(Board board)
     {
         if (board.board.Count < 1) { return true; }
         for (int i = 0; i < board.board.Count; i++)

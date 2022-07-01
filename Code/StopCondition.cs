@@ -1,17 +1,17 @@
 
 namespace Game;
 
-public class Classic : IStopGame<IPlayer, Token>
+public class Classic : IStopGame<Player, Token>
 {
 
 
-    public bool MeetsCriteria(IPlayer player, IGetScore<Token> score)
+    public bool MeetsCriteria(Player player, IGetScore<Token> score)
     {
         return (player.hand.Count == 0) ? true : false;
     }
 }
 
-public class CertainScore : IStopGame<IPlayer, Token>
+public class CertainScore : IStopGame<Player, Token>
 {
     public int Score { get; set; }
 
@@ -20,7 +20,7 @@ public class CertainScore : IStopGame<IPlayer, Token>
         this.Score = score;
     }
 
-    public bool MeetsCriteria(IPlayer player, IGetScore<Token> howtogetscore)
+    public bool MeetsCriteria(Player player, IGetScore<Token> howtogetscore)
     {
         int result = 0;
 
@@ -36,10 +36,10 @@ public class CertainScore : IStopGame<IPlayer, Token>
 #region  Champion
 //Champion
 
-public class StopChampion : IStopGame<Game, (Game, IPlayer)>
+public class StopChampion : IStopGame<Game, (Game, Player)>
 {
     protected int Point { get; set; }
-    public List<IPlayer> Players { get; set; }
+    public List<Player> Players { get; set; }
     public List<int> acc { get; set; }
 
     public bool CheckCriteria()
@@ -48,13 +48,13 @@ public class StopChampion : IStopGame<Game, (Game, IPlayer)>
     }
     public StopChampion(int porcentOfpoints = -1)//No lleve acumulado mas puntos que x cantidad
     {
-        this.Players = new List<IPlayer>() { };
+        this.Players = new List<Player>() { };
         this.Point = porcentOfpoints;
         this.acc = new List<int>() { };
     }
     //Cada juego se comprueba que no exceda de puntos
     //Se asume que estan todos los jugadores desde un inicio en caso contrario se añade 
-    public bool MeetsCriteria(Game game, IGetScore<(Game, IPlayer)> howtogetscore)
+    public bool MeetsCriteria(Game game, IGetScore<(Game, Player)> howtogetscore)
     {
         if (CheckCriteria()) return false;
         this.score(game, howtogetscore);
@@ -62,9 +62,9 @@ public class StopChampion : IStopGame<Game, (Game, IPlayer)>
         return false;
     }
 
-    protected void score(Game game, IGetScore<(Game, IPlayer)> howtogetscore)
+    protected void score(Game game, IGetScore<(Game, Player)> howtogetscore)
     {
-        List<IPlayer> temp = game.player!;
+        List<Player> temp = game.player!;
         foreach (var item in temp)
         {
             int cant = howtogetscore.Score((game, item));

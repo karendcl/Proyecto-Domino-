@@ -2,6 +2,8 @@ namespace Game;
 
 public class RandomStrategy : IPlayerStrategy
 {
+    public string Description => "Random Strategy";
+
     public int Evaluate(Token token, List<Token> hand, WatchPlayer watchPlayer)
     {
         var r = new Random();
@@ -19,6 +21,8 @@ public class RandomStrategy : IPlayerStrategy
 
 public class BGStrategy : IPlayerStrategy
 {
+    public string Description => "BotaGorda Strategy";
+
     public int Evaluate(Token token, List<Token> hand, WatchPlayer watchPlayer)
     {
         return watchPlayer.howtogetscore.Score(token);
@@ -33,6 +37,8 @@ public class BGStrategy : IPlayerStrategy
 
 public class SemiSmart : IPlayerStrategy
 {
+    public string Description => "SemiSmart Strategy";
+
     public int Evaluate(Token token, List<Token> hand, WatchPlayer watch)
     {
         int valor = 0;
@@ -52,7 +58,7 @@ public class SemiSmart : IPlayerStrategy
 
     public int ChooseSide(ChooseStrategyWrapped choose, WatchPlayer watch)
     {
-        IBoard board = watch.board;
+        Board board = watch.board;
         if (board.board is null || board.board.Count == 0) return 0;
 
         return (board.board.First().First.ComponentValue > board.board.Last().Last.ComponentValue/*.Part2*/) ? 1 : 0;

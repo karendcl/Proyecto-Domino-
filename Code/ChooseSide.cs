@@ -5,11 +5,11 @@ public class ChooseStrategyWrapped : IEquatable<ChooseStrategyWrapped>
     public bool CanMatch { get; protected set; } = false;
 
     public bool FirstPlay { get; protected set; } = false;
-    public IBoard board { get; protected set; }
+    public Board board { get; protected set; }
     public Token token { get; protected set; }
     public List<ChooseSideWrapped> side { get; protected set; }
 
-    public ChooseStrategyWrapped(IBoard board, Token token, bool FirstPlay = false)
+    public ChooseStrategyWrapped(Board board, Token token, bool FirstPlay = false)
     {
         this.FirstPlay = FirstPlay;
         this.CanMatch = FirstPlay;

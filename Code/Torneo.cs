@@ -18,10 +18,10 @@ public class Championship
     protected bool HaveAWinner { get; set; }
     protected List<Game> FinishGames = new List<Game>() { };
     protected Stack<GameStatus> GamesStatus = new Stack<GameStatus>() { };
-    protected List<IPlayer> Winners { get { return this.ChampionWinners(); } }
+    protected List<Player> Winners { get { return this.ChampionWinners(); } }
     public bool ItsChampionOver { get; protected set; }
     protected List<PlayerStrats> playerStrats { get; set; } = new List<PlayerStrats>() { };
-    protected List<IPlayer> AllPlayers { get { return GlobalPlayers.AllPlayers; } }
+    protected List<Player> AllPlayers { get { return GlobalPlayers.AllPlayers; } }
 
 
     #endregion
@@ -32,6 +32,7 @@ public class Championship
         this.Games = games;
         this.GlobalPlayers = players;
         this.judge = judge;
+
     }
 
     public void Run()
@@ -41,7 +42,7 @@ public class Championship
         {
             Game game = Games[i];
             game.GameStatus += PrintGames;
-            List<IPlayer> players = GlobalPlayers.GetNextTeam();
+            List<Player> players = GlobalPlayers.GetNextTeam();
 
             GameStatus gameStatus = game.PlayAGame(new Board(), players);
 
@@ -80,7 +81,7 @@ public class Championship
 
     protected ChampionStatus CreateAChampionStatus()
     {
-        List<IPlayer> AllPlayer = this.GlobalPlayers.AllPlayers;
+        List<Player> AllPlayer = this.GlobalPlayers.AllPlayers;
 
         ChampionStatus championStatus = new ChampionStatus(this.GamesStatus, this.playerStrats, HaveAWinner, this.Winners, this.ItsChampionOver);
         return championStatus;
@@ -120,12 +121,8 @@ public class Championship
 
 
 
-    protected List<IPlayer> ChampionWinners() => this.judge.Winners(this.FinishGames.ToList<Game>());
+    protected List<Player> ChampionWinners() => this.judge.Winners(this.FinishGames.ToList<Game>());
 
-
-
-
-    //  observer.WriteStats(game);
     protected bool ContinueGames() => Choose.Invoke(("Desea seguir jugando?, si / no"));
 
     protected void ChampionPrint()

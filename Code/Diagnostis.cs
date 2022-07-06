@@ -1,5 +1,5 @@
 namespace Game;
-
+/*
 public class Diagnostics
 {
     public bool TestGame(Board board)
@@ -9,8 +9,8 @@ public class Diagnostics
         {
             if (i > 0)
             {
-                Token anterior = board.board[i - 1];
-                Token c = board.board[i];
+                IToken anterior = board.board[i - 1];
+                IToken c = board.board[i];
 
                 if (anterior[1] != c[0])
                 {
@@ -32,4 +32,4 @@ public class Diagnostics
         return true;
     }
 }
-
+*/

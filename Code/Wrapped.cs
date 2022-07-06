@@ -1,6 +1,6 @@
 namespace Game;
 //Esta clase se utiliza para guardar la mano del jugador
-public class GamePlayerHand<TToken> : ICloneable<GamePlayerHand<TToken>>, IEquatable<GamePlayerHand<TToken>> where TToken : Token
+public class GamePlayerHand<TToken> : ICloneable<GamePlayerHand<TToken>>, IEquatable<GamePlayerHand<TToken>> where TToken : IToken
 {
 
     public int PlayerId { get; protected set; }
@@ -8,21 +8,21 @@ public class GamePlayerHand<TToken> : ICloneable<GamePlayerHand<TToken>>, IEquat
     public List<TToken> hand { get; protected set; }//Mano
     public Stack<TToken> FichasJugadas { get; protected set; } = new Stack<TToken>() { };//Fichas jugadas
 
-    public bool ContainsToken(TToken token)
+    public bool ContainsToken(TToken itoken)
     {
-        return hand.Contains(token);
+        return hand.Contains(itoken);
     }
 
-    public GamePlayerHand(int PlayerId, List<TToken> token)
+    public GamePlayerHand(int PlayerId, List<TToken> itoken)
     {
-        this.hand = token;
+        this.hand = itoken;
         this.PlayerId = PlayerId;
     }
 
-    public void AddLastPlay(TToken token)
+    public void AddLastPlay(TToken itoken)
     {
-        FichasJugadas.Push(token);
-        hand.Remove(token);
+        FichasJugadas.Push(itoken);
+        hand.Remove(itoken);
     }
 
     public bool LastPlay(out TToken temp)
@@ -75,7 +75,7 @@ public class PlayersCoach
 
     public void AddPlayers(int idGame, List<Player> players)
     {
-        if (players.Count > 0) this.players.Add(players);
+        this.players.Add(players);
     }
 
 
@@ -83,7 +83,9 @@ public class PlayersCoach
 
     public bool CloneLastGame(int id)
     {
-        List<Player> last = ClonePlayers(players.Last());
+
+        //fIX 
+        List<Player> last = ClonePlayers(this.players[id]);
         if (last == null) return false;
         this.players.Add(last);
         return true;
@@ -94,12 +96,12 @@ public class PlayersCoach
         List<Player> temp = new List<Player>() { };
         foreach (var item in list)
         {
-            temp.Add(item);
+            temp.Add(item.Clone());
         }
         return temp;
     }
 
-    public List<Player> GetNextTeam()
+    public List<Player> GetNextPlayers()
     {
         if (this.players.Count < 1) return null!;
         List<Player> temp = (ClonePlayers(this.players.First()));
@@ -137,7 +139,7 @@ public class ChampionStatus //Esta clase muestra en pantalla todos los sucesos d
         this.Winners = Winners;
         this.playerStrats = Players;
         this.FinishChampion = FinishChampion;
-        this.gameStatus = new GameStatus(new List<PlayerStrats>() { }, new List<GamePlayerHand<Token>>() { }, new Board());
+        this.gameStatus = new GameStatus(new List<PlayerStrats>() { }, new List<GamePlayerHand<IToken>>() { }, new Board());
     }
 
     public void AddGameStatus(GameStatus Know)
@@ -161,12 +163,12 @@ public class GameStatus //Actualiza en la pantalla todo lo que ocurre en cada ju
     public List<Player> winners { get; protected set; } = new List<Player>() { };
     public List<PlayerStrats> playerStrats { get; protected set; }
     public bool ItsAFinishGame { get; protected set; }
-    public List<GamePlayerHand<Token>> Hands { get; protected set; }
+    public List<GamePlayerHand<IToken>> Hands { get; protected set; }
     public Board board { get; protected set; }
     public Player actualPlayer { get { return SetActualPlayer(); } }
-    public GamePlayerHand<Token> PlayerActualHand { get { return SetActualPlayerHand(); } }
+    public GamePlayerHand<IToken> PlayerActualHand { get { return SetActualPlayerHand(); } }
 
-    public GameStatus(List<PlayerStrats> playerStrats, List<GamePlayerHand<Token>> hands, Board board, bool ItsAFinishGame = false)
+    public GameStatus(List<PlayerStrats> playerStrats, List<GamePlayerHand<IToken>> hands, Board board, bool ItsAFinishGame = false)
     {
         this.board = board;
         this.Hands = hands;
@@ -176,11 +178,11 @@ public class GameStatus //Actualiza en la pantalla todo lo que ocurre en cada ju
     protected Player SetActualPlayer()
     {
         int count = this.playerStrats.Count;
-        if (count < 0) return null!;
+        if (count < 1) return null!;
         return this.playerStrats[count - 1].player.Clone();
     }
 
-    protected GamePlayerHand<Token> SetActualPlayerHand()
+    protected GamePlayerHand<IToken> SetActualPlayerHand()
     {
         int count = this.Hands.Count;
         if (count < 0) return null!;
@@ -229,15 +231,21 @@ public class PlayerStrats : IEquatable<PlayerStrats> //Da la informacion de cada
 
 
 
-public class WatchPlayer //Tiene toda la informacion que es necesaria por un jugador para poder seleccionar un Token
+public class WatchPlayer //Tiene toda la informacion que es necesaria por un jugador para poder seleccionar un IToken
 {
-    public IGetScore<Token> howtogetscore { get; protected set; }
-    public IStopGame<Player, Token> stopCondition { get; protected set; }
-    public IValidPlay<Board, Token, ChooseStrategyWrapped> validPlay { get; protected set; }
-    public IWinCondition<(Player player, List<Token> hand), Token> winCondition { get; protected set; }
+    public IGetScore<IToken> howtogetscore { get; protected set; }
+    public IStopGame<Player, IToken> stopCondition { get; protected set; }
+    public IValidPlay<Board, IToken, ChooseStrategyWrapped> validPlay { get; protected set; }
+    public IWinCondition<(Player player, List<IToken> hand), IToken> winCondition { get; protected set; }
+
+
     public Board board { get; protected set; }
+
+
+
+
     //Despues hacer una interfaz tipo Ipasable 
-    public WatchPlayer(IGetScore<Token> howtogetscore, IStopGame<Player, Token> stopCondition, IValidPlay<Board, Token, ChooseStrategyWrapped> validPlay, IWinCondition<(Player player, List<Token> hand), Token> winCondition, Board board)
+    public WatchPlayer(IGetScore<IToken> howtogetscore, IStopGame<Player, IToken> stopCondition, IValidPlay<Board, IToken, ChooseStrategyWrapped> validPlay, IWinCondition<(Player player, List<IToken> hand), IToken> winCondition, Board board)
     {
         this.howtogetscore = howtogetscore;
         this.stopCondition = stopCondition;
@@ -247,5 +255,23 @@ public class WatchPlayer //Tiene toda la informacion que es necesaria por un jug
     }
 
 }
+
+
+/*
+public static class Extensor
+{
+    public static List<T> Clone(this List<T> list)
+    {
+        List<T> temp = new List<T>(list.Count);
+
+        foreach (var item in temp)
+        {
+            temp.Add(item.Clone());
+        }
+        return temp;
+    }
+
+}
+*/
 
 

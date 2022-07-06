@@ -1,17 +1,17 @@
 
 namespace Game;
 
-public class Classic : IStopGame<Player, Token>
+public class Classic : IStopGame<Player, IToken>
 {
 
 
-    public bool MeetsCriteria(Player player, IGetScore<Token> score)
+    public bool MeetsCriteria(Player player, IGetScore<IToken> score)
     {
         return (player.hand.Count == 0) ? true : false;
     }
 }
 
-public class CertainScore : IStopGame<Player, Token>
+public class CertainScore : IStopGame<Player, IToken>
 {
     public int Score { get; set; }
 
@@ -20,13 +20,13 @@ public class CertainScore : IStopGame<Player, Token>
         this.Score = score;
     }
 
-    public bool MeetsCriteria(Player player, IGetScore<Token> howtogetscore)
+    public bool MeetsCriteria(Player player, IGetScore<IToken> howtogetscore)
     {
         int result = 0;
 
-        foreach (var token in player.hand)
+        foreach (var itoken in player.hand)
         {
-            result += howtogetscore.Score(token);
+            result += howtogetscore.Score(itoken);
         }
 
         return (result == Score);
@@ -36,7 +36,7 @@ public class CertainScore : IStopGame<Player, Token>
 #region  Champion
 //Champion
 
-public class StopChampion : IStopGame<Game, (Game, Player)>
+public class StopChampionPerPoints : IStopGame<List<Game>, (Game, Player)>
 {
     protected int Point { get; set; }
     public List<Player> Players { get; set; }
@@ -46,7 +46,7 @@ public class StopChampion : IStopGame<Game, (Game, Player)>
     {
         return this.Point < 0 ? true : false;
     }
-    public StopChampion(int porcentOfpoints = -1)//No lleve acumulado mas puntos que x cantidad
+    public StopChampionPerPoints(int porcentOfpoints = -1)//No lleve acumulado mas puntos que x cantidad
     {
         this.Players = new List<Player>() { };
         this.Point = porcentOfpoints;
@@ -54,10 +54,16 @@ public class StopChampion : IStopGame<Game, (Game, Player)>
     }
     //Cada juego se comprueba que no exceda de puntos
     //Se asume que estan todos los jugadores desde un inicio en caso contrario se añade 
-    public bool MeetsCriteria(Game game, IGetScore<(Game, Player)> howtogetscore)
+    public bool MeetsCriteria(List<Game> games, IGetScore<(Game, Player)> howtogetscore)
     {
         if (CheckCriteria()) return false;
-        this.score(game, howtogetscore);
+
+        foreach (var game in games)
+        {
+            this.score(game, howtogetscore);
+        }
+
+        if (Point == -1) return true;
         foreach (var item in acc) { if (item > Point) { return true; } }
         return false;
     }
@@ -74,5 +80,25 @@ public class StopChampion : IStopGame<Game, (Game, Player)>
     }
 
 
+}
+
+
+public class StopChampionPerHaveAWinner : IStopGame<List<Game>, (Game, Player)>
+{
+    protected IWinCondition<Game, (Game, Player)> winCondition { get; set; }
+    protected int CantGanadores { get; set; } = 3;
+    public StopChampionPerHaveAWinner(IWinCondition<Game, (Game, Player)> winCondition, int CantGanadores)
+    {
+        this.winCondition = winCondition;
+        if (CantGanadores > 0) { this.CantGanadores = CantGanadores; }
+
+    }
+    public bool MeetsCriteria(List<Game> criterio, IGetScore<(Game, Player)> howtogetscore)
+    {
+
+        List<Player> players = this.winCondition.Winner(criterio, howtogetscore);
+        if (players.Count > CantGanadores) return true;
+        return false;
+    }
 }
 #endregion

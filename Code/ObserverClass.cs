@@ -4,9 +4,10 @@ namespace Game;
 
 public class Events
 {
+
     public event Func<string, int>? Asksmint;
 
-    public event Predicate<string>? BooleanAsk;
+    public event Predicate<Orders>? BooleanAsk;
 
     public event Action<ChampionStatus>? Status;
 
@@ -14,7 +15,7 @@ public class Events
 
     public int IntermediarioInt(string msg) => Asksmint(msg);
 
-    public bool IntermediarioBool(string msg) => BooleanAsk(msg);
+    public bool IntermediarioBool(Orders orders) => BooleanAsk(orders);
 
 
 
@@ -36,9 +37,34 @@ public class ChampionStart
     int MaxDouble = 0;
     public event Func<string, int>? Asksint;
 
-    public event Func<string, bool>? BooleanAsk;
-    // public event Action<ChampionStatus>? PrintChampionStatus;
+    public event Action<ChampionStatus>? PrintChampionStatus;
+    public event Predicate<string>? BooleanAsk;
 
+    public bool ChooseBool(string msg)
+    {
+        return this.BooleanAsk(msg);
+
+
+    }
+
+    public bool ChooseEnum(Orders orders)
+    {
+        System.Console.WriteLine(orders);
+        bool x;
+
+        bool.TryParse(Console.ReadLine()!, out x);
+        return x;
+    }
+
+    protected int ChooseInt(string msg, int min, int max)
+    {
+        int x = -1;
+        do
+        {
+            x = this.Asksint(msg);
+        } while (x < min && x > max);
+        return x;
+    }
 
     public bool Run()
     {
@@ -47,13 +73,19 @@ public class ChampionStart
 
         Championship champion = this.CreateAChampion();
         champion.status += Intermediario;
-        champion.Choose += IntermediarioBool;
-        //  PrintChampionStatus += this.Intermediario;
+        champion.CanContinue += IntermediarioEnum;
+        PrintChampionStatus += this.Intermediario;
         champion.Run();
         return true;
     }
 
     protected void Intermediario(ChampionStatus status) => obs.PrintChampionStatus(status);
+
+    protected bool IntermediarioEnum(Orders orders)
+    {
+        Thread.Sleep(500);
+        return true;
+    }
     protected bool IntermediarioBool(string msg) => obs.BoolResponses(msg);
     protected int IntermediarioInt(string msg) => obs.IntResponses(msg);
 
@@ -73,16 +105,26 @@ public class ChampionStart
     protected ChampionJudge ChooseChampionJudge()
 
     {
-        IStopGame<Game, (Game, Player)> stop = ChooseStopChampion();
+
         IWinCondition<Game, (Game, Player)> win = ChooseWinCondition();
-        IValidPlay<List<GameStatus>, Player, bool> valid = ChooseValidChampion();
+        IStopGame<List<Game>, (Game, Player)> stop = ChooseStopChampion(win);
+        IValidPlay<List<Game>, Player, bool> valid = ChooseValidChampion();
         IGetScore<(Game, Player)> score = ChooseChampionGetScore();
-        return new ChampionJudge(stop, win, valid, score);
+
+        string NormalJugde = "1- Juez Honesto";
+        string CorruptionChampionJugde = "2- Juez Corrupto";
+        string msg = NormalJugde + "\n" + CorruptionChampionJugde;
+        int choose = -1;
+        choose = ChooseInt(msg, 0, 3);
+        ChampionJudge championJudge = new ChampionJudge(stop, win, valid, score);
+        if (choose == 2) championJudge = new CorruptionChampionJugde(stop, win, valid, score);
+
+        return championJudge;
     }
 
 
 
-    protected IValidPlay<List<GameStatus>, Player, bool> ChooseValidChampion()
+    protected IValidPlay<List<Game>, Player, bool> ChooseValidChampion()
     {
         //1 Forma por puntuacion especifica de % de derrortas 
         string Porcent = "Por un % de veces que se queda por debajo del 50% en la lista ";
@@ -120,7 +162,7 @@ public class ChampionStart
         int x = -1;
         do
         {
-            x = this.Asksint("Que porcentaje desea que se acabe el torneo");
+            x = this.Asksint("Que porcentaje de partidas desea para que un jugador gane");
         } while (x < 1);
 
         return new WinChampion(x);
@@ -131,16 +173,28 @@ public class ChampionStart
         return new ScoreChampionNormal();
     }
 
-    protected IStopGame<Game, (Game, Player)> ChooseStopChampion()
+    protected IStopGame<List<Game>, (Game, Player)> ChooseStopChampion(IWinCondition<Game, (Game, Player)> winCondition)
     {
         int x = -1;
-        if (this.BooleanAsk("Desea que se acabe el campeonato puntuación máxima? "))
+        string y = " Elija el criterio de finalizacion del juego";
+        string a = "1.Cuando un jugador acumule una cantidad de puntos";
+        string b = "2. Cuando Existan n Cant de ganadores del Torneo";
+        string msg = y + "\n" + a + "\n" + b;
+
+
+        x = ChooseInt(msg, 0, 3);
+        IStopGame<List<Game>, (Game, Player)> stop = new StopChampionPerPoints(-1);
+        if (x == 1)
         {
-            x = this.Asksint("Escriba la cantidad de puntos maximos a tener por un jugador");
-            //En caso de -1 no hay limite
-            return new StopChampion(x);
+            int s = ChooseInt("Diga la puntuacion", 0, 10000);
+            stop = new StopChampionPerPoints(s);
         }
-        return new StopChampion(x);
+        else
+        {
+            int s = ChooseInt("Diga la cantidad de ganadores maximos", 0, this.cantPlayers);
+            stop = new StopChampionPerHaveAWinner(winCondition, s);
+        }
+        return stop;
 
     }
     protected int CantPartidas()
@@ -182,7 +236,7 @@ public class ChampionStart
 
         do
         {
-            a = this.Asksint("Elija la estrategia para el Player {0}. \n \n ➤ Escriba 0 para un jugador semi inteligente. \n ➤ Escriba 1 para jugador botagorda. \n ➤ Escriba 2 para jugador random. " + id.ToString());
+            a = this.Asksint("$Elija la estrategia para el Player {id.}. \n \n ➤ Escriba 0 para un jugador semi inteligente. \n ➤ Escriba 1 para jugador botagorda. \n ➤ Escriba 2 para jugador random. " + id.ToString());
         } while (a > 2 || a < 0);
 
         switch (a)
@@ -208,9 +262,9 @@ public class ChampionStart
 
     #region  Create Game
     //Elegir tipo de juego
-    protected IStopGame<Player, Token> ChooseStopGame(bool ConfGame = false)
+    protected IStopGame<Player, IToken> ChooseStopGame(bool ConfGame = false)
     {
-        IStopGame<Player, Token> stopcondition = new Classic();
+        IStopGame<Player, IToken> stopcondition = new Classic();
 
         int stop = 0;
         if (ConfGame)
@@ -245,9 +299,9 @@ public class ChampionStart
         return stopcondition;
     }
 
-    public IGetScore<Token> ChooseGetScore(bool ConfGame = false)
+    public IGetScore<IToken> ChooseGetScore(bool ConfGame = false)
     {
-        IGetScore<Token> HowTogetScore = new ClassicScore();
+        IGetScore<IToken> HowTogetScore = new ClassicScore();
 
         int score = 0;
 
@@ -277,9 +331,9 @@ public class ChampionStart
         return HowTogetScore;
     }
 
-    public IWinCondition<(Player player, List<Token> hand), Token> ChooseWinCondition(bool ConfGame = false)
+    public IWinCondition<(Player player, List<IToken> hand), IToken> ChooseWinCondition(bool ConfGame = false)
     {
-        IWinCondition<(Player player, List<Token> hand), Token> winCondition = new MinScore();
+        IWinCondition<(Player player, List<IToken> hand), IToken> winCondition = new MinScore();
 
         int winConditionn = 0;
         if (!ConfGame)
@@ -311,9 +365,9 @@ public class ChampionStart
         return winCondition;
     }
 
-    public IValidPlay<Board, Token, ChooseStrategyWrapped> ChooseValidPlay(IEqualityComparer<Token> equalityComparer, IComparer<Token> Comparer, bool ConfGame = false)
+    public IValidPlay<Board, IToken, ChooseStrategyWrapped> ChooseValidPlay(IEqualityComparer<IToken> equalityComparer, IComparer<IToken> Comparer, bool ConfGame = false)
     {
-        IValidPlay<Board, Token, ChooseStrategyWrapped> validPlay = new ClassicValidPlay(equalityComparer, Comparer);
+        IValidPlay<Board, IToken, ChooseStrategyWrapped> validPlay = new ClassicValidPlay(equalityComparer, Comparer);
         int val = 0;
 
         while (val < 1 || val > 3)
@@ -350,12 +404,11 @@ public class ChampionStart
     }
 
 
-    protected Judge ChooseJugde(IStopGame<Player, Token> stopcondition, IGetScore<Token> HowTogetScore, IWinCondition<(Player player, List<Token> hand), Token> winCondition, IValidPlay<Board, Token, ChooseStrategyWrapped> validPlay, bool ConfGame = false)
+    protected Judge ChooseJugde(IStopGame<Player, IToken> stopcondition, IGetScore<IToken> HowTogetScore, IWinCondition<(Player player, List<IToken> hand), IToken> winCondition, IValidPlay<Board, IToken, ChooseStrategyWrapped> validPlay, bool ConfGame = false)
     {
 
         Judge judge = new Judge(stopcondition, HowTogetScore, winCondition, validPlay);
-        bool changedirection = false;
-        if (ConfGame) { changedirection = this.BooleanAsk("Desea que cambie la direccion del juego cada vez que alguien se pase"); }
+
 
         while (!this.ValidSettings(CantTokenPerPerson, MaxDouble, cantPlayers))
         {
@@ -369,7 +422,7 @@ public class ChampionStart
         return judge;
     }
 
-    protected TokensManager ChooseATokenManager(int TokensForEach, IComparer<Token> comparer, IEqualityComparer<Token> equalityComparer)
+    protected TokensManager ChooseATokenManager(int TokensForEach, IComparer<IToken> comparer, IEqualityComparer<IToken> equalityComparer)
     {
         string ask = "Que tipo de ficha desea jugar ";
         string normalToken = " 1=>Tokens clasicos";
@@ -377,47 +430,57 @@ public class ChampionStart
         int choose = 0;
         do
         {
-            choose = this.Asksint(ask + normalToken + EnergyGenerator);
+            choose = this.Asksint(ask + normalToken + "\n" + EnergyGenerator);
         } while (choose > 2 && choose < 1);
+        List<IToken> tokens = new List<IToken>();
+        switch (choose)
+        {
+            case 1:
+                IntTokenGenerator generator = new IntTokenGenerator();
+                tokens = generator.CreateTokens(this.MaxDouble);
+                break;
+            case 2:
+                ElectricGeneratorGenerate generate = new ElectricGeneratorGenerate();
+                tokens = generate.GetToken(this.MaxDouble);
+                break;
 
-        IntTokenGenerator generator = new IntTokenGenerator();
-        List<Token> tokens = generator.CreateTokens(this.MaxDouble);
+        }
 
         return new TokensManager(TokensForEach, comparer, equalityComparer, tokens);
 
     }
 
-    protected IComparer<Token> ChooseATokenComparerCriteria()
+    protected IComparer<IToken> ChooseATokenComparerCriteria()
     {
         return new ComparerTokens();
     }
-    protected IEqualityComparer<Token> ChooseATokenEqualityCriteria()
+    protected IEqualityComparer<IToken> ChooseATokenEqualityCriteria()
     {
 
-        return new IEquatablePorPedazos();
+        return new IEquatablePorCaras();
     }
 
     protected Game ChooseAGame(bool ConfGame = false, bool ChampionPlayers = false)//Seleccionar un modo de juego
     {
         if (ConfGame) { ConfGame = true; }//Sleccionar si se quiere modo de juego normal
 
-        IStopGame<Player, Token> stopcondition = ChooseStopGame(ConfGame);
+        IStopGame<Player, IToken> stopcondition = ChooseStopGame(ConfGame);
 
-        IGetScore<Token> HowTogetScore = ChooseGetScore(ConfGame);
+        IGetScore<IToken> HowTogetScore = ChooseGetScore(ConfGame);
 
-        IWinCondition<(Player player, List<Token> hand), Token> winCondition = ChooseWinCondition(ConfGame);
+        IWinCondition<(Player player, List<IToken> hand), IToken> winCondition = ChooseWinCondition(ConfGame);
 
-        IComparer<Token> tokenComparer = ChooseATokenComparerCriteria();
+        IComparer<IToken> tokenComparer = ChooseATokenComparerCriteria();
 
-        IEqualityComparer<Token> equalityComparer = ChooseATokenEqualityCriteria();
+        IEqualityComparer<IToken> equalityComparer = ChooseATokenEqualityCriteria();
 
-        IValidPlay<Board, Token, ChooseStrategyWrapped> validPlay = ChooseValidPlay(equalityComparer, tokenComparer, ConfGame);
+        IValidPlay<Board, IToken, ChooseStrategyWrapped> validPlay = ChooseValidPlay(equalityComparer, tokenComparer, ConfGame);
 
         Judge judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
 
         TokensManager tokensManager = ChooseATokenManager(this.CantTokenPerPerson, tokenComparer, equalityComparer);
 
-        return new Game(false, this.MaxDouble, this.CantTokenPerPerson, judge, tokensManager);
+        return new Game(false, this.MaxDouble, judge, tokensManager);
     }
 
     //Crea los modos de juego
@@ -440,7 +503,7 @@ public class ChampionStart
             {
                 int x = i - 1;
                 Games[i] = Games[x].Clone();//Clona la partida para que no existan problemas de referencia
-                coach.CloneLastGame(i);
+                coach.CloneLastGame(x);
 
             }
             else
@@ -498,14 +561,14 @@ public class observador
             Console.Clear();
             System.Console.WriteLine(arg + "  ?" + " Sí/No");
             x = Console.ReadLine()!.ToLower();
-            if (x != null)
+            if (x != null && x.Length > 0)
             {
                 a = (x[0] == 's' || x[0] == 'n');
             }
 
         } while (!a);
         Console.Clear();
-        if (x[0] == 's') return true;
+        if (x.Length > 0 && x[0] == 's') return true;
         return false;
     }
 
@@ -554,11 +617,11 @@ public class observador
         Console.Clear();
         System.Console.WriteLine(gameStatus.actualPlayer);
         //  Thread.Sleep(2000);
-        // Console.ReadKey();
+        Console.ReadKey();
         Console.Clear();
         System.Console.WriteLine(gameStatus.PlayerActualHand);
         //  Thread.Sleep(1500);
-        // Console.ReadKey();
+        Console.ReadKey();
         Console.Clear();
 
 

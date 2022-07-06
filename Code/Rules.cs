@@ -9,8 +9,8 @@ public class ControlPlayer
 
     public bool CanPlay { get; protected set; } = false;
 
-    protected Func<Player, GamePlayerHand<Token>, Token, Board, int, bool> AddPTokenToBoard { get; set; }
-    public ControlPlayer(Player player, Func<Player, GamePlayerHand<Token>, Token, Board, int, bool> AddPTokenToBoard)
+    protected Func<Player, GamePlayerHand<IToken>, IToken, Board, int, bool> AddPTokenToBoard { get; set; }
+    public ControlPlayer(Player player, Func<Player, GamePlayerHand<IToken>, IToken, Board, int, bool> AddPTokenToBoard)
     {
         this.player = player;
         this.AddPTokenToBoard = AddPTokenToBoard;

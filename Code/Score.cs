@@ -1,16 +1,14 @@
 namespace Game;
 #region  Game
-public class ClassicScore : IGetScore<Token>
+public class ClassicScore : IGetScore<IToken>
 {
     public virtual string Description => "Clasic Score";
 
-    public int Score(Token token)
+    public int Score(IToken token)
     {
         int score = 0;
-        foreach (var item in token.Component)
-        {
-            score += (int)item.ComponentValue;
-        }
+        score = (int)(token.Part1.ComponentValue + token.Part2.ComponentValue);
+
         return score;
     }
 }
@@ -18,11 +16,11 @@ public class ClassicScore : IGetScore<Token>
 public class DoubleScore : ClassicScore
 {
     public override string Description => "Double Score";
-    public int Score(Token token)
+    public int Score(IToken itoken)
     {
-        int result = base.Score(token);
+        int result = base.Score(itoken);
 
-        if (token.IsDouble()) result *= 2;
+        if (itoken.ItsDouble()) result *= 2;
         return result;
     }
 }

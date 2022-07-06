@@ -4,24 +4,20 @@ namespace Game;
 
 #region  Definiton AbstractClass
 
+public abstract class ValidPlayClass : IValidPlay<Board, IToken, ChooseStrategyWrapped>
+{
 
-public abstract class ValidPlayClass : IValidPlay<Board, Token, ChooseStrategyWrapped>
-{         //Devuelve el valor del numero donde se puede machear en RN
-    public virtual IEqualityComparer<Token> equalityComparer { get; protected set; }
-    public virtual IComparer<Token> Comparer { get; protected set; }
-
-    public virtual string Description => "Game Valid Play";
-
-    public ValidPlayClass(IEqualityComparer<Token> equalityComparer, IComparer<Token> Comparer)
+    public ValidPlayClass(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer)
     {
-        this.Comparer = Comparer;
-        this.equalityComparer = equalityComparer;
+
     }
-    public virtual ChooseStrategyWrapped ValidPlay(Board board, Token token)
+    public string Description => "Valid Play";
+
+    public virtual ChooseStrategyWrapped ValidPlay(Board board, IToken token)
     {
 
         ChooseStrategyWrapped choose = new ChooseStrategyWrapped(board, token);
-
+        bool z = false;
         if (FirstPlay(board))
         {
             return (new ChooseStrategyWrapped(board, token, true));
@@ -33,23 +29,26 @@ public abstract class ValidPlayClass : IValidPlay<Board, Token, ChooseStrategyWr
         return choose;
 
     }
-    protected virtual ChooseSideWrapped ValidPlayFront(Board board, Token token)
+    protected virtual ChooseSideWrapped ValidPlayFront(Board board, IToken token)
     {
 
 
         ChooseSideWrapped choose = new ChooseSideWrapped(0);
         List<int> macth = new List<int>() { };
-
-        if (Match(token, board.First))
+        //if (FirstPlay(board)) return true;
+        if (Match((int)token.Part1.ComponentValue, (int)board.First.Part1.ComponentValue))
         {
-            ChooseWhereToPlay(token, board.First, choose);
+            choose.AddSide(1);//Girar la ficha
         }
-
+        if (Match((int)token.Part2.ComponentValue, (int)board.First.Part1.ComponentValue))
+        {
+            choose.AddSide(0);//No GirarLaFicha
+        }
         choose.Run();
         return choose;
     }
 
-    protected abstract bool Match(Token x, Token y);
+    protected abstract bool Match(double Part1, double part2);
 
     protected virtual bool FirstPlay(Board board)
     {
@@ -57,37 +56,22 @@ public abstract class ValidPlayClass : IValidPlay<Board, Token, ChooseStrategyWr
         return false;
     }
 
-    protected virtual ChooseSideWrapped ValidPlayBack(Board board, Token token)
+    protected virtual ChooseSideWrapped ValidPlayBack(Board board, IToken token)
     {
         ChooseSideWrapped choose = new ChooseSideWrapped(1);
 
-        if (Match(token, board.Last))
+
+        if (Match(token.Part1.ComponentValue, board.Last.Part2.ComponentValue))
         {
-            ChooseWhereToPlay(board.Last, token, choose);
+            choose.AddSide(0);//No girar
+        }
+
+        if (Match(token.Part2.ComponentValue, board.Last.Part2.ComponentValue))
+        {
+            choose.AddSide(1);//Girar
         }
         choose.Run();
         return choose;
-    }
-
-    // colocar en el orden a poner el token
-    protected virtual void ChooseWhereToPlay(Token first, Token last, ChooseSideWrapped choose)
-    {
-        if (first.Last.Equals(last.First))
-        { choose.DontNeedSwap(); return; }
-
-        choose.AddSide(Intercept(first, last));
-
-
-    }
-
-
-    protected virtual List<(int, int)> Intercept(Token first, Token last)
-    {
-        List<(int, int)> temp = new List<(int, int)>() { };
-        if (first.First.Equals(last.Last)) { temp.Add((-1, -1)); return temp; }
-        temp.Add((0, 1));
-
-        return temp;
     }
 
 
@@ -98,20 +82,15 @@ public abstract class ValidPlayClass : IValidPlay<Board, Token, ChooseStrategyWr
 # region Derivates class
 public class ClassicValidPlay : ValidPlayClass
 {
-    public override string Description => "Classic Game Valid Play";
-    public ClassicValidPlay(IEqualityComparer<Token> equalityComparer, IComparer<Token> Comparer) : base(equalityComparer, Comparer)
+    public ClassicValidPlay(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer) : base(equality, Comparer)
     {
     }
 
-    protected override bool Match(Token x, Token y)
+    protected override bool Match(double Part1, double part2)
     {
-
-        foreach (var xComponent in x.Component)
-        {
-            if (y.Component[0].Equals(xComponent))
-            { return true; }
-        }
-        return false;
+        part2 = (int)part2;
+        Part1 = (int)Part1;
+        return (part2.Equals(Part1));
     }
 
 
@@ -120,63 +99,34 @@ public class ClassicValidPlay : ValidPlayClass
 
 public class BiggerValidPlay : ValidPlayClass
 {
-    public override string Description => "Bigger Game Valid Play";
-    public BiggerValidPlay(IEqualityComparer<Token> equalityComparer, IComparer<Token> Comparer) : base(equalityComparer, Comparer)
+    public BiggerValidPlay(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer) : base(equality, Comparer)
     {
     }
 
-    protected override bool Match(Token token, Token board)
+    protected override bool Match(double token, double board)
     {
-        double xNorma = 0;
-        foreach (var itemx in token.Component)
-        {
-            xNorma += Math.Pow(itemx.ComponentValue, 2);
-        }
-        xNorma = Math.Sqrt(xNorma);
-        double yNorma = 0;
-
-        foreach (var itemy in board.Component)
-        {
-            yNorma += Math.Pow(itemy.ComponentValue, 2);
-        }
-        yNorma = Math.Sqrt(yNorma);
-        return (yNorma < yNorma);
+        return (board < token);
     }
 }
 
 public class SmallerValidPlay : ValidPlayClass
 {
-    public override string Description => "Smaller Game Valid Play";
-    public SmallerValidPlay(IEqualityComparer<Token> equalityComparer, IComparer<Token> Comparer) : base(equalityComparer, Comparer)
+    public SmallerValidPlay(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer) : base(equality, Comparer)
     {
     }
 
-    protected override bool Match(Token token, Token board)
+    protected override bool Match(double Part1, double part2)
     {
-        double xNorma = 0;
-        foreach (var itemx in token.Component)
-        {
-            xNorma += Math.Pow(itemx.ComponentValue, 2);
-        }
-        xNorma = Math.Sqrt(xNorma);
-        double yNorma = 0;
-
-        foreach (var itemy in board.Component)
-        {
-            yNorma += Math.Pow(itemy.ComponentValue, 2);
-        }
-        yNorma = Math.Sqrt(yNorma);
-        return (yNorma > yNorma);
+        return (part2 > Part1);
     }
 }
-
 #endregion
 
 #endregion
 
 #region Champion
 // Si ha perdido mas de las mitad 
-public class ValidChampion : IValidPlay<List<GameStatus>, Player, bool>
+public class ValidChampion : IValidPlay<List<Game>, Player, bool>
 {
     public double Porcent { get; protected set; }
 
@@ -186,14 +136,14 @@ public class ValidChampion : IValidPlay<List<GameStatus>, Player, bool>
     {
         this.Porcent = Porcent;
     }
-    public bool ValidPlay(List<GameStatus> gamesStatus, Player player)
+    public bool ValidPlay(List<Game> games, Player player)
     {
-        double cant = gamesStatus.Count * Porcent;
+        double cant = games.Count * Porcent;
         int count = 0;
-        foreach (var game in gamesStatus)
+        foreach (var game in games)
         {
-            int x = game.winners.IndexOf(player);
-            if (x < game.winners.Count / 2) count++;
+            int x = game.Winner().IndexOf(player);
+            if (x < game.Winner().Count / 2) count++;
             if (count < cant) return false;
         }
 
@@ -204,7 +154,7 @@ public class ValidChampion : IValidPlay<List<GameStatus>, Player, bool>
 
 
 
-public class ValidChampionPerdidasConsecutivas : IValidPlay<List<GameStatus>, Player, bool>
+public class ValidChampionPerdidasConsecutivas : IValidPlay<List<Game>, Player, bool>
 {
     public int CantdeVecesConsecutivas { get; protected set; }
 
@@ -217,14 +167,14 @@ public class ValidChampionPerdidasConsecutivas : IValidPlay<List<GameStatus>, Pl
 
     }
 
-    public bool ValidPlay(List<GameStatus> game, Player player)
+    public bool ValidPlay(List<Game> games, Player player)
     {
         if (CantdeVecesConsecutivas < 1) { return true; }
         int count = 0; int lastIndex = 0;
-        for (int i = 0; i < game.Count; i++)
+        for (int i = 0; i < games.Count; i++)
         {
-            var status = game[i];
-            status.winners.Contains(player);
+            var game = games[i];
+            game.Winner().Contains(player);
             if (lastIndex == 0 || i - lastIndex == 1)
             {
                 count++;

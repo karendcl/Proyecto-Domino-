@@ -4,7 +4,7 @@ namespace Game;
 
 public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<Player>, IDescriptible
 {
-    public virtual List<Token> hand { get; protected set; } = new List<Token>() { };
+    public virtual List<IToken> hand { get; protected set; } = new List<IToken>() { };
     public virtual int Id { get; }
     public virtual int TotalScore { get; set; }
     public virtual IPlayerStrategy strategy { get { return ChooseStrategy(); } }
@@ -25,7 +25,7 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
 
     }
 
-    public virtual void AddHand(List<Token> Tokens)
+    public virtual void AddHand(List<IToken> Tokens)
     {
         this.hand = Tokens;
     }
@@ -42,10 +42,10 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
         return a;
     }
 
-    protected virtual List<Token> PossiblePlays(WatchPlayer watchPlayer)// Plays posibles
+    protected virtual List<IToken> PossiblePlays(WatchPlayer watchPlayer)// Plays posibles
     {
 
-        var CanPlay = new List<Token>();
+        var CanPlay = new List<IToken>();
 
         foreach (var item in hand)
         {   //Cambie aca porque el jugador no debe saber si el juez es corrupto
@@ -56,7 +56,7 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
         return CanPlay;
     }
 
-    public virtual Token BestPlay(WatchPlayer watchPlayer)
+    public virtual IToken BestPlay(WatchPlayer watchPlayer)
     {
         var posibles = PossiblePlays(watchPlayer);
         if (posibles.Count == 0) return null!;
@@ -129,7 +129,7 @@ public class CorruptionPlayer : Player
 
     public override string Description => " Computer corruption player";
 
-    public override Token BestPlay(WatchPlayer watchPlayer)
+    public override IToken BestPlay(WatchPlayer watchPlayer)
     {
         int[] scores = new int[this.hand.Count];
 

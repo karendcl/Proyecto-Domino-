@@ -3,145 +3,9 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Game;
-/*
-
-public class Token : ICloneable<Token>
-{
-    public virtual int Part1 { set; get; }
-    public virtual int Part2 { set; get; }
 
 
-    public Token(int Part1, int Part2)
-    {
-        this.Part1 = Part1;
-        this.Part2 = Part2;
-    }
-
-    public override string ToString()
-    {
-        return "[" + Part1 + "|" + Part2 + "] ";
-    }
-
-
-
-    public bool Contains(int a)
-    {
-        return (this.Part1.Equals(a) || this.Part2.Equals(a));
-    }
-
-    public bool IsDouble()
-    {
-        return (this.Part1.Equals(this.Part2));
-    }
-
-    public void SwapToken()
-    {
-        var temp = this.Part1;
-        this.Part1 = this.Part2;
-        this.Part2 = temp;
-    }
-
-    public Token Clone()
-    {
-        return new Token(this.Part1, this.Part2);
-    }
-}
-
-
-public class RandomToken : Token
-{
-    protected int Part1Original => base.Part1;
-    protected int Part2Original => base.Part2;
-
-    public override int Part1 { get { return Part_1(); } }
-    public override int Part2 { get { return Part_2(); } }
-
-    protected readonly int MaxDouble;
-
-    protected readonly int porcent;
-    public RandomToken(int Part1, int Part2, int MaxDouble, int porcent) : base(Part1, Part2)
-    {
-        this.MaxDouble = MaxDouble;
-        this.porcent = porcent;
-    }
-
-    protected int RandomC()
-    {
-        Random random = new Random();
-        int x = random.Next(0, 10000);
-        return x;
-    }
-    protected int Part_1()
-    {
-        int x = RandomC();
-
-        if (x > porcent * 100)
-        {
-            Random random = new Random();
-            int ran = random.Next(0, MaxDouble);
-            return ran;
-        }
-
-        return Part1Original;
-    }
-
-    protected int Part_2()
-    {
-        int x = RandomC();
-
-        if (x > porcent * 100)
-        {
-            Random random = new Random();
-            int ran = random.Next(0, MaxDouble);
-            return ran;
-        }
-
-        return Part2Original;
-    }
-}
-
-*/
-/*
-
-public class Pinguino : IComparable<Pinguino>, ITokenizable
-{
-    public string Description { get; set; } = "Pinguino";
-    public int altura
-    { get; protected set; }
-    public int peso { get; protected set; }
-
-    public double ComponentValue { get; protected set; }
-
-    public int age { get; protected set; }
-    Stopwatch watch = new Stopwatch();
-
-    public Pinguino(int Altura, int Peso)
-    {
-        this.peso = peso;
-        this.altura = altura;
-        watch.Start();
-    }
-
-    protected int AgeNow()
-    {
-        return (int)watch.ElapsedMilliseconds * 20000;
-    }
-
-    public double ComponentValueMethod()
-    {
-        return age * peso * altura / Math.E;
-    }
-
-    public int CompareTo(Pinguino? other)
-    {
-        if (this.age > other.age) return 1;
-        if (this.age < other.age) return -1;
-        return 0;
-    }
-
-
-}
-*/
+#region ITokenizable
 
 public class NormalInt : ITokenizable
 {
@@ -186,6 +50,11 @@ public class EnergyGenerator : ITokenizable
     public double ComponentValue => PotencialKnow();
 
 
+    public override string ToString()
+    {
+        return this.ComponentValue.ToString();
+    }
+
 
     public double PotencialKnow()
     {
@@ -222,128 +91,83 @@ public class EnergyGenerator : ITokenizable
 
 }
 
+#endregion
 
+#region  TokenClass
 
-
-public class Token : IEquatable<Token>, ICloneable<Token>
+public class Token : IToken
 {
-    //El generador se asegura que todos tengan igual cant de componentes como el de mayor dimension
-    public List<ITokenizable> Component { get; set; }
-    public int Dimension { get => this.Component.Count; }
+    public virtual ITokenizable Part1 { protected set; get; }
+    public virtual ITokenizable Part2 { protected set; get; }
 
-    public double Norma { get => CalculateNorma(); }
 
-    public ITokenizable First { get => this.GetFirst(); }
 
-    public ITokenizable Last { get => this.GetLast(); }
-
-    protected virtual double CalculateNorma()
+    public Token(ITokenizable Part1, ITokenizable Part2)
     {
-        double xNorma = 0;
-        foreach (var itemx in this.Component)
-        {
-            xNorma += Math.Pow(itemx.ComponentValue, 2);
-        }
-        return Math.Sqrt(xNorma);
+        this.Part1 = Part1;
+        this.Part2 = Part2;
     }
 
-    public Token(List<ITokenizable> Component)
+    public virtual bool ItsDouble()
     {
-        this.Component = Component;
+        return (this.Part1.Equals(this.Part2));
     }
 
-    public bool IsDouble()
-    {
-        return (this[0] == this[1]);
-    }
-    public ITokenizable this[int index]
-    {
-        get => Component[index];
-    }
-    protected ITokenizable GetLast()
-    {
-        int x = this.Component.Count - 1;
-        return this.Component[x];
-    }
 
-    protected ITokenizable GetFirst()
-    {
-        return this.Component[0];
-    }
-
-    public bool Equals(Token? other)
-    {
-        if (other == null) return false;
-        if (this.Dimension != other.Dimension) { return false; }
-        foreach (var (This, Other) in this.Component.Zip(other.Component))
-        {
-            if (!This.Equals(Other)) return false;
-        }
-        return true;
-    }
-
-    public Token Clone() => new Token(this.Component);
 
     public override string ToString()
     {
-        string x = "[";
-        for (int i = 0; i < this.Component.Count; i++)
-        {
-            x += " , " + this.Component[i];
-        }
-        x += "]";
-        return x;
+        return "[" + Part1 + "|" + Part2 + "] ";
     }
 
-    public bool SwapToken(int oldIndex, int newIndex)
+    public virtual bool IsMatch(IToken other)
     {
-        if (oldIndex < 0 || newIndex < 0 || oldIndex >= this.Component.Count || newIndex >= this.Component.Count)
-        { return false; }
-        ITokenizable component = this.Component[oldIndex];
-        this.Component.RemoveAt(oldIndex);
-        if (this.Component.Count - 1 < newIndex) { this.Component.Add(component); return true; }
-        else { this.Component.Insert(newIndex, component); }
-        return true;
+        return (this.Part1.Equals(other.Part1)) ||
+               (this.Part1.Equals(other.Part2)) ||
+               (this.Part2.Equals(other.Part2)) ||
+               (this.Part2.Equals(other.Part1));
     }
 
-    public bool SwapToken(HashSet<(int, int)> change)
+    public virtual bool Contains(int a)
     {
+        return (this.Part1.Equals(a) || this.Part2.Equals(a));
+    }
 
-        bool x = false;
-        foreach (var item in change)
-        {
 
-            if (this.SwapToken(item.Item1, item.Item2)) x = true;
-        }
 
-        return x;
+    public virtual void SwapToken()
+    {
+        var temp = this.Part1;
+        this.Part1 = this.Part2;
+        this.Part2 = temp;
+    }
+
+    public virtual IToken Clone()
+    {
+        return new Token(this.Part1, this.Part2);
     }
 
 
 }
+#endregion
 
 
 
 
-
-
-
-
-
-public class TokensManager
+public class TokensManager : ITokensManager
 {
     protected int TokensForEach { get; set; }
-    public List<Token> Elements { get; protected set; }
+    public List<IToken> Elements { get; protected set; }
 
-    public IEqualityComparer<Token> equalityComparer { get; protected set; }
+    public IEqualityComparer<IToken> equalityComparer { get; protected set; }
 
-    public IComparer<Token> Comparer { get; protected set; }
+    public IComparer<IToken> Comparer { get; protected set; }
 
-    public TokensManager(int TokensForEach, IComparer<Token> Comparer, IEqualityComparer<Token> equalityComparer, List<Token> tokens)
+    public TokensManager(int TokensForEach, IComparer<IToken> Comparer, IEqualityComparer<IToken> equalityComparer, List<IToken> tokens)
     {
 
         this.Comparer = Comparer;
-        this.Elements = new List<Token>();
+        this.Elements = new List<IToken>();
         this.Comparer = Comparer;
         this.equalityComparer = equalityComparer;
         this.Elements = tokens;
@@ -351,28 +175,24 @@ public class TokensManager
     }
 
 
-    public bool ItsDouble(Token token)
+    public virtual bool ItsDouble(IToken x)
     {
-        ITokenizable x = token[0];
-        foreach (var item in token.Component)
-        {
-            if (item != x) return false;
-        }
-        return true;
+        return (x.Part1.Equals(x.Part2));
     }
 
 
 
-    public List<Token> SetTokensRandom()
+    public List<IToken> GetTokens()
     {
 
 
         int count = 0;
-        var list = new List<Token>();
+        var list = new List<IToken>();
 
         while (count != TokensForEach)
         {
             int cantidadDisponible = this.Elements.Count;
+            if (cantidadDisponible < 1) break;
             var r = new Random();
             var index = r.Next(0, cantidadDisponible);
             cantidadDisponible--;
@@ -389,42 +209,35 @@ public class TokensManager
 }
 
 
-public class ComparerTokens : IComparer<Token>
+public class ComparerTokens : IComparer<IToken>
 {
 
-    public int Compare(Token? x, Token? y)
+    public int Compare(IToken? x, IToken? y)
     {
-        double tempx = 0;
-        foreach (var item in x!.Component!) { tempx += item.ComponentValue; }
+        int temp = 0;
+        int xNorma = (int)(Math.Pow(2, x.Part1.ComponentValue) + Math.Pow(2, x.Part2.ComponentValue));
 
-        double tempy = 0;
+        int yNorma = (int)(Math.Pow(2, y.Part1.ComponentValue) + Math.Pow(2, y.Part2.ComponentValue));
 
-        foreach (var item in y!.Component!)
-        {
-            tempy += item.ComponentValue;
-        }
-        return tempx.CompareTo(tempy);
+        if (xNorma == yNorma) return 0;
+        if (xNorma < yNorma) return -1;
+        return 1;
 
     }
 }
 
-public class IEquatablePorPedazos : IEqualityComparer<Token>
+public class IEquatablePorCaras : IEqualityComparer<IToken>
 {
-    public bool Equals(Token? x, Token? y)
+    public bool Equals(IToken? x, IToken? y)
     {
         if (x == null || y == null) return false;
-
-        List<ITokenizable> list = (x!.Component.Count > y!.Component.Count) ? x?.Component : y.Component;
-
-        foreach (var (xComponent, yComponent) in x?.Component.Zip(y?.Component))
-        {
-            if (!xComponent.Equals(yComponent)) return false;
-        }
-        return true;
+        bool a = (x.Part1 == y.Part1 || x.Part1 == y.Part2);
+        bool b = (x.Part2 == y.Part1 || x.Part2 == y.Part1);
+        return (a || b);
 
     }
 
-    public int GetHashCode([DisallowNull] Token obj)
+    public int GetHashCode([DisallowNull] IToken obj)
     {
         return obj.GetHashCode();
     }
@@ -433,10 +246,10 @@ public class IEquatablePorPedazos : IEqualityComparer<Token>
 
 public class IntTokenGenerator
 {
-    public List<Token> CreateTokens(int MaxValue)
+    public List<IToken> CreateTokens(int MaxValue)
     {
 
-        List<Token> PosiblesTokens = new List<Token>();
+        List<IToken> PosiblesTokens = new List<IToken>();
 
         for (int i = 0; i <= MaxValue; i++)
         {
@@ -444,12 +257,79 @@ public class IntTokenGenerator
             {
                 ITokenizable temp1 = new NormalInt(i);
                 ITokenizable temp2 = new NormalInt(j);
-                Token token = new Token(new List<ITokenizable>() { temp1, temp2 });
+                Token token = new Token(temp1, temp2);
                 PosiblesTokens.Add(token);
             }
         }
         return PosiblesTokens;
     }
+}
+
+
+
+public class ElectricGeneratorGenerate
+{
+
+    List<string> names = new List<string>()
+    {
+        "Energía Nuclear ",
+        "Energía del Gas Natural",
+        "Energia del Crudo",
+        "Energia Solar",
+        "Energía Eólica"
+    };
+    public string GetAName()
+    {
+        Random random = new Random();
+        int index = random.Next(0, this.names.Count);
+        return this.names[index];
+    }
+
+
+
+    private List<ITokenizable> GenerateITokenizable(int MaxValue)
+    {
+        List<ITokenizable> temp = new List<ITokenizable>() { };
+        for (int i = 0; i < MaxValue; i++)
+        {
+            Random random = new Random();
+            int min = random.Next(i, 300);
+            int maxPotenci = random.Next(300, 3000);
+            EnergyGenerator generator = new EnergyGenerator(GetAName(), min, maxPotenci);
+            temp.Add(generator);
+        }
+        return temp;
+    }
+
+    public List<IToken> GetToken(int MaxValue)
+    {
+
+        List<IToken> result = new List<IToken>();
+        List<ITokenizable> temp = GenerateITokenizable(MaxValue);
+
+        for (int i = 0; i < MaxValue * MaxValue; i++)
+        {
+            (ITokenizable, ITokenizable) x = GetTokenizables(temp);
+            Token token = new Token(x.Item1, x.Item2);
+            result.Add(token);
+        }
+
+        return result;
+    }
+
+    private (ITokenizable, ITokenizable) GetTokenizables(List<ITokenizable> list) => (GetRandom(list), GetRandom(list));
+
+    private ITokenizable GetRandom(List<ITokenizable> list)
+    {
+        Random random = new Random();
+        int x = list.Count;
+        int index = random.Next(0, x - 1);
+        return list[index];
+
+    }
+
+
+
 }
 
 

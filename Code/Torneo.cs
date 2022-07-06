@@ -9,6 +9,8 @@ namespace Game;
 public class Championship
 {
     #region Global
+
+    public event Predicate<Orders> CanContinue;
     public event Action<ChampionStatus> status;
     public event Func<string, bool> Choose;
     public int Champions { get; protected set; }
@@ -41,27 +43,35 @@ public class Championship
         for (int i = 0; i < Games.Count; i++)
         {
             Game game = Games[i];
-            game.GameStatus += PrintGames;
-            List<Player> players = GlobalPlayers.GetNextTeam();
-
-            GameStatus gameStatus = game.PlayAGame(new Board(), players);
-
-            if (judge.EndGame(game))
+            game.GameStatus += this.PrintGames;
+            game.CanContinue += this.Continue;
+            List<Player> players = GlobalPlayers.GetNextPlayers();
+            ControlPlayers(players);
+            if (players.Count < 1)
             {
-                GameOver(game, gameStatus, i);
                 ChampionOver();
                 break;
             }
-
-            if (!ContinueGames()) { ChampionPrint(); break; }
-
+            GameStatus gameStatus = game.PlayAGame(new Board(), players);
             GameOver(game, gameStatus, i);
+            if (judge.EndGame(this.FinishGames))
+            {
+
+                ChampionOver();
+                break;
+            }
+            Orders c = Orders.NextPlay;
+            if (!Continue(c)) { ChampionPrint(); break; }
+
+
 
         }
         ChampionOver();
     }
 
     #region Mandar informacion de los partidos
+
+    public bool Continue(Orders orders) => this.CanContinue(orders);
     protected void GameOver(Game game, GameStatus gameStatus, int i)
     {
         this.GamesStatus.Push(gameStatus);
@@ -87,6 +97,15 @@ public class Championship
         return championStatus;
     }
 
+    protected void ControlPlayers(List<Player> players)
+    {
+        List<Player> temp = new List<Player>();
+        foreach (var player in players)
+        {
+            if (judge.ValidPlay(this.FinishGames, player)) temp.Add(player);
+        }
+        players = temp;
+    }
 
     protected void PlayerStrats()
     {
@@ -123,7 +142,7 @@ public class Championship
 
     protected List<Player> ChampionWinners() => this.judge.Winners(this.FinishGames.ToList<Game>());
 
-    protected bool ContinueGames() => Choose.Invoke(("Desea seguir jugando?, si / no"));
+
 
     protected void ChampionPrint()
     {

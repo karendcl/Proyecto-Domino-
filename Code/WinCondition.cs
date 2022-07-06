@@ -1,11 +1,11 @@
 
 namespace Game;
 
-public abstract class WinCondition : IWinCondition<(Player player, List<Token> hand), Token>
+public abstract class WinCondition : IWinCondition<(Player player, List<IToken> hand), IToken>
 {
     public virtual string Description => "Game WinCondition";
 
-    public virtual List<Player> Winner(List<(Player player, List<Token> hand)> players, IGetScore<Token> howtogetscore)
+    public virtual List<Player> Winner(List<(Player player, List<IToken> hand)> players, IGetScore<IToken> howtogetscore)
     {
 
         int count = 0;
@@ -19,9 +19,9 @@ public abstract class WinCondition : IWinCondition<(Player player, List<Token> h
                 result.Add(player);
             }
 
-            foreach (var Token in player.hand)
+            foreach (var IToken in player.hand)
             {
-                scores[count] += howtogetscore.Score(Token);
+                scores[count] += howtogetscore.Score(IToken);
             }
             count++;
         }
@@ -34,7 +34,7 @@ public abstract class WinCondition : IWinCondition<(Player player, List<Token> h
 
     }
 
-    public abstract List<Player> FinalWinner(int[] scores, List<(Player player, List<Token> hand)> players);
+    public abstract List<Player> FinalWinner(int[] scores, List<(Player player, List<IToken> hand)> players);
 
 
 
@@ -44,7 +44,7 @@ public class MinScore : WinCondition
 {
 
     public override string Description => "MinScore";
-    public override List<Player> FinalWinner(int[] scores, List<(Player player, List<Token> hand)> players)
+    public override List<Player> FinalWinner(int[] scores, List<(Player player, List<IToken> hand)> players)
     {
         var result = new List<Player>();
 
@@ -65,7 +65,7 @@ public class MinScore : WinCondition
 public class MaxScore : WinCondition
 {
     public override string Description => "MaxScore";
-    public override List<Player> FinalWinner(int[] scores, List<(Player player, List<Token> hand)> players)
+    public override List<Player> FinalWinner(int[] scores, List<(Player player, List<IToken> hand)> players)
     {
         var result = new List<Player>();
 
@@ -92,7 +92,7 @@ public class Specificscore : WinCondition
         this.score = score;
     }
 
-    public override List<Player> FinalWinner(int[] scores, List<(Player player, List<Token> hand)> players)
+    public override List<Player> FinalWinner(int[] scores, List<(Player player, List<IToken> hand)> players)
     {
         var result = new List<Player>();
 

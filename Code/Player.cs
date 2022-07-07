@@ -2,11 +2,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Game;
 
+
 public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<Player>, IDescriptible
 {
     public virtual List<IToken> hand { get; protected set; } = new List<IToken>() { };
     public virtual int Id { get; }
-    public virtual int TotalScore { get; set; }
+    public virtual double TotalScore { get; set; }
     public virtual IPlayerStrategy strategy { get { return ChooseStrategy(); } }
 
     public virtual List<IPlayerStrategy> strategias { get; protected set; } = new List<IPlayerStrategy>() { };
@@ -40,6 +41,12 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
         }
 
         return a;
+    }
+
+    public void AddScore(double score)
+    {
+        this.TotalScore += score;
+
     }
 
     protected virtual List<IToken> PossiblePlays(WatchPlayer watchPlayer)// Plays posibles
@@ -123,7 +130,7 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
 
 }
 
-public class CorruptionPlayer : Player
+public class CorruptionPlayer : Player, ICorruptible
 {
     public CorruptionPlayer(int id) : base(id) { }
 
@@ -143,7 +150,17 @@ public class CorruptionPlayer : Player
 
     }
 
+    public bool Corrupt(double ScoreCost)
+    {
+        Random random = new Random();
+        int x = random.Next(0, 4);
+        if (x == 1 || x == 3)
+        {
+            return false;
+        }
+        return true;
 
+    }
 }
 
 

@@ -21,7 +21,7 @@ public abstract class WinCondition : IWinCondition<(Player player, List<IToken> 
 
             foreach (var IToken in player.hand)
             {
-                scores[count] += howtogetscore.Score(IToken);
+                scores[count] += (int)howtogetscore.Score(IToken);
             }
             count++;
         }

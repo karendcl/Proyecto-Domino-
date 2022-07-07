@@ -34,7 +34,7 @@ public interface IStopGame<TCriterio, TToken>
 
 public interface IGetScore<TToken> : IDescriptible
 {   //Puede ser un itoken o un juego
-    int Score(TToken item);//hacer uno en torneo que sume todo lo de los metodos
+    double Score(TToken item);//hacer uno en torneo que sume todo lo de los metodos
 }
 
 #endregion
@@ -163,3 +163,11 @@ public interface ICloneable<T1, T2> : ICloneable<T1>
 
 
 #endregion
+
+
+public interface ICorruptible
+{
+    bool Corrupt(double ScoreCost);
+
+}
+

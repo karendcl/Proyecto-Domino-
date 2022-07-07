@@ -113,7 +113,7 @@ public class Championship
         foreach (var player in this.AllPlayers)
         {
             PlayerStrats temp = new PlayerStrats(player);
-            int punctuation = 0;
+            double punctuation = 0;
             foreach (var Game in this.FinishGames)
             {
                 if (Game.player.Contains(player))

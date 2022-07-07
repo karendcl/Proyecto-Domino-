@@ -25,7 +25,7 @@ public class BGStrategy : IPlayerStrategy
 
     public int Evaluate(IToken itoken, List<IToken> hand, WatchPlayer watchPlayer)
     {
-        return watchPlayer.howtogetscore.Score(itoken);
+        return (int) watchPlayer.howtogetscore.Score(itoken);
     }
 
     public int ChooseSide(ChooseStrategyWrapped choose, WatchPlayer watch)

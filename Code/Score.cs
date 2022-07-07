@@ -4,7 +4,7 @@ public class ClassicScore : IGetScore<IToken>
 {
     public virtual string Description => "Clasic Score";
 
-    public int Score(IToken token)
+    public double Score(IToken token)
     {
         int score = 0;
         score = (int)(token.Part1.ComponentValue + token.Part2.ComponentValue);
@@ -16,9 +16,9 @@ public class ClassicScore : IGetScore<IToken>
 public class DoubleScore : ClassicScore
 {
     public override string Description => "Double Score";
-    public int Score(IToken itoken)
+    public double Score(IToken itoken)
     {
-        int result = base.Score(itoken);
+        double result = base.Score(itoken);
 
         if (itoken.ItsDouble()) result *= 2;
         return result;
@@ -33,7 +33,7 @@ public class ScoreChampionNormal : IGetScore<(Game, Player)>
 {
     public string Description => " Champion Normal Score";
 
-    public int Score((Game, Player) item)
+    public double Score((Game, Player) item)
     {
         Game game = item.Item1;
         return game.judge.PlayerScore(item.Item2);

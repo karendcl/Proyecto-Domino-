@@ -3,14 +3,21 @@ namespace Game;
 #region Game
 public class Judge : IDescriptible
 {
+    #region Global
     protected virtual IStopGame<Player, IToken> stopcriteria { get; set; }
     protected virtual IGetScore<IToken> howtogetscore { get; set; }
     protected virtual IWinCondition<(Player player, List<IToken> hand), IToken> winCondition { get; set; }
     protected virtual IValidPlay<Board, IToken, ChooseStrategyWrapped> valid { get; set; }
     protected virtual Player playernow { get; set; } = null!;
     protected virtual List<ChooseStrategyWrapped> validTokenFornow { get; set; }
+    protected virtual Dictionary<int, IPlayerScore> playerScores { get; set; } = new Dictionary<int, IPlayerScore>();
 
-    public virtual string Description => "Game";
+    protected virtual CalculatePlayerScore getPlayerScore { get; set; }
+    public virtual string Description => "Game Jugde";
+
+    #endregion
+
+
 
     //Guarda las fichas que son validas en un momento x
     public Judge(IStopGame<Player, IToken> stop, IGetScore<IToken> getscore, IWinCondition<(Player player, List<IToken> hand), IToken> winCondition, IValidPlay<Board, IToken, ChooseStrategyWrapped> valid)
@@ -22,8 +29,11 @@ public class Judge : IDescriptible
         this.validTokenFornow = new List<ChooseStrategyWrapped>() { };
     }
 
+
+
     public virtual WatchPlayer RunWatchPlayer(Board board)
     {
+
         return new WatchPlayer(this.howtogetscore, this.stopcriteria, this.valid, this.winCondition, board);
     }
     protected virtual bool PlayerMeetsStopCriteria(Player player)
@@ -33,6 +43,7 @@ public class Judge : IDescriptible
     }
     public virtual ChooseStrategyWrapped ValidPlay(Player player, Board board, IToken token)
     {
+        AddPlayerScore(player);
         if (token == null)
         {
             return null!;
@@ -56,6 +67,13 @@ public class Judge : IDescriptible
         return valid;
     }
 
+    protected void AddPlayerScore(Player player)
+    {
+        if (!playerScores.ContainsKey(player.Id))
+        {
+            playerScores.Add(player.Id, new PlayerScore(player.Id));
+        }
+    }
     public virtual bool EndGame(List<(Player, List<IToken>)> players, Board board)
     {
 
@@ -78,17 +96,11 @@ public class Judge : IDescriptible
     }
 
 
-    public virtual int PlayerScore(Player player)
+    public virtual double PlayerScore(Player player)
     {
-        int result = 0;
-
-        foreach (var token in player.hand)
-        {
-            result += this.howtogetscore.Score(token);
-        }
-        player.TotalScore += result;
-
-        return result;
+        if (!this.playerScores.ContainsKey(player.Id)) return -1;
+        IPlayerScore score = this.playerScores[player.Id];
+        return score.Score;
     }
 
     // -1,1
@@ -105,15 +117,28 @@ public class Judge : IDescriptible
     public virtual bool AddTokenToBoard(Player player, GamePlayerHand<IToken> hand, IToken token, Board board, int side)
     {
         ChooseStrategyWrapped x = new ChooseStrategyWrapped(board, token);
+
         int index = validTokenFornow.IndexOf(x);
-        if (!CheckHand(player, hand, token)) { return false; }
-        if (player.hand.Count != hand.hand.Count) { return false;  /*Añadir a descalificacion*/}
+
+        if (!CheckHand(player, hand, token))
+        {
+            this.AddPlayerScoreStatus(player.Id, hand, token, true);
+
+            return false;
+        }
+        if (player.hand.Count != hand.hand.Count)
+        {
+            this.AddPlayerScoreStatus(player.Id, hand, token, false);
+
+            return false;  /*Añadir a descalificacion*/
+        }
 
         if (board.board.Count == 0)//Poner aca los no descalificados
         {
             validTokenFornow.Clear();
             hand.AddLastPlay(token);
             board.board.Add(token);
+            this.AddPlayerScoreStatus(player.Id, hand, token, true);
 
             return true;
         }
@@ -131,13 +156,20 @@ public class Judge : IDescriptible
         IToken first = board.First;
         IToken last = board.Last;
         side = d.Elije.index;//Da el indice donde es Valido 
-        if (side == 0) { PlayAlante(d.Elije, token, first, board); } else { PlayAtras(d.Elije, token, last, board); }
+        if (side == 0) { PlayFront(d.Elije, token, first, board); } else { PlayBack(d.Elije, token, last, board); }
         hand.AddLastPlay(token);// Se le quita de la mano
 
-
+        this.AddPlayerScoreStatus(player.Id, hand, token, true);
 
         return true;
 
+    }
+
+    protected virtual void AddPlayerScoreStatus(int id, GamePlayerHand<IToken> hand, IToken token, bool Add)
+    {
+        double x = this.howtogetscore.Score(token);
+        IPlayerScore score = this.playerScores[id];
+        this.getPlayerScore.AddPlay(score, hand, x, Add);
     }
 
     public virtual List<Player> Winner(List<(Player player, List<IToken> hand)> players)
@@ -162,9 +194,7 @@ public class Judge : IDescriptible
         return true;
     }
 
-
-
-    public virtual void PlayAlante(ChooseSideWrapped where, IToken token, IToken first, Board board)
+    protected virtual void PlayFront(ChooseSideWrapped where, IToken token, IToken first, Board board)
     {
 
         if (where.WhereCanMacht.Contains(1)) { token.SwapToken(); }
@@ -173,7 +203,7 @@ public class Judge : IDescriptible
         board.board.Insert(0, token);
     }
 
-    public virtual void PlayAtras(ChooseSideWrapped where, IToken token, IToken last, Board board)
+    protected virtual void PlayBack(ChooseSideWrapped where, IToken token, IToken last, Board board)
     {
         if (where.WhereCanMacht.Contains(1)) { token.SwapToken(); }
         board.board.Add(token);
@@ -207,14 +237,20 @@ public class CorruptionJugde : Judge
     }
     public override bool AddTokenToBoard(Player player, GamePlayerHand<IToken> hand, IToken token, Board board, int side)
     {
-        if (MakeCorruption())
+        bool x = (player is ICorruptible);
+        bool cant = base.ValidPlay(player, board, token).CanMatch;
+        if (MakeCorruption() && !cant && x)
         {
-            if (random.Next(0, 27) > Math.E / 2) { PlayAlante(null!, token, board.First, board); }
-            else
+            double score = this.PlayerScore(player) / 3;
+            ICorruptible temp = (ICorruptible)player;
+            if (temp.Corrupt(score))
             {
-                PlayAtras(null!, token, board.Last, board);
+                if (random.Next(0, 27) > Math.E / 2) { PlayBack(null!, token, board.First, board); }
+                else
+                {
+                    PlayFront(null!, token, board.Last, board);
+                }
             }
-
         }
         return base.AddTokenToBoard(player, hand, token, board, side);
     }

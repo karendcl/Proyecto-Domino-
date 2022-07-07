@@ -198,7 +198,7 @@ public class PlayerStrats : IEquatable<PlayerStrats> //Da la informacion de cada
 {
     public Player player { get; protected set; }
 
-    public int punctuation { get; protected set; } = -1;
+    public double punctuation { get; protected set; } = -1;
 
 
 
@@ -209,7 +209,7 @@ public class PlayerStrats : IEquatable<PlayerStrats> //Da la informacion de cada
 
     }
 
-    public void AddPuntuation(int punctuation)
+    public void AddPuntuation(double punctuation)
     {
         if (this.punctuation < 0) this.punctuation = punctuation;
     }
@@ -237,7 +237,6 @@ public class WatchPlayer //Tiene toda la informacion que es necesaria por un jug
     public IStopGame<Player, IToken> stopCondition { get; protected set; }
     public IValidPlay<Board, IToken, ChooseStrategyWrapped> validPlay { get; protected set; }
     public IWinCondition<(Player player, List<IToken> hand), IToken> winCondition { get; protected set; }
-
 
     public Board board { get; protected set; }
 

@@ -26,7 +26,7 @@ public class CertainScore : IStopGame<Player, IToken>
 
         foreach (var itoken in player.hand)
         {
-            result += howtogetscore.Score(itoken);
+            result += (int)howtogetscore.Score(itoken);
         }
 
         return (result == Score);
@@ -73,7 +73,7 @@ public class StopChampionPerPoints : IStopGame<List<Game>, (Game, Player)>
         List<Player> temp = game.player!;
         foreach (var item in temp)
         {
-            int cant = howtogetscore.Score((game, item));
+            int cant = (int)howtogetscore.Score((game, item));
             if (!Players.Contains(item)) { Players.Add(item); acc.Add(cant); }
             else { int i = Players.IndexOf(item); acc[i] += cant; }
         }

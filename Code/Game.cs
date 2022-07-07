@@ -194,7 +194,7 @@ public class Game : ICloneable<Game>
     {
         foreach (var item in this.playerStrats)
         {
-            int score = this.judge.PlayerScore(item.player);
+            double score = this.judge.PlayerScore(item.player);
             item.AddPuntuation(score);
         }
         GameStatus status = new GameStatus(this.playerStrats, this.hands, board!, true);
@@ -218,6 +218,7 @@ public class Game : ICloneable<Game>
     }
     private IToken Turno(Player player, WatchPlayer watch)
     {
+        player.AddScore(this.judge.PlayerScore(player));
         return player.BestPlay(watch);
         //Otorgar aca que si el juez lo deja jugar
     }

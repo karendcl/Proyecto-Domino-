@@ -22,6 +22,7 @@ public interface IWinCondition<TCriterio, TToken> : IDescriptible
 public interface IValidPlay<TGame, TPlayer, TCriterio> : IDescriptible
 {
     TCriterio ValidPlay(TGame game, TPlayer player);
+    
 
 }
 
@@ -79,8 +80,10 @@ public interface ITokenizable : IComparable<ITokenizable>, IEquatable<ITokenizab
 
     double ComponentValue { get; }
 
-    public string Description { get; }
+}
 
+public interface IGenerator{
+    public List<IToken> CreateTokens(int maxDouble);
 }
 
 
@@ -146,7 +149,7 @@ public interface ITokensManager
 
 public interface IDescriptible
 {
-    string Description { get; }
+    public static string Description { get; }
 }
 public interface ICloneable<T> : ICloneable
 {

@@ -9,7 +9,7 @@ namespace Game;
 
 public class NormalInt : ITokenizable
 {
-    public string Description => "Enteros";
+    public static string Description => "Enteros";
 
     public double ComponentValue { get; protected set; }
 
@@ -45,7 +45,7 @@ public class EnergyGenerator : ITokenizable
     public int minPotenci { get; protected set; }
     public int maxPotenci { get; protected set; }
 
-    public string Description { get => "Termoeléctrica"; }
+    public static string Description { get => "Termoeléctrica"; }
 
     public double ComponentValue => PotencialKnow();
 
@@ -244,8 +244,9 @@ public class IEquatablePorCaras : IEqualityComparer<IToken>
 }
 
 
-public class IntTokenGenerator
+public class Fichas_Enteros :IGenerator
 {
+    public static string Description{get => "Fichas de enteros";}
     public List<IToken> CreateTokens(int MaxValue)
     {
 
@@ -267,9 +268,10 @@ public class IntTokenGenerator
 
 
 
-public class ElectricGeneratorGenerate
+public class Fichas_Termoelectricas : IGenerator
 {
 
+    public static string Description{get => "Fichas de termoelectrica";}
     List<string> names = new List<string>()
     {
         "Energía Nuclear ",
@@ -301,7 +303,7 @@ public class ElectricGeneratorGenerate
         return temp;
     }
 
-    public List<IToken> GetToken(int MaxValue)
+    public List<IToken> CreateTokens(int MaxValue)
     {
 
         List<IToken> result = new List<IToken>();

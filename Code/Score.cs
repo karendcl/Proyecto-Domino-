@@ -2,7 +2,7 @@ namespace Game;
 #region  Game
 public class ClassicScore : IGetScore<IToken>
 {
-    public virtual string Description => "Clasic Score";
+    public static string Description => "Clasic Score";
 
     public int Score(IToken token)
     {
@@ -11,17 +11,27 @@ public class ClassicScore : IGetScore<IToken>
 
         return score;
     }
+
+    public override string ToString()
+    {
+        return "Clasico. El valor de la ficha es la suma de sus partes";
+    }
 }
 
-public class DoubleScore : ClassicScore
+public class Double : ClassicScore, IGetScore<IToken>
 {
-    public override string Description => "Double Score";
+    public static string Description => "Double Score";
     public int Score(IToken itoken)
     {
         int result = base.Score(itoken);
 
         if (itoken.ItsDouble()) result *= 2;
         return result;
+    }
+
+    public override string ToString()
+    {
+        return "Doble. Si una ficha es doble, su valor se duplica";
     }
 }
 
@@ -31,7 +41,7 @@ public class DoubleScore : ClassicScore
 
 public class ScoreChampionNormal : IGetScore<(Game, Player)>
 {
-    public string Description => " Champion Normal Score";
+    public static string Description => "De la forma usual en un juego";
 
     public int Score((Game, Player) item)
     {

@@ -22,7 +22,7 @@ public class Championship
     protected Stack<GameStatus> GamesStatus = new Stack<GameStatus>() { };
     protected List<Player> Winners { get { return this.ChampionWinners(); } }
     public bool ItsChampionOver { get; protected set; }
-    protected List<PlayerStrats> playerStrats { get; set; } = new List<PlayerStrats>() { };
+    protected List<PlayerStats> PlayerStats { get; set; } = new List<PlayerStats>() { };
     protected List<Player> AllPlayers { get { return GlobalPlayers.AllPlayers; } }
 
 
@@ -81,7 +81,7 @@ public class Championship
 
     protected void PrintGames(GameStatus gameStatus)
     {
-
+        
         ChampionStatus championStatus = CreateAChampionStatus();
         championStatus.AddGameStatus(gameStatus);
         this.status.Invoke(championStatus);
@@ -93,7 +93,7 @@ public class Championship
     {
         List<Player> AllPlayer = this.GlobalPlayers.AllPlayers;
 
-        ChampionStatus championStatus = new ChampionStatus(this.GamesStatus, this.playerStrats, HaveAWinner, this.Winners, this.ItsChampionOver);
+        ChampionStatus championStatus = new ChampionStatus(this.GamesStatus, this.PlayerStats, HaveAWinner, this.Winners, this.ItsChampionOver);
         return championStatus;
     }
 
@@ -107,12 +107,12 @@ public class Championship
         players = temp;
     }
 
-    protected void PlayerStrats()
+    protected void PlayerStatistics()
     {
-        List<PlayerStrats> Strats = new List<PlayerStrats>() { };
+        List<PlayerStats> Strats = new List<PlayerStats>() { };
         foreach (var player in this.AllPlayers)
         {
-            PlayerStrats temp = new PlayerStrats(player);
+            PlayerStats temp = new PlayerStats(player);
             int punctuation = 0;
             foreach (var Game in this.FinishGames)
             {
@@ -125,14 +125,14 @@ public class Championship
             Strats.Add(temp);
         }
 
-        this.playerStrats = Strats;
+        this.PlayerStats = Strats;
     }
 
 
     protected void ChampionOver()
     {
         this.ItsChampionOver = true;
-        PlayerStrats();
+        PlayerStatistics();
         ChampionStatus status = CreateAChampionStatus();
         this.status.Invoke(status);
 

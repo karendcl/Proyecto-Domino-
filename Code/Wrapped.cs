@@ -1,6 +1,6 @@
 namespace Game;
 //Esta clase se utiliza para guardar la mano del jugador
-public class GamePlayerHand<TToken> : ICloneable<GamePlayerHand<TToken>>, IEquatable<GamePlayerHand<TToken>> where TToken : IToken
+public class GamePlayerHand<TToken> : ICloneable<GamePlayerHand<TToken>>, IEquatable<GamePlayerHand<TToken>>, IEquatable<int> where TToken : IToken
 {
 
     public int PlayerId { get; protected set; }
@@ -43,6 +43,11 @@ public class GamePlayerHand<TToken> : ICloneable<GamePlayerHand<TToken>>, IEquat
 
         }
         return true;
+    }
+
+    public bool Equals(int other)
+    {
+        return other.Equals(this.PlayerId);
     }
 
     public override string ToString()
@@ -116,7 +121,7 @@ public class PlayersCoach
 public class ChampionStatus //Esta clase muestra en pantalla todos los sucesos del a nivel de torneo y juego
 {
     public Stack<GameStatus> FinishGame { get; protected set; } = new Stack<GameStatus>() { };
-    public List<PlayerStrats> playerStrats { get; protected set; }
+    public List<PlayerStats> PlayerStats { get; protected set; }
     public bool HaveAWinner { get; protected set; }
     public List<Player> Winners { get; protected set; }//Ganadores a nivel de torneo
     public bool ItsAnGameStatus { get; protected set; } = false;
@@ -132,14 +137,14 @@ public class ChampionStatus //Esta clase muestra en pantalla todos los sucesos d
     public GameStatus gameStatus { get; protected set; }
     public bool FinishChampion { get; protected set; }
 
-    public ChampionStatus(Stack<GameStatus> FinishGame, List<PlayerStrats> Players, bool HaveAWinner, List<Player> Winners, bool FinishChampion)
+    public ChampionStatus(Stack<GameStatus> FinishGame, List<PlayerStats> Players, bool HaveAWinner, List<Player> Winners, bool FinishChampion)
     {
         this.FinishGame = FinishGame;
         this.HaveAWinner = HaveAWinner;
         this.Winners = Winners;
-        this.playerStrats = Players;
+        this.PlayerStats = Players;
         this.FinishChampion = FinishChampion;
-        this.gameStatus = new GameStatus(new List<PlayerStrats>() { }, new List<GamePlayerHand<IToken>>() { }, new Board());
+        this.gameStatus = new GameStatus(new List<PlayerStats>() { }, new List<GamePlayerHand<IToken>>() { }, new Board());
     }
 
     public void AddGameStatus(GameStatus Know)
@@ -161,40 +166,48 @@ public class ChampionStatus //Esta clase muestra en pantalla todos los sucesos d
 public class GameStatus //Actualiza en la pantalla todo lo que ocurre en cada juego
 {
     public List<Player> winners { get; protected set; } = new List<Player>() { };
-    public List<PlayerStrats> playerStrats { get; protected set; }
+    public List<PlayerStats> PlayerStats { get; protected set; }
     public bool ItsAFinishGame { get; protected set; }
     public List<GamePlayerHand<IToken>> Hands { get; protected set; }
     public Board board { get; protected set; }
     public Player actualPlayer { get { return SetActualPlayer(); } }
     public GamePlayerHand<IToken> PlayerActualHand { get { return SetActualPlayerHand(); } }
 
-    public GameStatus(List<PlayerStrats> playerStrats, List<GamePlayerHand<IToken>> hands, Board board, bool ItsAFinishGame = false)
+    public GameStatus(List<PlayerStats> PlayerStats, List<GamePlayerHand<IToken>> hands, Board board, bool ItsAFinishGame = false)
     {
         this.board = board;
         this.Hands = hands;
-        this.playerStrats = playerStrats;
+        this.PlayerStats = PlayerStats;
         this.ItsAFinishGame = ItsAFinishGame;
     }
     protected Player SetActualPlayer()
     {
-        int count = this.playerStrats.Count;
+        int count = this.PlayerStats.Count;
         if (count < 1) return null!;
-        return this.playerStrats[count - 1].player.Clone();
+        return this.PlayerStats[count - 1].player.Clone();
     }
 
     protected GamePlayerHand<IToken> SetActualPlayerHand()
     {
         int count = this.Hands.Count;
         if (count < 0) return null!;
-        return this.Hands[count - 1].Clone();
+        foreach (var item in this.Hands)
+        {
+            if (item.Equals(this.actualPlayer.Id))
+            {
+                return item;
+            }
+        }
+        return null!;
     }
+
 
     public void AddWinners(List<Player> winners) => this.winners.AddRange(winners);
 
 }
 
 
-public class PlayerStrats : IEquatable<PlayerStrats> //Da la informacion de cada jugador a pantalla
+public class PlayerStats : IEquatable<PlayerStats> //Da la informacion de cada jugador a pantalla
 {
     public Player player { get; protected set; }
 
@@ -202,7 +215,7 @@ public class PlayerStrats : IEquatable<PlayerStrats> //Da la informacion de cada
 
 
 
-    public PlayerStrats(Player player)
+    public PlayerStats(Player player)
     {
         this.player = player;
 
@@ -214,7 +227,7 @@ public class PlayerStrats : IEquatable<PlayerStrats> //Da la informacion de cada
         if (this.punctuation < 0) this.punctuation = punctuation;
     }
 
-    public bool Equals(PlayerStrats? other)
+    public bool Equals(PlayerStats? other)
     {
         if (other == null) return false;
         return this.player.Equals(other.player);
@@ -222,9 +235,7 @@ public class PlayerStrats : IEquatable<PlayerStrats> //Da la informacion de cada
 
     public override string ToString()
     {
-        string temp = string.Empty;
-        temp += this.player + "   " + this.punctuation;
-        return temp;
+        return string.Format($"{this.player} : {this.punctuation}");
     }
 }
 

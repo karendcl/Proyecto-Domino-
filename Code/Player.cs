@@ -11,7 +11,7 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
 
     public virtual List<IPlayerStrategy> strategias { get; protected set; } = new List<IPlayerStrategy>() { };
 
-    public virtual string Description => "Computer Player";
+    public static string Description => "Jugador Normal";
 
     public Player(int id)
     {
@@ -127,7 +127,7 @@ public class CorruptionPlayer : Player
 {
     public CorruptionPlayer(int id) : base(id) { }
 
-    public override string Description => " Computer corruption player";
+    public static string Description => "Jugador Corrupto/Tramposo";
 
     public override IToken BestPlay(WatchPlayer watchPlayer)
     {

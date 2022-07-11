@@ -3,7 +3,7 @@ namespace Game;
 
 public abstract class WinCondition : IWinCondition<(Player player, List<IToken> hand), IToken>
 {
-    public virtual string Description => "Game WinCondition";
+    public static string Description => "Game WinCondition";
 
     public virtual List<Player> Winner(List<(Player player, List<IToken> hand)> players, IGetScore<IToken> howtogetscore)
     {
@@ -43,7 +43,7 @@ public abstract class WinCondition : IWinCondition<(Player player, List<IToken> 
 public class MinScore : WinCondition
 {
 
-    public override string Description => "MinScore";
+    public static string Description => "Gana el jugador que tenga menos puntos";
     public override List<Player> FinalWinner(int[] scores, List<(Player player, List<IToken> hand)> players)
     {
         var result = new List<Player>();
@@ -64,7 +64,7 @@ public class MinScore : WinCondition
 
 public class MaxScore : WinCondition
 {
-    public override string Description => "MaxScore";
+    public static string Description => "Gana el jugador que tenga mas puntos";
     public override List<Player> FinalWinner(int[] scores, List<(Player player, List<IToken> hand)> players)
     {
         var result = new List<Player>();
@@ -83,21 +83,22 @@ public class MaxScore : WinCondition
     }
 }
 
-public class Specificscore : WinCondition
+public class MiddleScore : WinCondition
 {
-    public override string Description => "Specificscore";
-    int score { get; set; }
-    public Specificscore(int score)
-    {
-        this.score = score;
-    }
+    public static string Description {get {return "Gana el jugador que tenga la media de puntos";}}
 
     public override List<Player> FinalWinner(int[] scores, List<(Player player, List<IToken> hand)> players)
     {
         var result = new List<Player>();
 
-        int score = scores.Min();
+        int[] temp = new int[scores.Length];
+        temp = scores.ToArray();
 
+        Array.Sort(temp);
+        int mid = temp.Length/2;
+        int score = temp[mid];
+
+        
         for (int i = 0; i < scores.Length; i++)
         {
             if (scores[i] == score)
@@ -119,7 +120,7 @@ public class WinChampion : IWinCondition<Game, (Game, Player)>
     public List<WPlayer<Player>> players { get; protected set; }
     public List<int> cantwins { get; protected set; }
 
-    public string Description => " Champion Win Condition Jugde";
+    public static string Description => " Este no estoy segura";
 
     public WinChampion(double porcentWins)
     {

@@ -10,7 +10,7 @@ public class Judge : IDescriptible
     protected virtual Player playernow { get; set; } = null!;
     protected virtual List<ChooseStrategyWrapped> validTokenFornow { get; set; }
 
-    public virtual string Description => "Game";
+    public static string Description => "Juez Honesto para el juego";
 
     //Guarda las fichas que son validas en un momento x
     public Judge(IStopGame<Player, IToken> stop, IGetScore<IToken> getscore, IWinCondition<(Player player, List<IToken> hand), IToken> winCondition, IValidPlay<Board, IToken, ChooseStrategyWrapped> valid)
@@ -28,7 +28,6 @@ public class Judge : IDescriptible
     }
     protected virtual bool PlayerMeetsStopCriteria(Player player)
     {
-
         return this.stopcriteria.MeetsCriteria(player, this.howtogetscore);
     }
     public virtual ChooseStrategyWrapped ValidPlay(Player player, Board board, IToken token)
@@ -153,7 +152,8 @@ public class Judge : IDescriptible
 
     protected virtual bool ItsThePlayerHand(Player player, List<IToken> hand)
     {
-        List<IToken> phand = player.hand;
+        List<IToken> phand = player.hand.ToList();
+        
         if (hand.Count != player.hand.Count) { return false; }
         for (int i = 0; i < hand.Count; i++)
         {
@@ -166,11 +166,9 @@ public class Judge : IDescriptible
 
     public virtual void PlayAlante(ChooseSideWrapped where, IToken token, IToken first, Board board)
     {
-
-        if (where.WhereCanMacht.Contains(1)) { token.SwapToken(); }
-
-
-        board.board.Insert(0, token);
+        if (where is not null ) if (where.WhereCanMacht.Contains(1)) { token.SwapToken(); }
+       // if (board.board.Count ==0) board.board.Add(token);
+        else board.board.Insert(0, token);
     }
 
     public virtual void PlayAtras(ChooseSideWrapped where, IToken token, IToken last, Board board)
@@ -179,20 +177,22 @@ public class Judge : IDescriptible
         board.board.Add(token);
 
     }
-
-
-
 }
 
 
 public class CorruptionJugde : Judge
 {
-    public override string Description => "Corruption Jugde";
+    public static string Description => "Juez Corrupto para el juego";
     protected Random random { get; set; }
     public CorruptionJugde(IStopGame<Player, IToken> stop, IGetScore<IToken> getscore, IWinCondition<(Player player, List<IToken> hand), IToken> winCondition, IValidPlay<Board, IToken, ChooseStrategyWrapped> valid) : base(stop, getscore, winCondition, valid)
     {
         this.random = new Random();
 
+    }
+
+    public override string ToString()
+    {
+        return Description;
     }
 
     public bool MakeCorruption()
@@ -237,7 +237,7 @@ public class ChampionJudge : IDescriptible
     protected virtual IValidPlay<List<Game>, Player, bool> valid { get; set; }
     protected virtual IGetScore<(Game, Player)> howtogetscore { get; set; }
 
-    public virtual string Description => "Champion Jugde";
+    public static string Description => "Juez Honesto para el torneo";
 
     public ChampionJudge(IStopGame<List<Game>, (Game, Player)> stopcriteria, IWinCondition<Game, (Game, Player)> winCondition, IValidPlay<List<Game>, Player, bool> valid, IGetScore<(Game, Player)> howtogetscore)
     {
@@ -268,7 +268,7 @@ public class ChampionJudge : IDescriptible
 
 public class CorruptionChampionJugde : ChampionJudge
 {
-    public override string Description => "Corruption Champion Judge";
+    public static string Description => "Juez Corrupto para el Torneo";
     public CorruptionChampionJugde(IStopGame<List<Game>, (Game, Player)> stopcriteria, IWinCondition<Game, (Game, Player)> winCondition, IValidPlay<List<Game>, Player, bool> valid, IGetScore<(Game, Player)> howtogetscore) : base(stopcriteria, winCondition, valid, howtogetscore)
     {
     }

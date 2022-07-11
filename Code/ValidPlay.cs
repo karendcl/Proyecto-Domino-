@@ -4,14 +4,14 @@ namespace Game;
 
 #region  Definiton AbstractClass
 
-public abstract class ValidPlayClass : IValidPlay<Board, IToken, ChooseStrategyWrapped>
+public abstract class ValidPlayClass : IValidPlay<Board, IToken, ChooseStrategyWrapped> 
 {
 
-    public ValidPlayClass(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer)
+    public ValidPlayClass(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer) 
     {
 
     }
-    public string Description => "Valid Play";
+    public static string Description => "Valid Play";
 
     public virtual ChooseStrategyWrapped ValidPlay(Board board, IToken token)
     {
@@ -80,9 +80,10 @@ public abstract class ValidPlayClass : IValidPlay<Board, IToken, ChooseStrategyW
 #endregion
 
 # region Derivates class
-public class ClassicValidPlay : ValidPlayClass
+public class ClassicPlay : ValidPlayClass
 {
-    public ClassicValidPlay(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer) : base(equality, Comparer)
+    public static string Description => "Clasico (solo si los numeros son iguales)";
+    public ClassicPlay(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer) : base(equality, Comparer)
     {
     }
 
@@ -93,12 +94,18 @@ public class ClassicValidPlay : ValidPlayClass
         return (part2.Equals(Part1));
     }
 
+    public override string ToString()
+    {
+        return Description;
+    }
+
 
 
 }
 
 public class BiggerValidPlay : ValidPlayClass
 {
+     public static string Description => "Solo si el numero a jugar es mayor al numero ya en la mesa";
     public BiggerValidPlay(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer) : base(equality, Comparer)
     {
     }
@@ -107,10 +114,16 @@ public class BiggerValidPlay : ValidPlayClass
     {
         return (board < token);
     }
+
+     public override string ToString()
+    {
+        return Description;
+    }
 }
 
 public class SmallerValidPlay : ValidPlayClass
 {
+    public static string Description => "Solo si el numero a jugar es menor al numero ya en la mesa";
     public SmallerValidPlay(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer) : base(equality, Comparer)
     {
     }
@@ -119,6 +132,11 @@ public class SmallerValidPlay : ValidPlayClass
     {
         return (part2 > Part1);
     }
+
+    public override string ToString()
+    {
+        return Description;
+    }
 }
 #endregion
 
@@ -126,13 +144,13 @@ public class SmallerValidPlay : ValidPlayClass
 
 #region Champion
 // Si ha perdido mas de las mitad 
-public class ValidChampion : IValidPlay<List<Game>, Player, bool>
+public class ValidChampionPorcientoPerdidas : IValidPlay<List<Game>, Player, bool>
 {
     public double Porcent { get; protected set; }
 
-    public string Description => "Champion Valid Play";
+    public static string Description => "Si ha perdido mas de un x por ciento del total de juegos";
 
-    public ValidChampion(double Porcent)
+    public ValidChampionPorcientoPerdidas(double Porcent)
     {
         this.Porcent = Porcent;
     }
@@ -156,11 +174,11 @@ public class ValidChampion : IValidPlay<List<Game>, Player, bool>
 
 public class ValidChampionPerdidasConsecutivas : IValidPlay<List<Game>, Player, bool>
 {
-    public int CantdeVecesConsecutivas { get; protected set; }
+    public double CantdeVecesConsecutivas { get; protected set; }
 
-    public string Description => "Champion Valid Play";
+    public static string Description => "Si el jugador ha perdido una x cantidad de veces consecutivas";
 
-    public ValidChampionPerdidasConsecutivas(int cantVeces)
+    public ValidChampionPerdidasConsecutivas(double cantVeces)
     {
 
         this.CantdeVecesConsecutivas = cantVeces;

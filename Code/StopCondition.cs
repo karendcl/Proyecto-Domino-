@@ -3,8 +3,7 @@ namespace Game;
 
 public class Classic : IStopGame<Player, IToken>
 {
-
-
+    public static string Description => "Clasico. Cuando alguien se pegue o se tranque el juego";
     public bool MeetsCriteria(Player player, IGetScore<IToken> score)
     {
         return (player.hand.Count == 0) ? true : false;
@@ -13,6 +12,7 @@ public class Classic : IStopGame<Player, IToken>
 
 public class CertainScore : IStopGame<Player, IToken>
 {
+    public static string Description => "Se acaba cuando un jugador tenga un score especifico";
     public int Score { get; set; }
 
     public CertainScore(int score)
@@ -38,6 +38,7 @@ public class CertainScore : IStopGame<Player, IToken>
 
 public class StopChampionPerPoints : IStopGame<List<Game>, (Game, Player)>
 {
+    public static string Description => "Se acaba cuando un jugador acumule x cantidad de puntos";
     protected int Point { get; set; }
     public List<Player> Players { get; set; }
     public List<int> acc { get; set; }
@@ -85,6 +86,7 @@ public class StopChampionPerPoints : IStopGame<List<Game>, (Game, Player)>
 
 public class StopChampionPerHaveAWinner : IStopGame<List<Game>, (Game, Player)>
 {
+    public static string Description => "Se acaba cuando haya una cantidad x de ganadores ";
     protected IWinCondition<Game, (Game, Player)> winCondition { get; set; }
     protected int CantGanadores { get; set; } = 3;
     public StopChampionPerHaveAWinner(IWinCondition<Game, (Game, Player)> winCondition, int CantGanadores)

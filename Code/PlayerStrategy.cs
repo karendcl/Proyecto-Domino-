@@ -2,7 +2,7 @@ namespace Game;
 
 public class RandomStrategy : IPlayerStrategy
 {
-    public string Description => " RandomStrategy ";
+    public static string Description => " Estrategia Random ";
 
     public int Evaluate(IToken itoken, List<IToken> hand, WatchPlayer watchPlayer)
     {
@@ -16,12 +16,17 @@ public class RandomStrategy : IPlayerStrategy
         return r.Next(2);
     }
 
+    public override string ToString()
+    {
+        return Description;
+    }
+
 
 }
 
 public class BGStrategy : IPlayerStrategy
 {
-    public string Description => "BGStrategy";
+    public static string Description => "Estrategia BotaGorda";
 
     public int Evaluate(IToken itoken, List<IToken> hand, WatchPlayer watchPlayer)
     {
@@ -33,12 +38,17 @@ public class BGStrategy : IPlayerStrategy
         if (watch.board.board is null || watch.board.board.Count == 0) return 0;
         return ((watch.board.board.First().Part1.ComponentValue) > watch.board.board.Last().Part2.ComponentValue) ? 1 : 0;
     }
+
+    public override string ToString()
+    {
+        return Description;
+    }
 }
 
 public class SemiSmart : IPlayerStrategy
 {
 
-    public string Description => "SemiSmart";
+    public static string Description => "Estrategia de un jugador semi-inteligente";
 
     public int Evaluate(IToken itoken, List<IToken> hand, WatchPlayer watch)
     {
@@ -62,5 +72,10 @@ public class SemiSmart : IPlayerStrategy
         Board board = watch.board;
         if (board.board is null || board.board.Count == 0) return 0;
         return ((board.board.First().Part1.ComponentValue) > (board.board.Last().Part2.ComponentValue)) ? 1 : 0;
+    }
+
+    public override string ToString()
+    {
+        return Description;
     }
 }

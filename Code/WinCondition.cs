@@ -1,15 +1,15 @@
 
 namespace Game;
 
-public abstract class WinCondition : IWinCondition<(Player player, List<IToken> hand), IToken>
+public abstract class WinCondition : IWinCondition<(IPlayer player, List<IToken> hand), IToken>
 {
     public static string Description => "Game WinCondition";
 
-    public virtual List<Player> Winner(List<(Player player, List<IToken> hand)> players, IGetScore<IToken> howtogetscore)
+    public virtual List<IPlayer> Winner(List<(IPlayer player, List<IToken> hand)> players, IGetScore<IToken> howtogetscore)
     {
         //devuelve una lista de ganadores de la partida
         int count = 0;
-        var result = new List<Player>();
+        var result = new List<IPlayer>();
         double[] scores = new double[players.Count];
 
         foreach (var (player, hand) in players)
@@ -31,7 +31,7 @@ public abstract class WinCondition : IWinCondition<(Player player, List<IToken> 
         return FinalWinner(scores, players);
     }
 
-    public abstract List<Player> FinalWinner(double[] scores, List<(Player player, List<IToken> hand)> players);
+    public abstract List<IPlayer> FinalWinner(double[] scores, List<(IPlayer player, List<IToken> hand)> players);
     //este es el metodo que va a cambiar
 
 
@@ -41,9 +41,9 @@ public class MinScore : WinCondition
 {
 
     public static string Description => "Gana el jugador que tenga menos puntos";
-    public override List<Player> FinalWinner(double[] scores, List<(Player player, List<IToken> hand)> players)
+    public override List<IPlayer> FinalWinner(double[] scores, List<(IPlayer player, List<IToken> hand)> players)
     {
-        var result = new List<Player>();
+        var result = new List<IPlayer>();
 
         double score = scores.Min();
 
@@ -62,9 +62,9 @@ public class MinScore : WinCondition
 public class MaxScore : WinCondition
 {
     public static string Description => "Gana el jugador que tenga mas puntos";
-    public override List<Player> FinalWinner(double[] scores, List<(Player player, List<IToken> hand)> players)
+    public override List<IPlayer> FinalWinner(double[] scores, List<(IPlayer player, List<IToken> hand)> players)
     {
-        var result = new List<Player>();
+        var result = new List<IPlayer>();
 
         double score = scores.Max();
 
@@ -84,9 +84,9 @@ public class MiddleScore : WinCondition
 {
     public static string Description { get { return "Gana el jugador que tenga la media de puntos"; } }
 
-    public override List<Player> FinalWinner(double[] scores, List<(Player player, List<IToken> hand)> players)
+    public override List<IPlayer> FinalWinner(double[] scores, List<(IPlayer player, List<IToken> hand)> players)
     {
-        var result = new List<Player>();
+        var result = new List<IPlayer>();
 
         double[] temp = new double[scores.Length];
         temp = scores.ToArray();
@@ -110,11 +110,11 @@ public class MiddleScore : WinCondition
 
 #region  Champion
 
-public class WinChampion : IWinCondition<Game, List<IPlayerScore>>
+public class WinChampion : IWinCondition<IGame<GameStatus>, List<IPlayerScore>>
 {//En total de ganadas 
 
     public double Porcent { get; protected set; }
-    protected List<WPlayer<Player>> players { get; set; }
+    protected List<WPlayer<IPlayer>> players { get; set; }
     protected List<int> cantwins { get; set; }
 
     protected IGetScore<List<IPlayerScore>> howtogetscore { get; set; }
@@ -123,12 +123,12 @@ public class WinChampion : IWinCondition<Game, List<IPlayerScore>>
 
     public WinChampion(double porcentWins)
     {
-        this.players = new List<WPlayer<Player>>() { };
+        this.players = new List<WPlayer<IPlayer>>() { };
         this.cantwins = new List<int>() { };
         this.Porcent = porcentWins;
     }
 
-    protected void Run(List<Game> games)
+    protected void Run(List<IGame<GameStatus>> games)
     {
         foreach (var game in games)
         {
@@ -146,20 +146,20 @@ public class WinChampion : IWinCondition<Game, List<IPlayerScore>>
             }
         }
     }
-    public List<Player> Winner(List<Game> games, IGetScore<List<IPlayerScore>> howtogetscore)
+    public List<IPlayer> Winner(List<IGame<GameStatus>> games, IGetScore<List<IPlayerScore>> howtogetscore)
     {
         this.howtogetscore = howtogetscore;
         Run(games);                                 ///Agregar una que utiize esta 
-        List<Player> winners = new List<Player>() { };
+        var winners = new List<IPlayer>() { };
         foreach (var game in games)
         {
             winners = game.Winner();
 
             for (int i = 0; i < winners.Count; i++)
             {
-                Player player = winners[i];
+                var player = winners[i];
 
-                WPlayer<Player> temp = new WPlayer<Player>(player, 1);
+                WPlayer<IPlayer> temp = new WPlayer<IPlayer>(player, 1);
                 if (!players.Contains(temp)) { players.Add(temp); }
                 else { int x = players.IndexOf(temp); players[x].AddScore(temp.Puntuation); }
             }
@@ -169,7 +169,7 @@ public class WinChampion : IWinCondition<Game, List<IPlayerScore>>
 
 
 
-        List<Player> list = new List<Player>() { };
+        var list = new List<IPlayer>() { };
         foreach (var player in players)
         {
             if (Check(player.player.Id))
@@ -216,9 +216,9 @@ public class WinChampion : IWinCondition<Game, List<IPlayerScore>>
 
 
 
-    protected internal class WPlayer_Comparer : IComparer<WPlayer<Player>>
+    protected internal class WPlayer_Comparer : IComparer<WPlayer<IPlayer>>
     {
-        public int Compare(WPlayer<Player>? x, WPlayer<Player>? y)
+        public int Compare(WPlayer<IPlayer>? x, WPlayer<IPlayer>? y)
         {
             if (x == null || y == null) { throw new NullReferenceException("null"); }
             if (x?.Puntuation < y?.Puntuation)

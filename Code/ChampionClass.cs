@@ -29,8 +29,8 @@ public class Championship : IChampionship<ChampionStatus>
     public virtual event Predicate<Orders> CanContinue;//Evento que pregunta al final de cada partida si se puede continuar
     public virtual event Action<ChampionStatus> status;// Evento que envia la informacion del torneo en cada accion desde poner un ficha hasta el final del mismo
     #endregion
-    public virtual int Champions { get; protected set; }//Cantidad de partidas
-    protected virtual IChampionJudge judge { get; set; }// Juez a nivel de torneo
+    public virtual int CountOfGames { get; protected set; }//Cantidad de partidas
+    protected virtual IChampionJudge<GameStatus> judge { get; set; }// Juez a nivel de torneo
     protected virtual List<Game> Games { get; set; }// Lista d elas partidas
     protected virtual PlayersCoach GlobalPlayers { get; set; }// El organizador de los jugadores a nivel de torneo
     public virtual bool HaveAWinner { get; protected set; } // True si hay un ganador a nivel de torneo  falso si no lo hay
@@ -46,7 +46,7 @@ public class Championship : IChampionship<ChampionStatus>
 
     public Championship(int cantTorneos, ChampionJudge judge, PlayersCoach players, List<Game> games)
     {
-        this.Champions = cantTorneos;
+        this.CountOfGames = cantTorneos;
         this.Games = games;
         this.GlobalPlayers = players;
         this.judge = judge;
@@ -64,10 +64,10 @@ public class Championship : IChampionship<ChampionStatus>
 
         for (int i = 0; i < Games.Count; i++) //Por cada una de las partidas
         {
-            Game game = Games[i]; // La partida a jugar en este momento
+            IGame<GameStatus> game = Games[i]; // La partida a jugar en este momento
             game.GameStatus += this.PrintGames;// Suscribirse al evento
             game.CanContinue += this.Continue;//Suscribirse al evento
-            List<Player> players = GlobalPlayers.GetNextPlayers(); //Jugadores en esta partida
+            List<IPlayer> players = GlobalPlayers.GetNextPlayers(); //Jugadores en esta partida
             ControlPlayers(players);// Se controla que los jugadores puedan jugar dicha partida
             if (players.Count < 1) //Si no hay jugadores se acabo el torneo
             {
@@ -95,7 +95,7 @@ public class Championship : IChampionship<ChampionStatus>
     #region Mandar informacion de los partidos
 
     public bool Continue(Orders orders) => this.CanContinue(orders);
-    protected void GameOver(Game game, GameStatus gameStatus, int i) //Significa que se acabo esa partida
+    protected void GameOver(IGame<GameStatus> game, GameStatus gameStatus, int i) //Significa que se acabo esa partida
     {
         this.GamesStatus.Push(gameStatus);
         this.FinishGames.Add(game);
@@ -114,15 +114,15 @@ public class Championship : IChampionship<ChampionStatus>
 
     protected ChampionStatus CreateAChampionStatus()   //Crea el estatus del torneo con el ultimo estatus de la partida
     {
-        List<Player> AllPlayer = this.GlobalPlayers.AllPlayers;
+        var AllPlayer = this.GlobalPlayers.AllPlayers;
 
         ChampionStatus championStatus = new ChampionStatus(this.GamesStatus, this.PlayerStats, HaveAWinner, this.Winners, this.ItsChampionOver);
         return championStatus;
     }
 
-    protected void ControlPlayers(List<Player> players) //Se contorla los players
+    protected void ControlPlayers(List<IPlayer> players) //Se contorla los players
     {
-        List<Player> temp = new List<Player>();
+        var temp = new List<IPlayer>();
         foreach (var player in players)
         {
             if (judge.ValidPlay(player)) temp.Add(player);
@@ -134,13 +134,13 @@ public class Championship : IChampionship<ChampionStatus>
         List<PlayerStats> Strats = new List<PlayerStats>() { };
         foreach (var player in this.AllPlayers)
         {
-            PlayerStats temp = new PlayerStats(player);
+            PlayerStats temp = new PlayerStats(player.Clone());
             double punctuation = 0;
             foreach (var Game in this.FinishGames)
             {
-                if (Game.player.Contains(player))
+                if (Game.GamePlayers.Contains(player))
                 {
-                    punctuation += Game.judge.PlayerScore(player);
+                    punctuation += Game.PlayerScore(player);
                 }
             }
             temp.AddPuntuation(punctuation);
@@ -159,7 +159,7 @@ public class Championship : IChampionship<ChampionStatus>
 
     }
 
-    protected List<Player> ChampionWinners() => this.judge.Winners();
+    protected List<IPlayer> ChampionWinners() => this.judge.Winners();
     protected void ChampionPrint()
     {
         ChampionStatus championStatus = this.CreateAChampionStatus();

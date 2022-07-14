@@ -1,20 +1,22 @@
 namespace Game;
 
+
+
 /// <summary>
 ///  Es un envoltorio para seleccionar la posicion de la ficha en el tablero
 /// </summary>
 /// <param name=""></param>
 /// <returns></returns>
-public class ChooseStrategyWrapped : IEquatable<ChooseStrategyWrapped>
+public class ChooseStrategyWrapped : IEquatable<ChooseStrategyWrapped>, IChooseStrategyWrapped
 {
     public bool CanMatch { get; private set; } = false;// Si se puede poner la ficha en el tablero
 
     public bool FirstPlay { get; private set; } = false; //Si es la primera partida
-    public Board board { get; private set; } // el tablero
+    public IBoard board { get; private set; } // el tablero
     public IToken itoken { get; private set; } // TOken a poner
     public List<ChooseSideWrapped> side { get; private set; }// Lista de envoltorio de las posibles posiciones a poner
 
-    public ChooseStrategyWrapped(Board board, IToken itoken, bool FirstPlay = false)
+    public ChooseStrategyWrapped(IBoard board, IToken itoken, bool FirstPlay = false)
     {
         this.FirstPlay = FirstPlay;
         this.CanMatch = FirstPlay;
@@ -64,12 +66,15 @@ public class ChooseStrategyWrapped : IEquatable<ChooseStrategyWrapped>
         return (this.itoken.Equals(other.itoken));
     }
 }
+
+
+
 /// <summary>
 ///  Seleccion de lugares donde se puede o no poner 
 /// </summary>
 /// <param name=""> Contiene el indice en numeros enteros y el bool canChoose si se puede poner</param>
 /// <returns> </returns>
-public class ChooseSideWrapped
+public class ChooseSideWrapped : IChooseSideWrapped
 {
     public int index { get; private set; }//Indice a poner el token
     public bool canChoose { get; private set; } = false;//Si se puede poner el token

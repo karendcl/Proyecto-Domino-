@@ -56,8 +56,16 @@ public class Board : IBoard
 
     public void AddTokenToBoard(IToken itoken, int side) //add una ficha al tablero
     {
-        if (side == 0) { this.temp.Insert(0, itoken); }
-        else { this.temp.Add(itoken); }
+        if (temp.Count < 1)
+        {
+            temp.Add(itoken);
+        }
+        else
+        {
+            if (side == 0) { this.temp.Insert(0, itoken); }
+            else { this.temp.Add(itoken); }
+        }
+
     }
 
     public IBoard Clone()  //clona el tablero

@@ -44,7 +44,7 @@ public class Player : IPlayer
         return a;
     }
 
-    protected virtual List<IToken> PossiblePlays(WatchPlayer watchPlayer)// Plays posibles
+    protected virtual List<IToken> PossiblePlays(IWatchPlayer watchPlayer)// Plays posibles
     {
         //devuelve una lista con las posibles fichas a jugar en dependencia de lo que el juez le diga
         var CanPlay = new List<IToken>();
@@ -57,7 +57,7 @@ public class Player : IPlayer
         return CanPlay;
     }
 
-    public virtual IToken BestPlay(WatchPlayer watchPlayer)
+    public virtual IToken BestPlay(IWatchPlayer watchPlayer)
     {
         //de todas las fichas posibles a jugar. el jugador las evalua en dependencia de su estrategia.
         //y la que tenga mas valor, la juega
@@ -85,7 +85,7 @@ public class Player : IPlayer
         int index = random.Next(0, count - 1);
         return this.strategias[index];
     }
-    public virtual int ChooseSide(ChooseStrategyWrapped choose, WatchPlayer watchPlayer)
+    public virtual int ChooseSide(IChooseStrategyWrapped choose, IWatchPlayer watchPlayer)
     {
         return strategy.ChooseSide(choose, watchPlayer);
     }
@@ -132,7 +132,7 @@ public class CorruptionPlayer : Player, ICorruptible
 
     public static string Description => "Jugador Corrupto/Tramposo";
 
-    public override IToken BestPlay(WatchPlayer watchPlayer)
+    public override IToken BestPlay(IWatchPlayer watchPlayer)
     {
         int[] scores = new int[this.hand.Count];
         List<IToken> pasar = this.hand.ToList();

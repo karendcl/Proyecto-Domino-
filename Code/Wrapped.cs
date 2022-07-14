@@ -173,7 +173,7 @@ public class GameStatus //Actualiza en la pantalla todo lo que ocurre en cada ju
     public IPlayer actualPlayer { get { return SetActualPlayer(); } }
     public GamePlayerHand<IToken> PlayerActualHand { get { return SetActualPlayerHand(); } }
 
-    public GameStatus(List<PlayerStats> PlayerStats, List<GamePlayerHand<IToken>> hands, Board board, bool ItsAFinishGame = false)
+    public GameStatus(List<PlayerStats> PlayerStats, List<GamePlayerHand<IToken>> hands, IBoard board, bool ItsAFinishGame = false)
     {
         this.board = board;
         this.Hands = hands;
@@ -202,20 +202,20 @@ public class GameStatus //Actualiza en la pantalla todo lo que ocurre en cada ju
     }
 
 
-    public void AddWinners(List<Player> winners) => this.winners.AddRange(winners);
+    public void AddWinners(List<IPlayer> winners) => this.winners.AddRange(winners);
 
 }
 
 
 public class PlayerStats : IEquatable<PlayerStats> //Da la informacion de cada jugador a pantalla
 {
-    public Player player { get; protected set; }
+    public IPlayer player { get; protected set; }
 
     public double punctuation { get; protected set; } = -1;
 
 
 
-    public PlayerStats(Player player)
+    public PlayerStats(IPlayer player)
     {
         this.player = player;
 
@@ -241,22 +241,22 @@ public class PlayerStats : IEquatable<PlayerStats> //Da la informacion de cada j
 
 
 
-
-public class WatchPlayer //Tiene toda la informacion que es necesaria por un jugador para poder seleccionar un IToken
+public class WatchPlayer : IWatchPlayer
+//Tiene toda la informacion que es necesaria por un jugador para poder seleccionar un IToken
 {
     public IGetScore<IToken> howtogetscore { get; protected set; }
-    public IStopGame<Player, IToken> stopCondition { get; protected set; }
-    public IValidPlay<Board, IToken, ChooseStrategyWrapped> validPlay { get; protected set; }
-    public IWinCondition<(Player player, List<IToken> hand), IToken> winCondition { get; protected set; }
+    public IStopGame<IPlayer, IToken> stopCondition { get; protected set; }
+    public IValidPlay<IBoard, IToken, IChooseStrategyWrapped> validPlay { get; protected set; }
+    public IWinCondition<(IPlayer player, List<IToken> hand), IToken> winCondition { get; protected set; }
 
 
-    public Board board { get; protected set; }
+    public IBoard board { get; protected set; }
 
 
 
 
     //Despues hacer una interfaz tipo Ipasable 
-    public WatchPlayer(IGetScore<IToken> howtogetscore, IStopGame<Player, IToken> stopCondition, IValidPlay<Board, IToken, ChooseStrategyWrapped> validPlay, IWinCondition<(Player player, List<IToken> hand), IToken> winCondition, Board board)
+    public WatchPlayer(IGetScore<IToken> howtogetscore, IStopGame<IPlayer, IToken> stopCondition, IValidPlay<IBoard, IToken, IChooseStrategyWrapped> validPlay, IWinCondition<(IPlayer player, List<IToken> hand), IToken> winCondition, IBoard board)
     {
         this.howtogetscore = howtogetscore;
         this.stopCondition = stopCondition;

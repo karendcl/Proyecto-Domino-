@@ -329,7 +329,7 @@ public class ChampionStart
         }
         PlayersCoach coach = new PlayersCoach(tt);
 
-        Game[] Games = new Game[CantPartidas];
+        var Games = new IGame<GameStatus>[CantPartidas];
         bool ConfGame = false;
         if (this.BooleanAsk("Quiere Jugar todos los partidos con las configuraciones predeterminadas"))
         { ConfGame = true; }

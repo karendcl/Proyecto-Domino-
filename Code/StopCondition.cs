@@ -36,7 +36,7 @@ public class CertainScore : IStopGame<Player, IToken>
 #region  Champion
 //Champion
 
-public class StopChampionPerPoints : IStopGame<List<Game>, List<IPlayerScore>>
+public class StopChampionPerPoints : IStopGame<List<IGame<GameStatus>>, List<IPlayerScore>>
 {
     public static string Description => "Se acaba cuando un jugador acumule x cantidad de puntos";
     protected int Point { get; set; }
@@ -56,7 +56,7 @@ public class StopChampionPerPoints : IStopGame<List<Game>, List<IPlayerScore>>
     }
     //Cada juego se comprueba que no exceda de puntos
     //Se asume que estan todos los jugadores desde un inicio en caso contrario se añade 
-    public bool MeetsCriteria(List<Game> games, IGetScore<List<IPlayerScore>> howtogetscore)
+    public bool MeetsCriteria(List<IGame<GameStatus>> games, IGetScore<List<IPlayerScore>> howtogetscore)
     {
         if (CheckCriteria()) return false;
 
@@ -67,7 +67,7 @@ public class StopChampionPerPoints : IStopGame<List<Game>, List<IPlayerScore>>
         return false;
     }
 
-    protected void score(List<Game> games, IGetScore<List<IPlayerScore>> howtogetscore)
+    protected void score(List<IGame<GameStatus>> games, IGetScore<List<IPlayerScore>> howtogetscore)
     {
         var PlayersScore = Organize(games);
         foreach (var playerScore in PlayersScore.Values)
@@ -82,7 +82,7 @@ public class StopChampionPerPoints : IStopGame<List<Game>, List<IPlayerScore>>
     }
 
 
-    protected virtual Dictionary<int, List<IPlayerScore>> Organize(List<Game> games)
+    protected virtual Dictionary<int, List<IPlayerScore>> Organize(List<IGame<GameStatus>> games)
     {
         Dictionary<int, List<IPlayerScore>> temp = new Dictionary<int, List<IPlayerScore>>();
         foreach (var game in games)
@@ -108,21 +108,21 @@ public class StopChampionPerPoints : IStopGame<List<Game>, List<IPlayerScore>>
 }
 
 
-public class StopChampionPerHaveAWinner : IStopGame<List<Game>, List<IPlayerScore>>
+public class StopChampionPerHaveAWinner : IStopGame<List<IGame<GameStatus>>, List<IPlayerScore>>
 {
     public static string Description => "Se acaba cuando haya una cantidad x de ganadores ";
-    protected IWinCondition<Game, List<IPlayerScore>> winCondition { get; set; }
+    protected IWinCondition<IGame<GameStatus>, List<IPlayerScore>> winCondition { get; set; }
     protected int CantGanadores { get; set; } = 3;
-    public StopChampionPerHaveAWinner(IWinCondition<Game, List<IPlayerScore>> winCondition, int CantGanadores)
+    public StopChampionPerHaveAWinner(IWinCondition<IGame<GameStatus>, List<IPlayerScore>> winCondition, int CantGanadores)
     {
         this.winCondition = winCondition;
         if (CantGanadores > 0) { this.CantGanadores = CantGanadores; }
 
     }
-    public bool MeetsCriteria(List<Game> criterio, IGetScore<List<IPlayerScore>> howtogetscore)
+    public bool MeetsCriteria(List<IGame<GameStatus>> criterio, IGetScore<List<IPlayerScore>> howtogetscore)
     {
 
-        List<Player> players = this.winCondition.Winner(criterio, howtogetscore);
+        List<IPlayer> players = this.winCondition.Winner(criterio, howtogetscore);
         if (players.Count > CantGanadores) return true;
         return false;
     }

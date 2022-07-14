@@ -10,19 +10,20 @@ namespace Game;
 /// <returns></returns>
 public class Game : IGame<GameStatus>
 {
-    internal virtual event Action<GameStatus>? GameStatus; //Evento sobre acciones del juego
-    internal virtual event Predicate<Orders> CanContinue;//  Evento de si puede continuar la partida
+    public virtual event Action<GameStatus>? GameStatus; //Evento sobre acciones del juego
+    public virtual event Predicate<Orders> CanContinue;//  Evento de si puede continuar la partida
     public virtual IBoard? board { get; protected set; } //Tablero se recibe en play a game
-    public virtual List<Player>? player { get; protected set; }// Jugadores de la partida
+    public virtual List<IPlayer>? GamePlayers { get { return GetPlayerList(); } }
+    protected virtual List<IPlayer>? player { get; set; }// Jugadores de la partida
     internal virtual int MaxDouble { get; set; } //Maximo doble a jugar
-    internal Judge judge { get; set; } //Juez de la partida
+    internal IJudgeGame judge { get; set; } //Juez de la partida
     protected List<GamePlayerHand<IToken>> hands { get { return this.PlayersHands.Values.ToList<GamePlayerHand<IToken>>(); } } //Mano de los jugadores
     protected List<PlayerStats> PlayerStats = new List<PlayerStats>() { };  //Estadisticas de los jugadores
     protected TokensManager Manager { get; set; } // Administrador de las fichas
 
     protected Dictionary<int, GamePlayerHand<IToken>> PlayersHands { get; set; }
 
-    public Game(int max, Judge judge, TokensManager manager)
+    public Game(int max, IJudgeGame judge, TokensManager manager)
     {
 
         this.MaxDouble = max;
@@ -39,6 +40,17 @@ public class Game : IGame<GameStatus>
 
         return a;
     }
+
+    protected List<IPlayer>? GetPlayerList()
+    {
+        var x = new List<IPlayer>();
+        foreach (var item in this.player)
+        {
+            x.Add(item.Clone());
+        }
+
+        return x;
+    }
     /// <summary>
     ///  Score de todos los player
     /// </summary>
@@ -54,13 +66,13 @@ public class Game : IGame<GameStatus>
     /// </summary>
     /// <param name=""></param>
     /// <returns>Lista de jugadores</returns>
-    public virtual List<Player> Winner()
+    public virtual List<IPlayer> Winner()
     {
-        List<(Player player, List<IToken> hand)> temp = MatchHandAndPlayer();
+        var temp = MatchHandAndPlayer();
         return this.judge.Winner(temp);
     }
 
-    protected virtual void AssingTokens(List<Player> players)  //se reparten las fichas
+    protected virtual void AssingTokens(List<IPlayer> players)  //se reparten las fichas
     {
         Dictionary<int, GamePlayerHand<IToken>> PlayersHands = new Dictionary<int, GamePlayerHand<IToken>>() { };
 
@@ -74,9 +86,9 @@ public class Game : IGame<GameStatus>
         this.PlayersHands = PlayersHands;
     }
 
-    protected virtual List<(Player player, List<IToken> hand)> MatchHandAndPlayer()//Se une la mano del jugador con el 
+    protected virtual List<(IPlayer player, List<IToken> hand)> MatchHandAndPlayer()//Se une la mano del jugador con el 
     {
-        List<(Player player, List<IToken> hand)> temp = new List<(Player player, List<IToken> hand)>() { };
+        List<(IPlayer player, List<IToken> hand)> temp = new List<(IPlayer player, List<IToken> hand)>() { };
         foreach (var item in this.player!)
         {
             int id = item.Id;
@@ -84,7 +96,7 @@ public class Game : IGame<GameStatus>
             {
                 GamePlayerHand<IToken> hands = PlayersHands[id];
 
-                (Player player, List<IToken> hand) Player = (item, hands.hand);
+                (IPlayer player, List<IToken> hand) Player = (item, hands.hand);
                 temp.Add(Player);
             }
 
@@ -94,7 +106,7 @@ public class Game : IGame<GameStatus>
         return temp;
     }
 
-    protected virtual GamePlayerHand<IToken> PullAPlayerAndHand(Player player) //Devuelve la mano de ese jugador
+    protected virtual GamePlayerHand<IToken> PullAPlayerAndHand(IPlayer player) //Devuelve la mano de ese jugador
     {
         if (PlayersHands.ContainsKey(player.Id)) { return PlayersHands[player.Id]; }
         return null!;
@@ -105,29 +117,29 @@ public class Game : IGame<GameStatus>
     /// </summary>
     /// <param name=""></param>
     /// <returns>El estado final de la partida</returns>
-    public GameStatus PlayAGame(IBoard board, List<Player> players)
+    public GameStatus PlayAGame(IBoard board, List<IPlayer> players)
     {
 
         this.AssingTokens(players); //Se assignan las fichas
         this.board = board;// Se asgina el tablero
         this.player = players;//Añadir al juego los jugadores y el tablero
 
-        Judge judge = this.judge;
+        var judge = this.judge;
 
-        List<Player> player = this.player;//Assignar jugadores
+        var player = this.player;//Assignar jugadores
 
 
 
-        Func<List<(Player, List<IToken>)>, IBoard, bool> EndGame = (player, board) => judge.EndGame(player, board.Clone(this.board.board));
+        Func<List<(IPlayer, List<IToken>)>, IBoard, bool> EndGame = (player, board) => judge.EndGame(player, board.Clone(this.board.board));
 
         while (!EndGame(MatchHandAndPlayer(), board)) //mientras no se acabe el juego
         {
             for (int i = 0; i < this.player.Count; i++) //turno de cada jugador
             {
 
-                List<(Player player, List<IToken> hand)> Match = MatchHandAndPlayer();//Se unen las manos de los jugadores
+                var Match = MatchHandAndPlayer();//Se unen las manos de los jugadores
 
-                Player playerNow = player[i];
+                var playerNow = player[i];
 
                 GamePlayerHand<IToken> playerHand = PullAPlayerAndHand(playerNow);
 
@@ -135,13 +147,13 @@ public class Game : IGame<GameStatus>
 
                 if (EndGame(Match, board)) break;
 
-                WatchPlayer watch = judge.RunWatchPlayer(board.Clone(this.board.board)); //Envoltorio para el jugador
+                IWatchPlayer watch = judge.RunWatchPlayer(board.Clone(this.board.board)); //Envoltorio para el jugador
 
                 this.Print(playerNow, this.board, playerHand);// Enviar a consola el estado actual de la partida
 
                 IToken Token1 = Turno(playerNow, watch);  //la ficha que se va a jugar                     
 
-                ChooseStrategyWrapped valid = this.judge.ValidPlay(playerNow, board, Token1); //Elije los lugares donde puede ser valida 
+                IChooseStrategyWrapped valid = this.judge.ValidPlay(playerNow, board, Token1); //Elije los lugares donde puede ser valida 
 
 
                 if (Token1 is not null) //si no es nulo, entonces si lleva
@@ -168,6 +180,11 @@ public class Game : IGame<GameStatus>
 
     }
 
+    public double PlayerScore(IPlayer player)
+    {
+        return this.judge.PlayerScore(player);
+    }
+
     protected GameStatus EndGameStatus()// Si finalizo la partida enviar toda la informacion de finalizacion 
     {
         foreach (var item in this.PlayerStats)
@@ -176,14 +193,14 @@ public class Game : IGame<GameStatus>
             item.AddPuntuation(score);
         }
         GameStatus status = new GameStatus(this.PlayerStats, hands, board!, true);
-        List<Player> winners = this.Winner();
+        List<IPlayer> winners = this.Winner();
         status.AddWinners(winners);
         this.GameStatus!.Invoke(status);
         return status;
 
     }
 
-    private void Print(Player player, IBoard board, GamePlayerHand<IToken> hand)
+    private void Print(IPlayer player, IBoard board, GamePlayerHand<IToken> hand)
     {
         PlayerStats PlayerStats = new PlayerStats(player);
 
@@ -197,11 +214,11 @@ public class Game : IGame<GameStatus>
 
 
 
-    private IToken Turno(Player player, WatchPlayer watch) //el turno solo le pide al jugador su ficha a jugar
+    private IToken Turno(IPlayer player, IWatchPlayer watch) //el turno solo le pide al jugador su ficha a jugar
     {
         return player.BestPlay(watch);
     }
-    public IGame<Clone() => new Game(this.MaxDouble, this.judge, this.Manager);
+    public IGame<GameStatus> Clone() => new Game(this.MaxDouble, this.judge, this.Manager);
 
 
 

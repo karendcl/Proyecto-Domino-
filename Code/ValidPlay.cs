@@ -4,10 +4,10 @@ namespace Game;
 
 #region  Definiton AbstractClass
 
-public abstract class ValidPlayClass : IValidPlay<Board, IToken, ChooseStrategyWrapped> 
+public abstract class ValidPlayClass : IValidPlay<Board, IToken, ChooseStrategyWrapped>
 {
 
-    public ValidPlayClass(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer) 
+    public ValidPlayClass(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer)
     {
 
     }
@@ -18,13 +18,13 @@ public abstract class ValidPlayClass : IValidPlay<Board, IToken, ChooseStrategyW
 
         ChooseStrategyWrapped choose = new ChooseStrategyWrapped(board, token);
         bool z = false;
-        if (FirstPlay(board))
+        if (FirstPlay(board)) //Si es l primera partida siempre se puede poner ficha
         {
             return (new ChooseStrategyWrapped(board, token, true));
         }
-        ChooseSideWrapped front = ValidPlayFront(board, token);
+        ChooseSideWrapped front = ValidPlayFront(board, token);// Si se puede jugar por el indice 0
         choose.AddSide(front);
-        ChooseSideWrapped back = ValidPlayBack(board, token);
+        ChooseSideWrapped back = ValidPlayBack(board, token);// Si se puede jugar por el ultimo indice
         choose.AddSide(back);
         return choose;
 
@@ -34,8 +34,7 @@ public abstract class ValidPlayClass : IValidPlay<Board, IToken, ChooseStrategyW
 
 
         ChooseSideWrapped choose = new ChooseSideWrapped(0);
-        //List<int> macth = new List<int>() { };
-        //if (FirstPlay(board)) return true;
+
         if (Match((int)token.Part1.ComponentValue, (int)board.First.Part1.ComponentValue))
         {
             choose.AddSide(1);//Girar la ficha
@@ -105,7 +104,7 @@ public class ClassicPlay : ValidPlayClass
 
 public class BiggerValidPlay : ValidPlayClass
 {
-     public static string Description => "Solo si el numero a jugar es mayor al numero ya en la mesa";
+    public static string Description => "Solo si el numero a jugar es mayor al numero ya en la mesa";
     public BiggerValidPlay(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer) : base(equality, Comparer)
     {
     }
@@ -115,7 +114,7 @@ public class BiggerValidPlay : ValidPlayClass
         return (board < token);
     }
 
-     public override string ToString()
+    public override string ToString()
     {
         return Description;
     }

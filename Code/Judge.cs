@@ -1,8 +1,9 @@
 namespace Game;
 
+
 #region Game
 
-public class Judge : IDescriptible
+public class Judge : IDescriptible, IJudgeGame
 {
     #region Global
     protected virtual IStopGame<Player, IToken> stopcriteria { get; set; }
@@ -281,13 +282,14 @@ public class CorruptionJugde : Judge
 
 }
 
+
 #endregion
 
 
 #region  Champion
 
 
-public class ChampionJudge : IDescriptible
+public class ChampionJudge : IDescriptible, IChampionJudge
 {
     protected virtual IStopGame<List<Game>, List<IPlayerScore>> stopcriteria { get; set; }
     protected virtual IWinCondition<Game, List<IPlayerScore>> winCondition { get; set; }
@@ -306,7 +308,7 @@ public class ChampionJudge : IDescriptible
         this.stopcriteria = stopcriteria;
         this.valid = valid;
         this.winCondition = winCondition;
-       
+
     }
 
     public virtual void Run(List<Player> players)

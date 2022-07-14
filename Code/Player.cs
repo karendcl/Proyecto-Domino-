@@ -2,7 +2,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Game;
 
-public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<Player>, IDescriptible, IEquatable<int>
+
+
+public class Player : IPlayer
 {
     public virtual List<IToken> hand { get; protected set; } = new List<IToken>() { };
     public virtual int Id { get; }
@@ -88,7 +90,7 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
         return strategy.ChooseSide(choose, watchPlayer);
     }
 
-    public virtual Player Clone()
+    public virtual IPlayer Clone()
     {
         Player temp = new Player(this.Id);
         foreach (var item in strategias)
@@ -98,13 +100,13 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
         return temp;
     }
 
-    public virtual bool Equals(Player? other)
+    public virtual bool Equals(IPlayer? other)
     {
         if (other is null) return false;
         return (this.Id == other.Id);
     }
 
-    public virtual bool Equals(Player? x, Player? y)  //???????????????????????????
+    public virtual bool Equals(IPlayer? x, IPlayer? y)
     {
         if (x == null || y == null) return false;
         if (x.Id == y.Id) return true;
@@ -112,7 +114,7 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
         return false;
     }
 
-    public virtual int GetHashCode([DisallowNull] Player obj)
+    public virtual int GetHashCode([DisallowNull] IPlayer obj)
     {
         return obj.GetHashCode();
     }

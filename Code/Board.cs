@@ -1,15 +1,29 @@
 namespace Game;
 
-public class Board
-{
-    public List<IToken> board { get; protected set; }
 
+
+public class Board : IBoard
+{
+    public List<IToken> board { get { return GetTokens(); } }
+
+
+    protected List<IToken> temp { get; set; }
+
+    protected List<IToken> GetTokens()
+    {
+        List<IToken> list = new List<IToken>();
+        foreach (var item in temp)
+        {
+            list.Add(item.Clone());
+        }
+        return list;
+    }
     public IToken First  //devuelve la primera ficha del tablero
     {
         get
         {
-            if (board.Count == 0) return null!;
-            return this.board.First();
+            if (temp.Count == 0) return null!;
+            return this.temp.First().Clone();
         }
     }
 
@@ -17,21 +31,21 @@ public class Board
     {
         get
         {
-            if (board.Count == 0) throw new NullReferenceException("The itoken can´t be null");
-            return this.board.Last();
+            if (temp.Count == 0) throw new NullReferenceException("The itoken can´t be null");
+            return this.temp.Last().Clone();
         }
     }
 
     public Board()
     {
-        this.board = new List<IToken>() { };
+        this.temp = new List<IToken>() { };
     }
 
     public override string ToString()  //escribe el tablero y las fichas
     {
         string a = " Board:  \n";
 
-        foreach (var item in this.board)
+        foreach (var item in this.temp)
         {
             a += item.ToString();
         }
@@ -42,17 +56,17 @@ public class Board
 
     public void AddTokenToBoard(IToken itoken, int side) //add una ficha al tablero
     {
-        if (side == 0) { this.board.Insert(0, itoken); }
-        else { this.board.Add(itoken); }
+        if (side == 0) { this.temp.Insert(0, itoken); }
+        else { this.temp.Add(itoken); }
     }
 
-    public Board Clone()  //clona el tablero
+    public IBoard Clone()  //clona el tablero
     {
         return new Board();
     }
-    public Board Clone(List<IToken> CopyTokens)
+    public IBoard Clone(List<IToken> CopyTokens)
     {
-        this.board = CopyTokens;
+        this.temp = CopyTokens;
         return this;
     }
 

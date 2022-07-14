@@ -1,14 +1,18 @@
 namespace Game;
+
+
+
+
 /// <summary>
 ///  Una partida de domino completa
 /// </summary>
 /// <param name=""></param>
 /// <returns></returns>
-public class Game : ICloneable<Game>
+public class Game : ICloneable<Game>, IGame
 {
     internal virtual event Action<GameStatus>? GameStatus; //Evento sobre acciones del juego
     internal virtual event Predicate<Orders> CanContinue;//  Evento de si puede continuar la partida
-    public virtual Board? board { get; protected set; } //Tablero se recibe en play a game
+    public virtual IBoard? board { get; protected set; } //Tablero se recibe en play a game
     public virtual List<Player>? player { get; protected set; }// Jugadores de la partida
     internal virtual int MaxDouble { get; set; } //Maximo doble a jugar
     internal Judge judge { get; set; } //Juez de la partida
@@ -101,7 +105,7 @@ public class Game : ICloneable<Game>
     /// </summary>
     /// <param name=""></param>
     /// <returns>El estado final de la partida</returns>
-    public GameStatus PlayAGame(Board board, List<Player> players)
+    public GameStatus PlayAGame(IBoard board, List<Player> players)
     {
 
         this.AssingTokens(players); //Se assignan las fichas
@@ -114,7 +118,7 @@ public class Game : ICloneable<Game>
 
 
 
-        Func<List<(Player, List<IToken>)>, Board, bool> EndGame = (player, board) => judge.EndGame(player, board.Clone(this.board.board));
+        Func<List<(Player, List<IToken>)>, IBoard, bool> EndGame = (player, board) => judge.EndGame(player, board.Clone(this.board.board));
 
         while (!EndGame(MatchHandAndPlayer(), board)) //mientras no se acabe el juego
         {
@@ -164,7 +168,7 @@ public class Game : ICloneable<Game>
 
     }
 
-    protected GameStatus EndGameStatus()// Si finalizo la partida enviar todo 
+    protected GameStatus EndGameStatus()// Si finalizo la partida enviar toda la informacion de finalizacion 
     {
         foreach (var item in this.PlayerStats)
         {

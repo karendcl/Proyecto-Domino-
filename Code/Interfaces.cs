@@ -192,3 +192,77 @@ public interface ICorruptible
     bool Corrupt(double ScoreCost);
 
 }
+
+
+
+#region  Añadir ahora
+#region  Game
+public interface IJudgeGame
+{
+    bool AddTokenToBoard(Player player, GamePlayerHand<IToken> hand, IToken token, Board board, int side);
+    bool EndGame(List<(Player, List<IToken>)> players, Board board);
+    double PlayerScore(Player player);
+    List<IPlayerScore> PlayersScores();
+    WatchPlayer RunWatchPlayer(Board board);
+    ChooseStrategyWrapped ValidPlay(Player player, Board board, IToken token);
+    List<Player> Winner(List<(Player player, List<IToken> hand)> players);
+}
+#endregion
+
+#region  Torenro
+public interface IChampionJudge
+{
+    void AddFinishGame(Game game);
+    bool EndGame(List<Game> game);
+    double PlayerScore(int playerId);
+    void Run(List<Player> players);
+    bool ValidPlay(Player player);
+    List<Player> Winners();
+}
+#endregion
+public interface IPlayer : ICloneable<IPlayer>, IEquatable<IPlayer>, IEqualityComparer<IPlayer>, IDescriptible, IEquatable<int>
+{
+    List<IToken> hand { get; }
+    int Id { get; }
+    int TotalScore { get; set; }
+    IPlayerStrategy strategy { get; }
+    List<IPlayerStrategy> strategias { get; }
+
+    void AddHand(List<IToken> Tokens);
+    void AddStrategy(IPlayerStrategy strategy);
+    IToken BestPlay(WatchPlayer watchPlayer);
+    int ChooseSide(ChooseStrategyWrapped choose, WatchPlayer watchPlayer);
+    IPlayer Clone();
+    bool Equals(IPlayer? other);
+    bool Equals(IPlayer? x, IPlayer? y);
+    bool Equals(int otherId);
+    int GetHashCode(IPlayer obj);
+    string ToString();
+}
+
+
+public interface IBoard : ICloneable<IBoard>
+{
+    List<IToken> board { get; }
+    IToken First { get; }
+    IToken Last { get; }
+
+    void AddTokenToBoard(IToken itoken, int side);
+    IBoard Clone();
+    IBoard Clone(List<IToken> CopyTokens);
+    string ToString();
+}
+
+public interface IGame
+{
+    IBoard? board { get; }
+    List<Player>? player { get; }
+
+    Game Clone();
+    GameStatus PlayAGame(IBoard board, List<Player> players);
+    List<IPlayerScore> PlayerScores();
+    string ToString();
+    List<Player> Winner();
+}
+
+#endregion

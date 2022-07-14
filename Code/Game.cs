@@ -8,7 +8,7 @@ namespace Game;
 /// </summary>
 /// <param name=""></param>
 /// <returns></returns>
-public class Game : IGame
+public class Game : IGame<GameStatus>
 {
     internal virtual event Action<GameStatus>? GameStatus; //Evento sobre acciones del juego
     internal virtual event Predicate<Orders> CanContinue;//  Evento de si puede continuar la partida
@@ -201,7 +201,7 @@ public class Game : IGame
     {
         return player.BestPlay(watch);
     }
-    public IGame Clone() => new Game(this.MaxDouble, this.judge, this.Manager);
+    public IGame<Clone() => new Game(this.MaxDouble, this.judge, this.Manager);
 
 
 

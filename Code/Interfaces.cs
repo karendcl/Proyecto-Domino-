@@ -23,6 +23,7 @@ public interface IValidPlay<TGame, TPlayer, TCriterio> : IDescriptible
 {
     TCriterio ValidPlay(TGame game, TPlayer player);
 
+
 }
 
 public interface IStopGame<TCriterio, TToken>
@@ -46,6 +47,23 @@ public interface IPlayerStrategy : IDescriptible
 {
     int Evaluate(IToken itoken, List<IToken> hand, WatchPlayer watch);
     int ChooseSide(ChooseStrategyWrapped choose, WatchPlayer watch);
+}
+
+
+public interface IPlayerScore : IDescriptible, IEquatable<PlayerScore>, IEquatable<int>, ICloneable<IPlayerScore>
+{
+    string Description { get; }
+    double Score { get; }
+
+    int PlayerId { get; }
+    void AddScore(double score);
+    bool Equals(PlayerScore? other);
+    void LessScore(double score);
+    void resetScore();
+    void SetScore(double score);
+    bool AddRange(IPlayerScore player);
+
+
 }
 
 public interface IJudge<TCriterio, TToken, TWrapped> : IDescriptible
@@ -79,8 +97,11 @@ public interface ITokenizable : IComparable<ITokenizable>, IEquatable<ITokenizab
 
     double ComponentValue { get; }
 
-    public string Description { get; }
+}
 
+public interface IGenerator
+{
+    public List<IToken> CreateTokens(int maxDouble);
 }
 
 
@@ -146,7 +167,7 @@ public interface ITokensManager
 
 public interface IDescriptible
 {
-    string Description { get; }
+    public static string Description { get; }
 }
 public interface ICloneable<T> : ICloneable
 {
@@ -165,9 +186,9 @@ public interface ICloneable<T1, T2> : ICloneable<T1>
 #endregion
 
 
+
 public interface ICorruptible
 {
     bool Corrupt(double ScoreCost);
 
 }
-

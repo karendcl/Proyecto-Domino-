@@ -2,17 +2,16 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Game;
 
-
-public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<Player>, IDescriptible
+public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<Player>, IDescriptible, IEquatable<int>
 {
     public virtual List<IToken> hand { get; protected set; } = new List<IToken>() { };
     public virtual int Id { get; }
-    public virtual double TotalScore { get; set; }
+    public virtual int TotalScore { get; set; }
     public virtual IPlayerStrategy strategy { get { return ChooseStrategy(); } }
 
     public virtual List<IPlayerStrategy> strategias { get; protected set; } = new List<IPlayerStrategy>() { };
 
-    public virtual string Description => "Computer Player";
+    public static string Description => "Jugador Normal";
 
     public Player(int id)
     {
@@ -33,7 +32,7 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
 
     public override string ToString()
     {
-        string a = "\n Player " + this.Id + "\n";
+        string a = $"Player {Id} : \n";
 
         foreach (var item in this.hand)
         {
@@ -43,20 +42,13 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
         return a;
     }
 
-    public void AddScore(double score)
-    {
-        this.TotalScore += score;
-
-    }
-
     protected virtual List<IToken> PossiblePlays(WatchPlayer watchPlayer)// Plays posibles
     {
-
+        //devuelve una lista con las posibles fichas a jugar en dependencia de lo que el juez le diga
         var CanPlay = new List<IToken>();
 
         foreach (var item in hand)
-        {   //Cambie aca porque el jugador no debe saber si el juez es corrupto
-
+        {
             if (watchPlayer.validPlay.ValidPlay(watchPlayer.board, item).CanMatch) CanPlay.Add(item);
         }
 
@@ -65,14 +57,17 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
 
     public virtual IToken BestPlay(WatchPlayer watchPlayer)
     {
+        //de todas las fichas posibles a jugar. el jugador las evalua en dependencia de su estrategia.
+        //y la que tenga mas valor, la juega
         var posibles = PossiblePlays(watchPlayer);
         if (posibles.Count == 0) return null!;
 
         int[] scores = new int[posibles.Count];
 
+        List<IToken> pasar = this.hand.ToList();
         for (int i = 0; i < scores.Length; i++)
         {
-            scores[i] += strategy.Evaluate(posibles[i], hand, watchPlayer);
+            scores[i] += strategy.Evaluate(posibles[i].Clone(), pasar, watchPlayer);
         }
 
         int index = Array.IndexOf(scores, scores.Max());
@@ -81,7 +76,7 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
 
     protected virtual IPlayerStrategy ChooseStrategy()
     {
-
+        //en caso de que tenga mas de una estrategia, se selecciona una random
         int count = this.strategias.Count;
         if (count == 1) return strategias[0];
         Random random = new Random();
@@ -109,12 +104,7 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
         return (this.Id == other.Id);
     }
 
-
-
-
-
-
-    public virtual bool Equals(Player? x, Player? y)
+    public virtual bool Equals(Player? x, Player? y)  //???????????????????????????
     {
         if (x == null || y == null) return false;
         if (x.Id == y.Id) return true;
@@ -127,22 +117,27 @@ public class Player : ICloneable<Player>, IEquatable<Player>, IEqualityComparer<
         return obj.GetHashCode();
     }
 
-
+    public virtual bool Equals(int otherId)
+    {
+        if (this.Id == otherId) return true;
+        return false;
+    }
 }
 
 public class CorruptionPlayer : Player, ICorruptible
 {
     public CorruptionPlayer(int id) : base(id) { }
 
-    public override string Description => " Computer corruption player";
+    public static string Description => "Jugador Corrupto/Tramposo";
 
     public override IToken BestPlay(WatchPlayer watchPlayer)
     {
         int[] scores = new int[this.hand.Count];
+        List<IToken> pasar = this.hand.ToList();
 
         for (int i = 0; i < scores.Length; i++)
         {
-            scores[i] += strategy.Evaluate(this.hand[i], hand, watchPlayer);
+            scores[i] += strategy.Evaluate(this.hand[i].Clone(), pasar, watchPlayer);
         }
 
         int index = Array.IndexOf(scores, scores.Max());
@@ -161,6 +156,7 @@ public class CorruptionPlayer : Player, ICorruptible
         return true;
 
     }
+
 }
 
 

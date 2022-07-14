@@ -1,6 +1,7 @@
 namespace Game;
 
 #region Game
+
 public class Judge : IDescriptible
 {
     #region Global
@@ -10,10 +11,11 @@ public class Judge : IDescriptible
     protected virtual IValidPlay<Board, IToken, ChooseStrategyWrapped> valid { get; set; }
     protected virtual Player playernow { get; set; } = null!;
     protected virtual List<ChooseStrategyWrapped> validTokenFornow { get; set; }
+
     protected virtual Dictionary<int, IPlayerScore> playerScores { get; set; } = new Dictionary<int, IPlayerScore>();
 
-    protected virtual CalculatePlayerScore getPlayerScore { get; set; }
-    public virtual string Description => "Game Jugde";
+    protected virtual CalculatePlayerScore getPlayerScore { get; set; } = new CalculatePlayerScore();
+    public static string Description => "Juez Honesto para el juego";
 
     #endregion
 
@@ -101,6 +103,18 @@ public class Judge : IDescriptible
         if (!this.playerScores.ContainsKey(player.Id)) return -1;
         IPlayerScore score = this.playerScores[player.Id];
         return score.Score;
+    }
+
+    public virtual List<IPlayerScore> PlayersScores()
+    {
+        List<IPlayerScore> result = new List<IPlayerScore>();
+
+        foreach (var item in this.playerScores.Values)
+        {
+            IPlayerScore temp = item;
+            result.Add(temp.Clone());
+        }
+        return result;
     }
 
     // -1,1
@@ -217,7 +231,7 @@ public class Judge : IDescriptible
 
 public class CorruptionJugde : Judge
 {
-    public override string Description => "Corruption Jugde";
+    public static string Description => "Juez Corrupto para el juego";
     protected Random random { get; set; }
     public CorruptionJugde(IStopGame<Player, IToken> stop, IGetScore<IToken> getscore, IWinCondition<(Player player, List<IToken> hand), IToken> winCondition, IValidPlay<Board, IToken, ChooseStrategyWrapped> valid) : base(stop, getscore, winCondition, valid)
     {
@@ -235,6 +249,11 @@ public class CorruptionJugde : Judge
         return false;
 
     }
+    protected virtual void LessPlayerScore(int playerID, double score)
+    {
+        IPlayerScore score1 = this.playerScores[playerID];
+        score1.LessScore(score);
+    }
     public override bool AddTokenToBoard(Player player, GamePlayerHand<IToken> hand, IToken token, Board board, int side)
     {
         bool x = (player is ICorruptible);
@@ -245,6 +264,8 @@ public class CorruptionJugde : Judge
             ICorruptible temp = (ICorruptible)player;
             if (temp.Corrupt(score))
             {
+                LessPlayerScore(player.Id, score);//Bajar el score del jugador
+
                 if (random.Next(0, 27) > Math.E / 2) { PlayBack(null!, token, board.First, board); }
                 else
                 {
@@ -268,19 +289,35 @@ public class CorruptionJugde : Judge
 
 public class ChampionJudge : IDescriptible
 {
-    protected virtual IStopGame<List<Game>, (Game, Player)> stopcriteria { get; set; }
-    protected virtual IWinCondition<Game, (Game, Player)> winCondition { get; set; }
+    protected virtual IStopGame<List<Game>, List<IPlayerScore>> stopcriteria { get; set; }
+    protected virtual IWinCondition<Game, List<IPlayerScore>> winCondition { get; set; }
     protected virtual IValidPlay<List<Game>, Player, bool> valid { get; set; }
-    protected virtual IGetScore<(Game, Player)> howtogetscore { get; set; }
+    protected virtual IGetScore<List<IPlayerScore>> howtogetscore { get; set; }
+    protected virtual CalculateChampionScore getPlayerScore { get; set; }
+    protected virtual List<Game> finishedGames { get; set; } = new List<Game>();
 
-    public virtual string Description => "Champion Jugde";
+    protected virtual List<int> playersId { get; set; } = new List<int>();
 
-    public ChampionJudge(IStopGame<List<Game>, (Game, Player)> stopcriteria, IWinCondition<Game, (Game, Player)> winCondition, IValidPlay<List<Game>, Player, bool> valid, IGetScore<(Game, Player)> howtogetscore)
+    public static string Description => "Juez Honesto para el torneo";
+
+    public ChampionJudge(IStopGame<List<Game>, List<IPlayerScore>> stopcriteria, IWinCondition<Game, List<IPlayerScore>> winCondition, IValidPlay<List<Game>, Player, bool> valid, IGetScore<List<IPlayerScore>> howtogetscore)
     {
         this.howtogetscore = howtogetscore;
         this.stopcriteria = stopcriteria;
         this.valid = valid;
         this.winCondition = winCondition;
+       
+    }
+
+    public virtual void Run(List<Player> players)
+    {
+        foreach (var item in players)
+        {
+            playersId.Add(item.Id);
+
+        }
+        this.getPlayerScore = new CalculateChampionScore(this.playersId);
+
     }
     public virtual bool EndGame(List<Game> game)
     {
@@ -288,14 +325,32 @@ public class ChampionJudge : IDescriptible
         return false;
     }
     //Verificar antes de comenzar otro juego 
-    public virtual bool ValidPlay(List<Game> game, Player player)//Los que continuan
+
+    public virtual void AddFinishGame(Game game)
     {
-        return valid.ValidPlay(game, player);
+        finishedGames.Add(game);
+        foreach (var item in game.PlayerScores())
+        {
+            this.getPlayerScore.AddPlayerScore(item.PlayerId, item);
+        }
     }
 
-    public virtual List<Player> Winners(List<Game> criterios)
+
+    public virtual bool ValidPlay(Player player)//Los que continuan
     {
-        return this.winCondition.Winner(criterios, this.howtogetscore);
+        return valid.ValidPlay(this.finishedGames, player);
+    }
+
+    public virtual List<Player> Winners()
+    {
+        return this.winCondition.Winner(this.finishedGames, this.howtogetscore);
+    }
+
+    public double PlayerScore(int playerId)
+    {
+        if (this.playersId.Contains(playerId)) return double.MinValue;
+        var x = this.getPlayerScore.GetPlayerScore(playerId);
+        return this.howtogetscore.Score(x);
     }
 
 }
@@ -304,8 +359,8 @@ public class ChampionJudge : IDescriptible
 
 public class CorruptionChampionJugde : ChampionJudge
 {
-    public override string Description => "Corruption Champion Judge";
-    public CorruptionChampionJugde(IStopGame<List<Game>, (Game, Player)> stopcriteria, IWinCondition<Game, (Game, Player)> winCondition, IValidPlay<List<Game>, Player, bool> valid, IGetScore<(Game, Player)> howtogetscore) : base(stopcriteria, winCondition, valid, howtogetscore)
+    public static string Description => "Juez Corrupto para el Torneo";
+    public CorruptionChampionJugde(IStopGame<List<Game>, List<IPlayerScore>> stopcriteria, IWinCondition<Game, List<IPlayerScore>> winCondition, IValidPlay<List<Game>, Player, bool> valid, IGetScore<List<IPlayerScore>> howtogetscore) : base(stopcriteria, winCondition, valid, howtogetscore)
     {
     }
 
@@ -330,19 +385,24 @@ public class CorruptionChampionJugde : ChampionJudge
         return base.EndGame(game);
     }
 
-    public override bool ValidPlay(List<Game> game, Player player)
+    public override bool ValidPlay(Player player)
     {
-        if (MakeCorruption())
+        bool x = (player is ICorruptible);
+        if (MakeCorruption() && x)
         {
-            bool x = base.ValidPlay(game, player);
-            Random random = new Random();
-            int c = random.Next(0, 100);
-            if (c <= 50 && x) { return false; ; }
+            double ofert = this.getPlayerScore.GetScore(player.Id) / 2;
+            if (ofert > 0)
+            {
+                ICorruptible temp = (ICorruptible)player;
+                if (temp.Corrupt(ofert))
+                {
+                    return true;
+                }
+            }
 
-            return true;
         }
 
-        return base.ValidPlay(game, player);
+        return base.ValidPlay(player);
     }
 
 

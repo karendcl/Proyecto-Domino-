@@ -4,7 +4,7 @@ public class Board
 {
     public List<IToken> board { get; protected set; }
 
-    public IToken First
+    public IToken First  //devuelve la primera ficha del tablero
     {
         get
         {
@@ -13,7 +13,7 @@ public class Board
         }
     }
 
-    public IToken Last
+    public IToken Last  //devuelve la ultima ficha del tablero
     {
         get
         {
@@ -27,9 +27,9 @@ public class Board
         this.board = new List<IToken>() { };
     }
 
-    public override string ToString()
+    public override string ToString()  //escribe el tablero y las fichas
     {
-        string a = "\n Board:  \n";
+        string a = " Board:  \n";
 
         foreach (var item in this.board)
         {
@@ -40,13 +40,13 @@ public class Board
     }
 
 
-    public void AddTokenToBoard(IToken itoken, int side)
+    public void AddTokenToBoard(IToken itoken, int side) //add una ficha al tablero
     {
         if (side == 0) { this.board.Insert(0, itoken); }
         else { this.board.Add(itoken); }
     }
 
-    public Board Clone()
+    public Board Clone()  //clona el tablero
     {
         return new Board();
     }

@@ -9,7 +9,7 @@ namespace Game;
 
 public class NormalInt : ITokenizable
 {
-    public string Description => "Enteros";
+    public static string Description => "Enteros";
 
     public double ComponentValue { get; protected set; }
 
@@ -22,8 +22,6 @@ public class NormalInt : ITokenizable
     public string Paint()
     {
         return this.ComponentValue.ToString();
-
-
     }
 
     public override string ToString()
@@ -38,6 +36,7 @@ public class NormalInt : ITokenizable
         return this.ComponentValue.Equals(other.ComponentValue);
     }
 }
+
 public class EnergyGenerator : ITokenizable
 {
     public string name { get; set; }
@@ -45,9 +44,9 @@ public class EnergyGenerator : ITokenizable
     public int minPotenci { get; protected set; }
     public int maxPotenci { get; protected set; }
 
-    public string Description { get => "Termoeléctrica"; }
+    public static string Description { get => "Termoeléctrica"; }
 
-    public double ComponentValue => PotencialKnow();
+    public double ComponentValue => PotencialNow();
 
 
     public override string ToString()
@@ -56,12 +55,11 @@ public class EnergyGenerator : ITokenizable
     }
 
 
-    public double PotencialKnow()
+    public double PotencialNow()
     {
         Random random = new Random();
         int x = random.Next(-1, 1);
         return x * random.Next(minPotenci, maxPotenci);
-
     }
 
     public string Paint()
@@ -95,7 +93,7 @@ public class EnergyGenerator : ITokenizable
 
 #region  TokenClass
 
-public class Token : IToken
+public class Token : IToken //ficha
 {
     public virtual ITokenizable Part1 { protected set; get; }
     public virtual ITokenizable Part2 { protected set; get; }
@@ -110,6 +108,7 @@ public class Token : IToken
 
     public virtual bool ItsDouble()
     {
+        //es doble si sus partes son iguales
         return (this.Part1.Equals(this.Part2));
     }
 
@@ -122,6 +121,7 @@ public class Token : IToken
 
     public virtual bool IsMatch(IToken other)
     {
+        //dos fichas son match si la parte de una es igual a una parte de la otra
         return (this.Part1.Equals(other.Part1)) ||
                (this.Part1.Equals(other.Part2)) ||
                (this.Part2.Equals(other.Part2)) ||
@@ -146,11 +146,8 @@ public class Token : IToken
     {
         return new Token(this.Part1, this.Part2);
     }
-
-
 }
 #endregion
-
 
 
 
@@ -184,7 +181,6 @@ public class TokensManager : ITokensManager
 
     public List<IToken> GetTokens()
     {
-
 
         int count = 0;
         var list = new List<IToken>();
@@ -244,8 +240,9 @@ public class IEquatablePorCaras : IEqualityComparer<IToken>
 }
 
 
-public class IntTokenGenerator
+public class Fichas_Enteros :IGenerator  //genera las fichas normales
 {
+    public static string Description{get => "Fichas de enteros";}
     public List<IToken> CreateTokens(int MaxValue)
     {
 
@@ -267,9 +264,10 @@ public class IntTokenGenerator
 
 
 
-public class ElectricGeneratorGenerate
+public class Fichas_Termoelectricas : IGenerator  //genera las fichas random
 {
 
+    public static string Description{get => "Fichas de termoelectrica";}
     List<string> names = new List<string>()
     {
         "Energía Nuclear ",
@@ -301,7 +299,7 @@ public class ElectricGeneratorGenerate
         return temp;
     }
 
-    public List<IToken> GetToken(int MaxValue)
+    public List<IToken> CreateTokens(int MaxValue)
     {
 
         List<IToken> result = new List<IToken>();

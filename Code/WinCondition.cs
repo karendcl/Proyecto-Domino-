@@ -3,14 +3,14 @@ namespace Game;
 
 public abstract class WinCondition : IWinCondition<(Player player, List<IToken> hand), IToken>
 {
-    public virtual string Description => "Game WinCondition";
+    public static string Description => "Game WinCondition";
 
     public virtual List<Player> Winner(List<(Player player, List<IToken> hand)> players, IGetScore<IToken> howtogetscore)
     {
-
+        //devuelve una lista de ganadores de la partida
         int count = 0;
         var result = new List<Player>();
-        int[] scores = new int[players.Count];
+        double[] scores = new double[players.Count];
 
         foreach (var (player, hand) in players)
         {
@@ -21,7 +21,7 @@ public abstract class WinCondition : IWinCondition<(Player player, List<IToken> 
 
             foreach (var IToken in player.hand)
             {
-                scores[count] += (int)howtogetscore.Score(IToken);
+                scores[count] += howtogetscore.Score(IToken);
             }
             count++;
         }
@@ -29,13 +29,10 @@ public abstract class WinCondition : IWinCondition<(Player player, List<IToken> 
         if (result.Count != 0) return result;
 
         return FinalWinner(scores, players);
-
-
-
     }
 
-    public abstract List<Player> FinalWinner(int[] scores, List<(Player player, List<IToken> hand)> players);
-
+    public abstract List<Player> FinalWinner(double[] scores, List<(Player player, List<IToken> hand)> players);
+    //este es el metodo que va a cambiar
 
 
 
@@ -43,12 +40,12 @@ public abstract class WinCondition : IWinCondition<(Player player, List<IToken> 
 public class MinScore : WinCondition
 {
 
-    public override string Description => "MinScore";
-    public override List<Player> FinalWinner(int[] scores, List<(Player player, List<IToken> hand)> players)
+    public static string Description => "Gana el jugador que tenga menos puntos";
+    public override List<Player> FinalWinner(double[] scores, List<(Player player, List<IToken> hand)> players)
     {
         var result = new List<Player>();
 
-        int score = scores.Min();
+        double score = scores.Min();
 
         for (int i = 0; i < scores.Length; i++)
         {
@@ -64,12 +61,12 @@ public class MinScore : WinCondition
 
 public class MaxScore : WinCondition
 {
-    public override string Description => "MaxScore";
-    public override List<Player> FinalWinner(int[] scores, List<(Player player, List<IToken> hand)> players)
+    public static string Description => "Gana el jugador que tenga mas puntos";
+    public override List<Player> FinalWinner(double[] scores, List<(Player player, List<IToken> hand)> players)
     {
         var result = new List<Player>();
 
-        int score = scores.Min();
+        double score = scores.Max();
 
         for (int i = 0; i < scores.Length; i++)
         {
@@ -83,20 +80,21 @@ public class MaxScore : WinCondition
     }
 }
 
-public class Specificscore : WinCondition
+public class MiddleScore : WinCondition
 {
-    public override string Description => "Specificscore";
-    int score { get; set; }
-    public Specificscore(int score)
-    {
-        this.score = score;
-    }
+    public static string Description { get { return "Gana el jugador que tenga la media de puntos"; } }
 
-    public override List<Player> FinalWinner(int[] scores, List<(Player player, List<IToken> hand)> players)
+    public override List<Player> FinalWinner(double[] scores, List<(Player player, List<IToken> hand)> players)
     {
         var result = new List<Player>();
 
-        int score = scores.Min();
+        double[] temp = new double[scores.Length];
+        temp = scores.ToArray();
+
+        Array.Sort(temp);
+        int mid = temp.Length / 2;
+        double score = temp[mid];
+
 
         for (int i = 0; i < scores.Length; i++)
         {
@@ -112,14 +110,16 @@ public class Specificscore : WinCondition
 
 #region  Champion
 
-public class WinChampion : IWinCondition<Game, (Game, Player)>
+public class WinChampion : IWinCondition<Game, List<IPlayerScore>>
 {//En total de ganadas 
 
     public double Porcent { get; protected set; }
-    public List<WPlayer<Player>> players { get; protected set; }
-    public List<int> cantwins { get; protected set; }
+    protected List<WPlayer<Player>> players { get; set; }
+    protected List<int> cantwins { get; set; }
 
-    public string Description => " Champion Win Condition Jugde";
+    protected IGetScore<List<IPlayerScore>> howtogetscore { get; set; }
+    protected virtual Dictionary<int, List<IPlayerScore>> playersScore { get; set; } = new Dictionary<int, List<IPlayerScore>>();
+    public static string Description => "Gana el torneo, aquel jugador que haya ganado la mayor cantidad de veces";
 
     public WinChampion(double porcentWins)
     {
@@ -127,8 +127,29 @@ public class WinChampion : IWinCondition<Game, (Game, Player)>
         this.cantwins = new List<int>() { };
         this.Porcent = porcentWins;
     }
-    public List<Player> Winner(List<Game> games, IGetScore<(Game, Player)> howtogetscore)
-    {                                              ///Agregar una que utiize esta 
+
+    protected void Run(List<Game> games)
+    {
+        foreach (var game in games)
+        {
+            foreach (var playersScore in game.PlayerScores())
+            {
+                int id = playersScore.PlayerId;
+                if (!this.playersScore.ContainsKey(id))
+                {
+                    this.playersScore.TryAdd(id, new List<IPlayerScore>() { playersScore });
+                }
+                else
+                {
+                    this.playersScore[id].Add(playersScore);
+                }
+            }
+        }
+    }
+    public List<Player> Winner(List<Game> games, IGetScore<List<IPlayerScore>> howtogetscore)
+    {
+        this.howtogetscore = howtogetscore;
+        Run(games);                                 ///Agregar una que utiize esta 
         List<Player> winners = new List<Player>() { };
         foreach (var game in games)
         {
@@ -136,7 +157,9 @@ public class WinChampion : IWinCondition<Game, (Game, Player)>
 
             for (int i = 0; i < winners.Count; i++)
             {
-                WPlayer<Player> temp = new WPlayer<Player>(winners[i], 1);
+                Player player = winners[i];
+
+                WPlayer<Player> temp = new WPlayer<Player>(player, 1);
                 if (!players.Contains(temp)) { players.Add(temp); }
                 else { int x = players.IndexOf(temp); players[x].AddScore(temp.Puntuation); }
             }
@@ -147,16 +170,25 @@ public class WinChampion : IWinCondition<Game, (Game, Player)>
 
 
         List<Player> list = new List<Player>() { };
-        for (int i = 0; i < players.Count; i++)
+        foreach (var player in players)
         {
-            list.Add(players[i].player);
+            if (Check(player.player.Id))
+            {
+                list.Add(player.player);
+            }
         }
 
         return list;
     }
 
 
-
+    protected virtual bool Check(int playerId)
+    {
+        var x = this.playersScore[playerId];
+        double score = this.howtogetscore.Score(x);
+        if (score < 0) return false;
+        return true;
+    }
 
 
     public class WPlayer<T> : IEquatable<WPlayer<T>> where T : IEquatable<T>

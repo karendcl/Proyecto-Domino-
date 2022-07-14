@@ -64,21 +64,21 @@ public class GamePlayerHand<TToken> : ICloneable<GamePlayerHand<TToken>>, IEquat
 
 public class PlayersCoach
 {
-    public List<Player> AllPlayers { get; protected set; }
-    public List<List<Player>> players { get; protected set; }
+    public List<IPlayer> AllPlayers { get; protected set; }
+    public List<List<IPlayer>> players { get; protected set; }
 
-    public List<List<Player>> LastPlayersPlays { get; protected set; }
+    public List<List<IPlayer>> LastPlayersPlays { get; protected set; }
 
-    public PlayersCoach(List<Player> AllPLayers)
+    public PlayersCoach(List<IPlayer> AllPLayers)
     {
         this.AllPlayers = AllPLayers;
-        this.players = new List<List<Player>>() { };
+        this.players = new List<List<IPlayer>>() { };
 
-        this.LastPlayersPlays = new List<List<Player>>() { };
+        this.LastPlayersPlays = new List<List<IPlayer>>() { };
 
     }
 
-    public void AddPlayers(int idGame, List<Player> players)
+    public void AddPlayers(int idGame, List<IPlayer> players)
     {
         this.players.Add(players);
     }
@@ -89,16 +89,16 @@ public class PlayersCoach
     public bool CloneLastGame(int id)
     {
 
-        //fIX 
-        List<Player> last = ClonePlayers(this.players[id]);
+
+        List<IPlayer> last = ClonePlayers(this.players[id]);
         if (last == null) return false;
         this.players.Add(last);
         return true;
     }
 
-    protected List<Player> ClonePlayers(List<Player> list)
+    protected List<IPlayer> ClonePlayers(List<IPlayer> list)
     {
-        List<Player> temp = new List<Player>() { };
+        List<IPlayer> temp = new List<IPlayer>() { };
         foreach (var item in list)
         {
             temp.Add(item.Clone());
@@ -106,10 +106,10 @@ public class PlayersCoach
         return temp;
     }
 
-    public List<Player> GetNextPlayers()
+    public List<IPlayer> GetNextPlayers()
     {
         if (this.players.Count < 1) return null!;
-        List<Player> temp = (ClonePlayers(this.players.First()));
+        List<IPlayer> temp = (ClonePlayers(this.players.First()));
         this.LastPlayersPlays.Add(this.players.First());
         this.players.RemoveAt(0);
         return temp;
@@ -123,7 +123,7 @@ public class ChampionStatus //Esta clase muestra en pantalla todos los sucesos d
     public Stack<GameStatus> FinishGame { get; protected set; } = new Stack<GameStatus>() { };
     public List<PlayerStats> PlayerStats { get; protected set; }
     public bool HaveAWinner { get; protected set; }
-    public List<Player> Winners { get; protected set; }//Ganadores a nivel de torneo
+    public List<IPlayer> Winners { get; protected set; }//Ganadores a nivel de torneo
     public bool ItsAnGameStatus { get; protected set; } = false;
 
     public bool ItsAFinishGame
@@ -137,7 +137,7 @@ public class ChampionStatus //Esta clase muestra en pantalla todos los sucesos d
     public GameStatus gameStatus { get; protected set; }
     public bool FinishChampion { get; protected set; }
 
-    public ChampionStatus(Stack<GameStatus> FinishGame, List<PlayerStats> Players, bool HaveAWinner, List<Player> Winners, bool FinishChampion)
+    public ChampionStatus(Stack<GameStatus> FinishGame, List<PlayerStats> Players, bool HaveAWinner, List<IPlayer> Winners, bool FinishChampion)
     {
         this.FinishGame = FinishGame;
         this.HaveAWinner = HaveAWinner;
@@ -165,12 +165,12 @@ public class ChampionStatus //Esta clase muestra en pantalla todos los sucesos d
 
 public class GameStatus //Actualiza en la pantalla todo lo que ocurre en cada juego
 {
-    public List<Player> winners { get; protected set; } = new List<Player>() { };
+    public List<IPlayer> winners { get; protected set; } = new List<IPlayer>() { };
     public List<PlayerStats> PlayerStats { get; protected set; }
     public bool ItsAFinishGame { get; protected set; }
     public List<GamePlayerHand<IToken>> Hands { get; protected set; }
-    public Board board { get; protected set; }
-    public Player actualPlayer { get { return SetActualPlayer(); } }
+    public IBoard board { get; protected set; }
+    public IPlayer actualPlayer { get { return SetActualPlayer(); } }
     public GamePlayerHand<IToken> PlayerActualHand { get { return SetActualPlayerHand(); } }
 
     public GameStatus(List<PlayerStats> PlayerStats, List<GamePlayerHand<IToken>> hands, Board board, bool ItsAFinishGame = false)
@@ -180,7 +180,7 @@ public class GameStatus //Actualiza en la pantalla todo lo que ocurre en cada ju
         this.PlayerStats = PlayerStats;
         this.ItsAFinishGame = ItsAFinishGame;
     }
-    protected Player SetActualPlayer()
+    protected IPlayer SetActualPlayer()
     {
         int count = this.PlayerStats.Count;
         if (count < 1) return null!;

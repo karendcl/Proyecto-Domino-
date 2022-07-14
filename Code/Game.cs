@@ -8,7 +8,7 @@ namespace Game;
 /// </summary>
 /// <param name=""></param>
 /// <returns></returns>
-public class Game : ICloneable<Game>, IGame
+public class Game : IGame
 {
     internal virtual event Action<GameStatus>? GameStatus; //Evento sobre acciones del juego
     internal virtual event Predicate<Orders> CanContinue;//  Evento de si puede continuar la partida
@@ -183,7 +183,7 @@ public class Game : ICloneable<Game>, IGame
 
     }
 
-    private void Print(Player player, Board board, GamePlayerHand<IToken> hand)
+    private void Print(Player player, IBoard board, GamePlayerHand<IToken> hand)
     {
         PlayerStats PlayerStats = new PlayerStats(player);
 
@@ -201,7 +201,7 @@ public class Game : ICloneable<Game>, IGame
     {
         return player.BestPlay(watch);
     }
-    public Game Clone() => new Game(this.MaxDouble, this.judge, this.Manager);
+    public IGame Clone() => new Game(this.MaxDouble, this.judge, this.Manager);
 
 
 

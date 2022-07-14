@@ -11,20 +11,7 @@ namespace Game;
 /// <param name=""></param>
 
 /// <returns></returns>
-public interface IChampionship
-{
 
-    int Champions { get; }
-
-    bool ItsChampionOver { get; }
-
-    event Predicate<Orders> CanContinue;
-    event Action<ChampionStatus> status;
-
-
-    bool Continue(Orders orders);
-    void Run();
-}
 
 //Torneo Se encarga de crear los juegos y procesarlos
 /// <summary>
@@ -33,7 +20,7 @@ public interface IChampionship
 /// <param name=""></param>
 
 /// <returns></returns>
-public class Championship : IChampionship
+public class Championship : IChampionship<ChampionStatus>
 {
     #region Global
 
@@ -43,16 +30,16 @@ public class Championship : IChampionship
     public virtual event Action<ChampionStatus> status;// Evento que envia la informacion del torneo en cada accion desde poner un ficha hasta el final del mismo
     #endregion
     public virtual int Champions { get; protected set; }//Cantidad de partidas
-    protected virtual ChampionJudge judge { get; set; }// Juez a nivel de torneo
+    protected virtual IChampionJudge judge { get; set; }// Juez a nivel de torneo
     protected virtual List<Game> Games { get; set; }// Lista d elas partidas
     protected virtual PlayersCoach GlobalPlayers { get; set; }// El organizador de los jugadores a nivel de torneo
     public virtual bool HaveAWinner { get; protected set; } // True si hay un ganador a nivel de torneo  falso si no lo hay
-    protected virtual List<Game> FinishGames { get; set; } = new List<Game>() { }; //Juegos Finalizados
+    protected virtual List<IGame<GameStatus>> FinishGames { get; set; } = new List<IGame<GameStatus>>() { }; //Juegos Finalizados
     protected virtual Stack<GameStatus> GamesStatus { get; set; } = new Stack<GameStatus>() { }; //Wrapped que envia las partidas
-    protected virtual List<Player> Winners { get { return this.ChampionWinners(); } } //Ganadores a nivel de torneo
+    protected virtual List<IPlayer> Winners { get { return this.ChampionWinners(); } } //Ganadores a nivel de torneo
     public virtual bool ItsChampionOver { get; protected set; }// Si se acabo el torneo
     protected virtual List<PlayerStats> PlayerStats { get; set; } = new List<PlayerStats>() { }; //Puntuacion del jugador 
-    protected virtual List<Player> AllPlayers { get { return GlobalPlayers.AllPlayers; } } // Jugadores a nivel de torneo
+    protected virtual List<IPlayer> AllPlayers { get { return GlobalPlayers.AllPlayers; } } // Jugadores a nivel de torneo
 
 
     #endregion

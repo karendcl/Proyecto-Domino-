@@ -210,6 +210,20 @@ public interface IJudgeGame
 #endregion
 
 #region  Torenro
+public interface IChampionship<TEstatus>
+{
+
+    int Champions { get; }
+
+    bool ItsChampionOver { get; }
+
+    event Predicate<Orders> CanContinue;
+    event Action<TEstatus> status;
+
+
+    bool Continue(Orders orders);
+    void Run();
+}
 public interface IChampionJudge
 {
     void AddFinishGame(Game game);
@@ -253,13 +267,13 @@ public interface IBoard : ICloneable<IBoard>
     string ToString();
 }
 
-public interface IGame
+public interface IGame<TStatus> : ICloneable<IGame<TStatus>>
 {
     IBoard? board { get; }
     List<Player>? player { get; }
 
-    Game Clone();
-    GameStatus PlayAGame(IBoard board, List<Player> players);
+    IGame<TStatus> Clone();
+    TStatus PlayAGame(IBoard board, List<Player> players);
     List<IPlayerScore> PlayerScores();
     string ToString();
     List<Player> Winner();

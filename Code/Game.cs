@@ -1,17 +1,20 @@
 namespace Game;
-
+/// <summary>
+///  Una partida de domino completa
+/// </summary>
+/// <param name=""></param>
+/// <returns></returns>
 public class Game : ICloneable<Game>
 {
-    internal virtual event Action<GameStatus>? GameStatus;
-    internal virtual event Predicate<Orders> CanContinue;
-    public Board? board { get; protected set; }
-    public List<Player>? player { get; protected set; }
-    internal int MaxDouble { get; set; }
-    internal int Players { get; set; }
-    internal Judge judge { get; set; }
-    protected List<GamePlayerHand<IToken>> hands { get { return this.PlayersHands.Values.ToList<GamePlayerHand<IToken>>(); } }
-    protected List<PlayerStats> PlayerStats = new List<PlayerStats>() { };
-    protected TokensManager Manager { get; set; }
+    internal virtual event Action<GameStatus>? GameStatus; //Evento sobre acciones del juego
+    internal virtual event Predicate<Orders> CanContinue;//  Evento de si puede continuar la partida
+    public virtual Board? board { get; protected set; } //Tablero se recibe en play a game
+    public virtual List<Player>? player { get; protected set; }// Jugadores de la partida
+    internal virtual int MaxDouble { get; set; } //Maximo doble a jugar
+    internal Judge judge { get; set; } //Juez de la partida
+    protected List<GamePlayerHand<IToken>> hands { get { return this.PlayersHands.Values.ToList<GamePlayerHand<IToken>>(); } } //Mano de los jugadores
+    protected List<PlayerStats> PlayerStats = new List<PlayerStats>() { };  //Estadisticas de los jugadores
+    protected TokensManager Manager { get; set; } // Administrador de las fichas
 
     protected Dictionary<int, GamePlayerHand<IToken>> PlayersHands { get; set; }
 
@@ -32,13 +35,21 @@ public class Game : ICloneable<Game>
 
         return a;
     }
-
+    /// <summary>
+    ///  Score de todos los player
+    /// </summary>
+    /// <param name=""></param>
+    /// <returns>Lista de IplayerScore</returns>
     public virtual List<IPlayerScore> PlayerScores()
     {
         return judge.PlayersScores();
     }
 
-
+    /// <summary>
+    ///  Lista  De ganadores
+    /// </summary>
+    /// <param name=""></param>
+    /// <returns>Lista de jugadores</returns>
     public virtual List<Player> Winner()
     {
         List<(Player player, List<IToken> hand)> temp = MatchHandAndPlayer();
@@ -59,7 +70,7 @@ public class Game : ICloneable<Game>
         this.PlayersHands = PlayersHands;
     }
 
-    protected virtual List<(Player player, List<IToken> hand)> MatchHandAndPlayer()
+    protected virtual List<(Player player, List<IToken> hand)> MatchHandAndPlayer()//Se une la mano del jugador con el 
     {
         List<(Player player, List<IToken> hand)> temp = new List<(Player player, List<IToken> hand)>() { };
         foreach (var item in this.player!)
@@ -79,21 +90,27 @@ public class Game : ICloneable<Game>
         return temp;
     }
 
-    protected virtual GamePlayerHand<IToken> PullAPlayerAndHand(Player player)
+    protected virtual GamePlayerHand<IToken> PullAPlayerAndHand(Player player) //Devuelve la mano de ese jugador
     {
         if (PlayersHands.ContainsKey(player.Id)) { return PlayersHands[player.Id]; }
         return null!;
     }
+
+    /// <summary>
+    ///  Jugar la partida 
+    /// </summary>
+    /// <param name=""></param>
+    /// <returns>El estado final de la partida</returns>
     public GameStatus PlayAGame(Board board, List<Player> players)
     {
-        
-        this.AssingTokens(players);
-        this.board = board;
+
+        this.AssingTokens(players); //Se assignan las fichas
+        this.board = board;// Se asgina el tablero
         this.player = players;//Añadir al juego los jugadores y el tablero
 
         Judge judge = this.judge;
-       
-        List<Player> player = this.player;
+
+        List<Player> player = this.player;//Assignar jugadores
 
 
 
@@ -104,23 +121,23 @@ public class Game : ICloneable<Game>
             for (int i = 0; i < this.player.Count; i++) //turno de cada jugador
             {
 
-                List<(Player player, List<IToken> hand)> Match = MatchHandAndPlayer();
+                List<(Player player, List<IToken> hand)> Match = MatchHandAndPlayer();//Se unen las manos de los jugadores
 
                 Player playerNow = player[i];
 
                 GamePlayerHand<IToken> playerHand = PullAPlayerAndHand(playerNow);
 
-                if (playerHand == null) { continue; }
+                if (playerHand == null) { continue; }  //Si no tiene mano continua la partida
 
                 if (EndGame(Match, board)) break;
 
-                WatchPlayer watch = judge.RunWatchPlayer(board.Clone(this.board.board));
+                WatchPlayer watch = judge.RunWatchPlayer(board.Clone(this.board.board)); //Envoltorio para el jugador
 
-                this.Print(playerNow, this.board, playerHand);//
+                this.Print(playerNow, this.board, playerHand);// Enviar a consola el estado actual de la partida
 
                 IToken Token1 = Turno(playerNow, watch);  //la ficha que se va a jugar                     
 
-                ChooseStrategyWrapped valid = this.judge.ValidPlay(playerNow, board, Token1);
+                ChooseStrategyWrapped valid = this.judge.ValidPlay(playerNow, board, Token1); //Elije los lugares donde puede ser valida 
 
 
                 if (Token1 is not null) //si no es nulo, entonces si lleva
@@ -132,14 +149,14 @@ public class Game : ICloneable<Game>
                         index = player[i].ChooseSide(valid, watch);
 
                         Func<Player, GamePlayerHand<IToken>, IToken, Board, int, bool> AddPTokenToBoard = (player, playerHand, Token1, board, index) => judge.AddTokenToBoard(player, playerHand, Token1, board, index);
-                        bool control = this.judge.AddTokenToBoard(playerNow, playerHand, Token1, this.board, index);
+                        bool control = this.judge.AddTokenToBoard(playerNow, playerHand, Token1, this.board, index); //Intentar añadir la ficha al board
                         playerNow.AddHand(playerHand.hand);
                         //Actualizar la mano del jugador
                         this.Print(playerNow, this.board, playerHand);
                     }
                 }
 
-                this.CanContinue(Orders.NextPartida);
+                this.CanContinue(Orders.NextPartida);//Esperar la confirmacion para continuar
             }
         }
         GameStatus status = EndGameStatus();
@@ -147,7 +164,7 @@ public class Game : ICloneable<Game>
 
     }
 
-    protected GameStatus EndGameStatus()
+    protected GameStatus EndGameStatus()// Si finalizo la partida enviar todo 
     {
         foreach (var item in this.PlayerStats)
         {

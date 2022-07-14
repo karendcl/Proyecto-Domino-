@@ -1,14 +1,18 @@
 namespace Game;
 
-
+/// <summary>
+///  Es un envoltorio para seleccionar la posicion de la ficha en el tablero
+/// </summary>
+/// <param name=""></param>
+/// <returns></returns>
 public class ChooseStrategyWrapped : IEquatable<ChooseStrategyWrapped>
 {
-    public bool CanMatch { get; private set; } = false;
+    public bool CanMatch { get; private set; } = false;// Si se puede poner la ficha en el tablero
 
-    public bool FirstPlay { get; private set; } = false;
-    public Board board { get; private set; }
-    public IToken itoken { get; private set; }
-    public List<ChooseSideWrapped> side { get; private set; }
+    public bool FirstPlay { get; private set; } = false; //Si es la primera partida
+    public Board board { get; private set; } // el tablero
+    public IToken itoken { get; private set; } // TOken a poner
+    public List<ChooseSideWrapped> side { get; private set; }// Lista de envoltorio de las posibles posiciones a poner
 
     public ChooseStrategyWrapped(Board board, IToken itoken, bool FirstPlay = false)
     {
@@ -20,12 +24,13 @@ public class ChooseStrategyWrapped : IEquatable<ChooseStrategyWrapped>
 
     }
 
-    /*  private void Run()
-      {
-          if (board.board.Count < 1) { CanMatch = true; FirstPlay = true; }
-      }*/
 
-    public (bool, ChooseSideWrapped) ControlSide(int side)
+    /// <summary>
+    ///  Controla que el lugar a poner sea valido y devuelve el envoltorio para dicho indice
+    /// </summary>
+    /// <param name=""></param>
+    /// <returns>retorna true si es posible y el envoltorio correspondiente,  false si no es posible y null el envoltorio</returns>
+    public virtual (bool, ChooseSideWrapped) ControlSide(int side)
     {
         if (side >= this.side.Count) { return (false, null)!; }
         ChooseSideWrapped temp = this.side[side];
@@ -39,7 +44,11 @@ public class ChooseStrategyWrapped : IEquatable<ChooseStrategyWrapped>
         return (temp.canChoose, temp);
     }
 
-
+    /// <summary>
+    ///  Se añade el envoltorio de un posible lugar a poner el token
+    /// </summary>
+    /// <param name=""></param>
+    /// <returns></returns>
     public void AddSide(ChooseSideWrapped side)
     {
         this.side.Add(side);
@@ -55,11 +64,15 @@ public class ChooseStrategyWrapped : IEquatable<ChooseStrategyWrapped>
         return (this.itoken.Equals(other.itoken));
     }
 }
-
-public sealed class ChooseSideWrapped
+/// <summary>
+///  Seleccion de lugares donde se puede o no poner 
+/// </summary>
+/// <param name=""> Contiene el indice en numeros enteros y el bool canChoose si se puede poner</param>
+/// <returns> </returns>
+public class ChooseSideWrapped
 {
-    public int index { get; private set; }
-    public bool canChoose { get; private set; } = false;
+    public int index { get; private set; }//Indice a poner el token
+    public bool canChoose { get; private set; } = false;//Si se puede poner el token
 
     public List<int> WhereCanMacht { get; private set; }
 

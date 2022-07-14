@@ -411,7 +411,16 @@ public class CalculateChampionScore
     protected virtual void CalculateScore(int playerId, IPlayerScore player)
     {
         double score = player.Score;
-        this.scores[playerId] += score;
+        if (!this.scores.ContainsKey(playerId))
+        {
+            this.scores.TryAdd(playerId, score);
+        }
+        else
+        {
+            this.scores[playerId] += score;
+        }
+
+
     }
 
     public double GetScore(int PlayerId)

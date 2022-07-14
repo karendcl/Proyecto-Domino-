@@ -7,6 +7,12 @@ namespace Game;
 
 #region ITokenizable
 
+/* Todos los objetos pueden ser tokenizados solo con implementar ITokenizable */
+/// <summary>
+///  Enteros siendo Tokenizados
+/// </summary>
+/// <param name=""></param>
+/// <returns></returns>
 public class NormalInt : ITokenizable
 {
     public static string Description => "Enteros";
@@ -19,10 +25,6 @@ public class NormalInt : ITokenizable
         return this.ComponentValue.CompareTo(obj?.ComponentValue);
     }
 
-    public string Paint()
-    {
-        return this.ComponentValue.ToString();
-    }
 
     public override string ToString()
     {
@@ -35,8 +37,17 @@ public class NormalInt : ITokenizable
         if (other == null) return false;
         return this.ComponentValue.Equals(other.ComponentValue);
     }
-}
 
+    public string Paint()
+    {
+        return Description;
+    }
+}
+/// <summary>
+///  Energy Generator ITokenizable
+/// </summary>
+/// <param name=""></param>
+/// <returns></returns>
 public class EnergyGenerator : ITokenizable
 {
     public string name { get; set; }
@@ -46,7 +57,7 @@ public class EnergyGenerator : ITokenizable
 
     public static string Description { get => "Termoeléctrica"; }
 
-    public double ComponentValue => PotencialNow();
+    public double ComponentValue => PotencialNow();// Este es el valor a tener en cuenta para un token
 
 
     public override string ToString()
@@ -240,9 +251,9 @@ public class IEquatablePorCaras : IEqualityComparer<IToken>
 }
 
 
-public class Fichas_Enteros :IGenerator  //genera las fichas normales
+public class Fichas_Enteros : IGenerator  //genera las fichas normales
 {
-    public static string Description{get => "Fichas de enteros";}
+    public static string Description { get => "Fichas de enteros"; }
     public List<IToken> CreateTokens(int MaxValue)
     {
 
@@ -267,7 +278,7 @@ public class Fichas_Enteros :IGenerator  //genera las fichas normales
 public class Fichas_Termoelectricas : IGenerator  //genera las fichas random
 {
 
-    public static string Description{get => "Fichas de termoelectrica";}
+    public static string Description { get => "Fichas de termoelectrica"; }
     List<string> names = new List<string>()
     {
         "Energía Nuclear ",

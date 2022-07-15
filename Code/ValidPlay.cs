@@ -4,7 +4,7 @@ namespace Game;
 
 #region  Definiton AbstractClass
 
-public abstract class ValidPlayClass : IValidPlay<Board, IToken, ChooseStrategyWrapped>
+public abstract class ValidPlayClass : IValidPlay<IBoard, IToken, IChooseStrategyWrapped>
 {
 
     public ValidPlayClass(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer)
@@ -13,10 +13,10 @@ public abstract class ValidPlayClass : IValidPlay<Board, IToken, ChooseStrategyW
     }
     public static string Description => "Valid Play";
 
-    public virtual ChooseStrategyWrapped ValidPlay(Board board, IToken token)
+    public virtual IChooseStrategyWrapped ValidPlay(IBoard board, IToken token)
     {
 
-        ChooseStrategyWrapped choose = new ChooseStrategyWrapped(board, token);
+        var choose = new ChooseStrategyWrapped(board, token);
         bool z = false;
         if (FirstPlay(board)) //Si es l primera partida siempre se puede poner ficha
         {
@@ -29,7 +29,7 @@ public abstract class ValidPlayClass : IValidPlay<Board, IToken, ChooseStrategyW
         return choose;
 
     }
-    protected virtual ChooseSideWrapped ValidPlayFront(Board board, IToken token)
+    protected virtual ChooseSideWrapped ValidPlayFront(IBoard board, IToken token)
     {
 
 
@@ -49,13 +49,13 @@ public abstract class ValidPlayClass : IValidPlay<Board, IToken, ChooseStrategyW
 
     protected abstract bool Match(double Part1, double part2);
 
-    protected virtual bool FirstPlay(Board board)
+    protected virtual bool FirstPlay(IBoard board)
     {
         if (board.board == null || board.board.Count == 0) return true;
         return false;
     }
 
-    protected virtual ChooseSideWrapped ValidPlayBack(Board board, IToken token)
+    protected virtual ChooseSideWrapped ValidPlayBack(IBoard board, IToken token)
     {
         ChooseSideWrapped choose = new ChooseSideWrapped(1);
 
@@ -143,7 +143,7 @@ public class SmallerValidPlay : ValidPlayClass
 
 #region Champion
 // Si ha perdido mas de las mitad 
-public class ValidChampionPorcientoPerdidas : IValidPlay<List<Game>, Player, bool>
+public class ValidChampionPorcientoPerdidas : IValidPlay<List<IGame<GameStatus>>, IPlayer, bool>
 {
     public double Porcent { get; protected set; }
 
@@ -153,7 +153,7 @@ public class ValidChampionPorcientoPerdidas : IValidPlay<List<Game>, Player, boo
     {
         this.Porcent = Porcent;
     }
-    public bool ValidPlay(List<Game> games, Player player)
+    public bool ValidPlay(List<IGame<GameStatus>> games, IPlayer player)
     {
         double cant = games.Count * Porcent;
         int count = 0;
@@ -171,7 +171,7 @@ public class ValidChampionPorcientoPerdidas : IValidPlay<List<Game>, Player, boo
 
 
 
-public class ValidChampionPerdidasConsecutivas : IValidPlay<List<Game>, Player, bool>
+public class ValidChampionPerdidasConsecutivas : IValidPlay<List<IGame<GameStatus>>, IPlayer, bool>
 {
     public double CantdeVecesConsecutivas { get; protected set; }
 
@@ -184,7 +184,7 @@ public class ValidChampionPerdidasConsecutivas : IValidPlay<List<Game>, Player, 
 
     }
 
-    public bool ValidPlay(List<Game> games, Player player)
+    public bool ValidPlay(List<IGame<GameStatus>> games, IPlayer player)
     {
         if (CantdeVecesConsecutivas < 1) { return true; }
         int count = 0; int lastIndex = 0;

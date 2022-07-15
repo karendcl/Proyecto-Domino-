@@ -31,7 +31,7 @@ public class Championship : IChampionship<ChampionStatus>
     #endregion
     public virtual int CountOfGames { get; protected set; }//Cantidad de partidas
     protected virtual IChampionJudge<GameStatus> judge { get; set; }// Juez a nivel de torneo
-    protected virtual List<Game> Games { get; set; }// Lista d elas partidas
+    protected virtual List<IGame<GameStatus>> Games { get; set; }// Lista d elas partidas
     protected virtual PlayersCoach GlobalPlayers { get; set; }// El organizador de los jugadores a nivel de torneo
     public virtual bool HaveAWinner { get; protected set; } // True si hay un ganador a nivel de torneo  falso si no lo hay
     protected virtual List<IGame<GameStatus>> FinishGames { get; set; } = new List<IGame<GameStatus>>() { }; //Juegos Finalizados
@@ -44,7 +44,7 @@ public class Championship : IChampionship<ChampionStatus>
 
     #endregion
 
-    public Championship(int cantTorneos, ChampionJudge judge, PlayersCoach players, List<Game> games)
+    public Championship(int cantTorneos, IChampionJudge<GameStatus> judge, PlayersCoach players, List<IGame<GameStatus>> games)
     {
         this.CountOfGames = cantTorneos;
         this.Games = games;
@@ -79,7 +79,6 @@ public class Championship : IChampionship<ChampionStatus>
             GameOver(game, gameStatus, i); // Se envia el estatus general del torneo con el ultimo estatus de la partida
             if (judge.EndGame(this.FinishGames)) // se pregunta si se puede continuar jugando
             {
-
                 ChampionOver();
                 break;
             }

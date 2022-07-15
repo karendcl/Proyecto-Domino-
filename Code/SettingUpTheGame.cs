@@ -81,42 +81,42 @@ public class ChampionStart
     {
         // retorna un nuevo torneo
         int cantPartidas = CantPartidas();
-        ChampionJudge judge = ChooseChampionJudge();
-        (PlayersCoach players, List<Game> games) games = SelectGameTypes(cantPartidas);
+        IChampionJudge<GameStatus> judge = ChooseChampionJudge();
+        (PlayersCoach players, List<IGame<GameStatus>> games) games = SelectGameTypes(cantPartidas);
         return new Championship(cantPartidas, judge, games.players, games.games);
     }
 
-    protected ChampionJudge ChooseChampionJudge()
+    protected IChampionJudge<GameStatus> ChooseChampionJudge()
     {
         //retorna un juez del torneo
-        IWinCondition<Game, List<IPlayerScore>> win = ChooseWinCondition();
-        IStopGame<List<Game>, List<IPlayerScore>> stop = ChooseStopChampion(win);
-        IValidPlay<List<Game>, Player, bool> valid = ChooseValidChampion();
+        IWinCondition<IGame<GameStatus>, List<IPlayerScore>> win = ChooseWinCondition();
+        IStopGame<List<IGame<GameStatus>>, List<IPlayerScore>> stop = ChooseStopChampion(win);
+        IValidPlay<List<IGame<GameStatus>>, IPlayer, bool> valid = ChooseValidChampion();
         IGetScore<List<IPlayerScore>> score = ChooseChampionGetScore();
 
         string words = "Que tipo de juez desea para el torneo? ";
         Type[] a = Utils.TypesOfChampionJudge();
         var x = a[GetChoice(a, words)];
 
-        return Activator.CreateInstance(x, stop, win, valid, score) as ChampionJudge;
+        return Activator.CreateInstance(x, stop, win, valid, score) as IChampionJudge<GameStatus>;
     }
 
 
-    protected IValidPlay<List<Game>, Player, bool> ChooseValidChampion()
+    protected IValidPlay<List<IGame<GameStatus>>, IPlayer, bool> ChooseValidChampion()
     {
         //retorna la calidad de descalificacion del torneo
         string words = "Bajo que criterio desee que se descalifique a alguien del torneo \n ";
         Type[] a = Utils.TypesofValidChampion();
         var x = a[GetChoice(a, words)];
         string ask = "Escriba el numero";
-        return Activator.CreateInstance(x, ChooseInt(ask, 0, 100)) as IValidPlay<List<Game>, Player, bool>;
+        return Activator.CreateInstance(x, ChooseInt(ask, 0, 100)) as IValidPlay<List<IGame<GameStatus>>, IPlayer, bool>;
 
     }
-    protected IWinCondition<Game, List<IPlayerScore>> ChooseWinCondition()
+    protected IWinCondition<IGame<GameStatus>, List<IPlayerScore>> ChooseWinCondition()
     {
         //retorna la condicion de ganada del torneo
         string msg = "Que porcentaje de partidas ganadas son necesarias para que un jugador gane el torneo";
-        return new WinChampion(ChooseInt(msg, 0, 100));
+        return new WinChampion(ChooseInt(msg, 0, 100)) as IWinCondition<IGame<GameStatus>, List<IPlayerScore>>;
 
     }
     protected IGetScore<List<IPlayerScore>> ChooseChampionGetScore()
@@ -125,7 +125,7 @@ public class ChampionStart
         return new ScoreChampionNormal();
     }
 
-    protected IStopGame<List<Game>, List<IPlayerScore>> ChooseStopChampion(IWinCondition<Game, List<IPlayerScore>> winCondition)
+    protected IStopGame<List<IGame<GameStatus>>, List<IPlayerScore>> ChooseStopChampion(IWinCondition<IGame<GameStatus>, List<IPlayerScore>> winCondition)
     {
         //retorna el criterio de parada del torneo
         string words = "Bajo que criterio desea que se pare el torneo \n ";
@@ -133,8 +133,8 @@ public class ChampionStart
         var x = a[GetChoice(a, words)];
         string ask = "Escriba la cantidad";
         if (x.GetConstructors().SelectMany(t => t.GetParameters()).Count() == 2)
-            return Activator.CreateInstance(x, winCondition, ChooseInt(ask, 0, 10000)) as IStopGame<List<Game>, List<IPlayerScore>>;
-        else return Activator.CreateInstance(x, ChooseInt(ask, 0, 10000)) as IStopGame<List<Game>, List<IPlayerScore>>;
+            return Activator.CreateInstance(x, winCondition, ChooseInt(ask, 0, 10000)) as IStopGame<List<IGame<GameStatus>>, List<IPlayerScore>>;
+        else return Activator.CreateInstance(x, ChooseInt(ask, 0, 10000)) as IStopGame<List<IGame<GameStatus>>, List<IPlayerScore>>;
 
     }
     protected int CantPartidas()
@@ -142,10 +142,10 @@ public class ChampionStart
         return ChooseInt("Cuantas partidas desea jugar?", 1, 10000);
 
     }
-    protected List<Player> ChampionPlayers(int cantPlayers)
+    protected List<IPlayer> ChampionPlayers(int cantPlayers)
     {
         //se eligen si los jugadores van a jugar
-        List<Player> players = new List<Player>() { };
+        List<IPlayer> players = new List<IPlayer>() { };
 
         for (int i = 0; i < cantPlayers; i++)
         {
@@ -168,13 +168,13 @@ public class ChampionStart
         var x = a[GetChoice(a, words)];
         return Activator.CreateInstance(x) as IPlayerStrategy;
     }
-    protected Player ChoosePlayers(int id)
+    protected IPlayer ChoosePlayers(int id)
     {
         //devuelve el tipo de jugador 
         string words = $"Elija el tipo de jugador para el Player {id}\n ";
         Type[] a = Utils.TypesOfPlayer();
         var x = a[GetChoice(a, words)];
-        Player player = Activator.CreateInstance(x, id) as Player;
+        IPlayer player = Activator.CreateInstance(x, id) as IPlayer;
         player.AddStrategy(ChoosePlayerStrategy(id));
         return player;
     }
@@ -183,20 +183,19 @@ public class ChampionStart
 
     #region  Create Game
     //Elegir tipo de juego
-    protected IStopGame<Player, IToken> ChooseStopGame(bool ConfGame = false)
+    protected IStopGame<IPlayer, IToken> ChooseStopGame(bool ConfGame)
     {
-        //devuelve el criterio para terminar el juego
-        string words = "Que tipo de criterio quiere para terminar el juego? \n ";
+         string words = "Que tipo de criterio quiere para terminar el juego? \n ";
         Type[] a = Utils.TypesofStopConditionGame();
 
-        if (ConfGame) return Activator.CreateInstance(a[0]) as IStopGame<Player, IToken>;
+        if (ConfGame) return Activator.CreateInstance(a[0]) as IStopGame<IPlayer, IToken>;
 
         var x = a[GetChoice(a, words)];
         string ask = "Escriba la cantidad de puntos";
         if (x.GetConstructors().SelectMany(t => t.GetParameters()).Count() != 0)
-            return Activator.CreateInstance(x, ChooseInt(ask, 0, 10000)) as IStopGame<Player, IToken>;
+            return Activator.CreateInstance(x, ChooseInt(ask, 0, 10000)) as IStopGame<IPlayer, IToken>;
         else
-            return Activator.CreateInstance(x) as IStopGame<Player, IToken>;
+            return Activator.CreateInstance(x) as IStopGame<IPlayer, IToken>;
 
     }
 
@@ -214,7 +213,7 @@ public class ChampionStart
         return ChooseInt(words, 1, a.Length + 1) - 1;
 
     }
-    public IGetScore<IToken> ChooseGetScore(bool ConfGame = false)
+    public IGetScore<IToken> ChooseGetScore(bool ConfGame )
     {
         //devuelve como se calcula el score de la ficha en el juego
         string words = "Como desea que se cuente el score de la ficha \n ";
@@ -226,38 +225,39 @@ public class ChampionStart
 
     }
 
-    public IWinCondition<(Player player, List<IToken> hand), IToken> ChooseWinCondition(bool ConfGame = false)
+    public IWinCondition<(IPlayer player, List<IToken> hand), IToken> ChooseWinCondition(bool ConfGame)
     {
         //retorna la condicion de ganar del juego
         string words = "Una vez acabe el juego, quien ganaria? \n ";
         Type[] a = Utils.TypesofWinConditionGame();
-        if (ConfGame) return Activator.CreateInstance(a[0]) as IWinCondition<(Player player, List<IToken> hand), IToken>;
+        if (ConfGame) return Activator.CreateInstance(a[0]) as IWinCondition<(IPlayer player, List<IToken> hand), IToken>;
         var x = a[GetChoice(a, words)];
 
-        return Activator.CreateInstance(x) as IWinCondition<(Player player, List<IToken> hand), IToken>;
+        return Activator.CreateInstance(x) as IWinCondition<(IPlayer player, List<IToken> hand), IToken>;
 
     }
 
-    public IValidPlay<Board, IToken, ChooseStrategyWrapped> ChooseValidPlay(IEqualityComparer<IToken> equalityComparer, IComparer<IToken> Comparer, bool ConfGame = false)
+    public IValidPlay<IBoard, IToken, IChooseStrategyWrapped> ChooseValidPlay(IEqualityComparer<IToken> equalityComparer, IComparer<IToken> Comparer, bool ConfGame )
     {
         //retorna la jugada que es valida para el juego
         string words = "Que tipo de jugada valida desea para el juego \n ";
         Type[] a = Utils.TypesofValidPlayGame();
-        if (ConfGame) return Activator.CreateInstance(a[0], equalityComparer, Comparer) as IValidPlay<Board, IToken, ChooseStrategyWrapped>;
+        if (ConfGame) return Activator.CreateInstance(a[0], equalityComparer, Comparer) as IValidPlay<IBoard, IToken, IChooseStrategyWrapped>;
         var x = a[GetChoice(a, words)];
 
-        return Activator.CreateInstance(x, equalityComparer, Comparer) as IValidPlay<Board, IToken, ChooseStrategyWrapped>;
+        return Activator.CreateInstance(x, equalityComparer, Comparer) as IValidPlay<IBoard, IToken, IChooseStrategyWrapped>;
     }
 
 
-    protected Judge ChooseJugde(IStopGame<Player, IToken> stopcondition, IGetScore<IToken> HowTogetScore, IWinCondition<(Player player, List<IToken> hand), IToken> winCondition, IValidPlay<Board, IToken, ChooseStrategyWrapped> validPlay, bool ConfGame = false)
+    protected IJudgeGame ChooseJugde(IStopGame<IPlayer, IToken> stopcondition, IGetScore<IToken> HowTogetScore, IWinCondition<(IPlayer player, List<IToken> hand), IToken> winCondition, IValidPlay<IBoard, IToken, IChooseStrategyWrapped> validPlay, bool ConfGame )
     {
         //retorna el tipo de juez para el juego
+        //return new Judge(stopcondition,HowTogetScore,winCondition,validPlay);
 
         string ask = "Que tipo de juez quiere para el juego \n";
         Type[] a = Utils.TypesOfJudgeGame();
         var x = a[GetChoice(a, ask)];
-        Judge judge = Activator.CreateInstance(x, stopcondition, HowTogetScore, winCondition, validPlay) as Judge;
+        IJudgeGame judge = Activator.CreateInstance(x, stopcondition, HowTogetScore, winCondition, validPlay) as IJudgeGame;
 
 
         while (!this.ValidSettings(CantTokenPerPerson, MaxDouble, cantPlayers))
@@ -295,34 +295,35 @@ public class ChampionStart
         return new IEquatablePorCaras();
     }
 
-    protected Game ChooseAGame(bool ConfGame = false, bool ChampionPlayers = false)
+    protected IGame<GameStatus> ChooseAGame(bool ConfGame , bool ChampionPlayers = false)
     {
         //Crea el juego
         if (ConfGame) { ConfGame = true; }//Sleccionar si se quiere modo de juego normal
 
-        IStopGame<Player, IToken> stopcondition = ChooseStopGame(ConfGame);
+        IStopGame<IPlayer, IToken> stopcondition = ChooseStopGame(ConfGame);
 
         IGetScore<IToken> HowTogetScore = ChooseGetScore(ConfGame);
 
-        IWinCondition<(Player player, List<IToken> hand), IToken> winCondition = ChooseWinCondition(ConfGame);
+        IWinCondition<(IPlayer player, List<IToken> hand), IToken> winCondition = ChooseWinCondition(ConfGame);
 
         IComparer<IToken> tokenComparer = ChooseATokenComparerCriteria();
 
         IEqualityComparer<IToken> equalityComparer = ChooseATokenEqualityCriteria();
 
-        IValidPlay<Board, IToken, ChooseStrategyWrapped> validPlay = ChooseValidPlay(equalityComparer, tokenComparer, ConfGame);
+        IValidPlay<IBoard, IToken, IChooseStrategyWrapped> validPlay = ChooseValidPlay(equalityComparer, tokenComparer, ConfGame);
 
-        Judge judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
+        IJudgeGame judge = ChooseJugde(stopcondition, HowTogetScore, winCondition, validPlay, ConfGame);
 
         TokensManager tokensManager = ChooseATokenManager(this.CantTokenPerPerson, tokenComparer, equalityComparer);
 
-        return new Game(this.MaxDouble, judge, tokensManager);
+        return new Game(this.MaxDouble, judge, tokensManager) as IGame<GameStatus>;
     }
 
     //Crea los modos de juego
-    public (PlayersCoach, List<Game>) SelectGameTypes(int CantPartidas)
+    public (PlayersCoach, List<IGame<GameStatus>>) SelectGameTypes(int CantPartidas)
     {
-        List<Player> tt = new List<Player>() { };
+        List<IPlayer> tt = new List<IPlayer>();
+
         for (int i = 0; i < this.cantPlayers; i++)
         {
             tt.Add(new Player(i));
@@ -348,7 +349,7 @@ public class ChampionStart
                 coach.AddPlayers(i, ChampionPlayers(this.cantPlayers));
             }
         }
-        return (coach, Games.ToList<Game>());
+        return (coach, Games.ToList<IGame<GameStatus>>());
     }
     #endregion
 

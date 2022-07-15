@@ -139,9 +139,9 @@ public class Judge : IDescriptible, IJudgeGame
 
         if (!CheckHand(player, hand, token)) //Se comprueba que la mano contenga la ficha
         {
-            
+
             this.AddPlayerScoreStatus(player.Id, hand, token, false);// Como no se ´puede poner la ficha se le quita el score e esta
-                validTokenFornow.Clear();
+            validTokenFornow.Clear();
             return false;
         }
         if (player.hand.Count != hand.hand.Count)
@@ -155,7 +155,7 @@ public class Judge : IDescriptible, IJudgeGame
         {
             validTokenFornow.Clear();// Se limpia las ultimas propuestas
             hand.AddLastPlay(token); //Añade la ultima ficha puesta
-            board.AddTokenToBoard(token,0);  //Añade al board la ficha
+            board.AddTokenToBoard(token, 0);  //Añade al board la ficha
             this.AddPlayerScoreStatus(player.Id, hand, token, true);// Se le añade el score al jugador
 
             return true;
@@ -183,19 +183,19 @@ public class Judge : IDescriptible, IJudgeGame
 
     }
 
-     protected virtual void PlayFront(IChooseSideWrapped where, IToken token, IToken first, IBoard board)
+    protected virtual void PlayFront(IChooseSideWrapped where, IToken token, IToken first, IBoard board)
     {
 
         if (where.WhereCanMacht.Contains(1)) { token.SwapToken(); }
 
 
-        board.board.Insert(0, token);
+        board.AddTokenToBoard(token, 0);
     }
 
     protected virtual void PlayBack(IChooseSideWrapped where, IToken token, IToken last, IBoard board)
     {
         if (where.WhereCanMacht.Contains(1)) { token.SwapToken(); }
-        board.board.Add(token);
+        board.AddTokenToBoard(token, 1);
 
     }
 
@@ -229,13 +229,13 @@ public class Judge : IDescriptible, IJudgeGame
         return true;
     }
 
-   
+
 
 
 }
 
 
-public class CorruptionJugde : Judge
+public class CorruptionJugde : Judge, IJudgeGame
 {
     public static string Description => "Juez Corrupto para el juego";
     protected Random random { get; set; }
@@ -262,12 +262,13 @@ public class CorruptionJugde : Judge
     }
     public override bool AddTokenToBoard(IPlayer player, GamePlayerHand<IToken> hand, IToken token, IBoard board, int side)
     {
-        bool x = (player is ICorruptible); //Comprueba si es corruptible
+        bool x = (player.GetType() == typeof(CorruptionPlayer)); //Comprueba si es corruptible
+
         bool cant = base.ValidPlay(player, board, token).CanMatch; //Comprueba si no se puede jugar ese token
-        if (MakeCorruption() && !cant && x) 
+        if (MakeCorruption() && !cant && x)
         {
             double score = this.PlayerScore(player) / 3; //Le hace una oferta de quitarle 1/3 del score
-            ICorruptible temp = (ICorruptible)player;
+            CorruptionPlayer temp = (CorruptionPlayer)player;
             if (temp.Corrupt(score)) // si acepta
             {
                 LessPlayerScore(player.Id, score);//Bajar el score del jugador
@@ -364,7 +365,7 @@ public class ChampionJudge : IDescriptible, IChampionJudge<GameStatus>
 
 
 
-public class CorruptionChampionJugde : ChampionJudge
+public class CorruptionChampionJugde : ChampionJudge, IChampionJudge<GameStatus>
 {
     public static string Description => "Juez Corrupto para el Torneo";
     public CorruptionChampionJugde(IStopGame<List<IGame<GameStatus>>, List<IPlayerScore>> stopcriteria, IWinCondition<IGame<GameStatus>, List<IPlayerScore>> winCondition, IValidPlay<List<IGame<GameStatus>>, IPlayer, bool> valid, IGetScore<List<IPlayerScore>> howtogetscore) : base(stopcriteria, winCondition, valid, howtogetscore)

@@ -7,7 +7,7 @@ namespace Game;
 /// </summary>
 /// <param name=""></param>
 /// <returns></returns>
-public class ChooseStrategyWrapped : IEquatable<ChooseStrategyWrapped>, IChooseStrategyWrapped
+public class ChooseStrategyWrapped : IChooseStrategyWrapped
 {
     public bool CanMatch { get; private set; } = false;// Si se puede poner la ficha en el tablero
 
@@ -60,7 +60,7 @@ public class ChooseStrategyWrapped : IEquatable<ChooseStrategyWrapped>, IChooseS
         }
     }
 
-    public bool Equals(ChooseStrategyWrapped? other)
+    public bool Equals(IChooseStrategyWrapped? other)
     {  // SOn iguales si tienen el mismo itoken
         if (other == null) { return false; }
         return (this.itoken.Equals(other.itoken));
@@ -95,5 +95,11 @@ public class ChooseSideWrapped : IChooseSideWrapped
     public void Run()//Verifica si se puede o no 
     {
         if (WhereCanMacht.Count > 0) { canChoose = true; }
+    }
+
+    public bool Equals(IChooseSideWrapped? other)
+    {
+        if (other == null) { return false; }
+        return this.index.Equals(other.index);
     }
 }

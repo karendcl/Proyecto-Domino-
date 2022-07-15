@@ -126,7 +126,7 @@ public class Player : IPlayer
     }
 }
 
-public class CorruptionPlayer : Player, ICorruptible
+public class CorruptionPlayer : Player, ICorruptible, IPlayer
 {
     public CorruptionPlayer(int id) : base(id) { }
 

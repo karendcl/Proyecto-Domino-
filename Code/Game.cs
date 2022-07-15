@@ -164,7 +164,7 @@ public class Game : IGame<GameStatus>
 
                         index = player[i].ChooseSide(valid, watch);
 
-                        Func<Player, GamePlayerHand<IToken>, IToken, Board, int, bool> AddPTokenToBoard = (player, playerHand, Token1, board, index) => judge.AddTokenToBoard(player, playerHand, Token1, board, index);
+                        Func<IPlayer, GamePlayerHand<IToken>, IToken, IBoard, int, bool> AddPTokenToBoard = (player, playerHand, Token1, board, index) => judge.AddTokenToBoard(player, playerHand, Token1, board, index);
                         bool control = this.judge.AddTokenToBoard(playerNow, playerHand, Token1, this.board, index); //Intentar añadir la ficha al board
                         playerNow.AddHand(playerHand.hand);
                         //Actualizar la mano del jugador

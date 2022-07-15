@@ -36,7 +36,7 @@ public interface IValidPlay<TGame, TPlayer, TCriterio> : IDescriptible
 
 }
 
-public interface IStopGame<TCriterio, TToken>
+public interface IStopGame<TCriterio, TToken> : IDescriptible
 {    /// <summary>
 ///  Returns true if the stopping premises are met, false if they are not met
 /// </summary>
@@ -88,7 +88,6 @@ public interface IPlayerStrategy : IDescriptible
 /// <returns></returns>
 public interface IPlayerScore : IDescriptible, IEquatable<PlayerScore>, IEquatable<int>, ICloneable<IPlayerScore>
 {
-    string Description { get; }
     double Score { get; }
 
     int PlayerId { get; }
@@ -130,7 +129,7 @@ public interface ITokenizable : IComparable<ITokenizable>, IEquatable<ITokenizab
 /// <param name=""></param>
 /// <returns></returns>
 
-public interface IGenerator
+public interface IGenerator : IDescriptible
 {
     /// <summary>
     ///  Returns a list of tokens with a double max between the two parts
@@ -519,7 +518,7 @@ public interface IGame<TStatus> : ICloneable<IGame<TStatus>>
 /// </summary>
 /// <param name=""></param>
 /// <returns></returns>
-public interface IChooseSideWrapped
+public interface IChooseSideWrapped : IEquatable<IChooseSideWrapped>
 {
     /// <summary>
     ///  board index
@@ -559,7 +558,7 @@ public interface IChooseSideWrapped
 /// </summary>
 /// <param name=""></param>
 /// <returns></returns>
-public interface IChooseStrategyWrapped
+public interface IChooseStrategyWrapped : IEquatable<IChooseStrategyWrapped>
 {
     /// <summary>
     ///   True if you can set false otherwise
@@ -596,7 +595,7 @@ public interface IChooseStrategyWrapped
     (bool, ChooseSideWrapped) ControlSide(int side);
 
 
-    bool Equals(ChooseStrategyWrapped? other);
+    //  bool Equals(IChooseStrategyWrapped? other);
 }
 /// <summary>
 ///  It is a container of rules and current state of the game that the player must receive

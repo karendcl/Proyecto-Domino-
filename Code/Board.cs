@@ -53,7 +53,11 @@ public class Board : IBoard
         return a;
     }
 
-
+    /// <summary>
+    ///  0 para poner en el frente del tablero 1 para el final
+    /// </summary>
+    /// <param name=""></param>
+    /// <returns></returns>
     public void AddTokenToBoard(IToken itoken, int side) //add una ficha al tablero
     {
         if (temp.Count < 1)

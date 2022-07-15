@@ -152,13 +152,8 @@ public interface IToken
 {
     ITokenizable Part1 { get; }
     ITokenizable Part2 { get; }
-
     IToken Clone();
-    bool Contains(int a);
-
-
     bool ItsDouble();
-    bool IsMatch(IToken other);
     void SwapToken();
     string ToString();
 }

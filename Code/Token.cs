@@ -161,7 +161,6 @@ public class Token : IToken //ficha
 #endregion
 
 
-
 public class TokensManager : ITokensManager
 {
     protected int TokensForEach { get; set; }

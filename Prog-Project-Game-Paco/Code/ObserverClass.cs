@@ -10,11 +10,7 @@ public class observador
         int current = 0;
 
         if (options is null){
-            Console.Clear();
-            System.Console.WriteLine(type);
-            int x = -1;
-            int.TryParse(Console.ReadLine(), out x);
-            return x;
+            return GetIntNumber(type);
         }
         else
         while (true)
@@ -30,13 +26,18 @@ public class observador
          for (int i = 0; i < options.Length; i++)
         {
             if(i==current) 
-            System.Console.WriteLine($"=> [{i+1}] {options[i]}");
+            System.Console.WriteLine($"[{i+1}] ==> {options[i]}");
             else System.Console.WriteLine($"[{i+1}] {options[i]}");
         }   
 
+
+        System.Console.WriteLine("\n\n Use las flechitas del teclado para elegir su opcion");
+
         switch (Console.ReadKey().Key)
         {
+            case (ConsoleKey.LeftArrow):
             case (ConsoleKey.UpArrow): current--; break;
+            case (ConsoleKey.RightArrow):
             case (ConsoleKey.DownArrow): current++; break;
             case (ConsoleKey.Enter) : return current;      
             default: break;
@@ -44,6 +45,35 @@ public class observador
         }
 
         
+    }
+
+    public int GetIntNumber(string message){
+        int current = 0;
+
+         while (true)
+        {
+         if (current <0) current=0;   
+         Console.Clear();   
+         Console.ForegroundColor = ConsoleColor.Cyan;   
+         System.Console.WriteLine(message); 
+         Console.ForegroundColor = ConsoleColor.White;
+
+        System.Console.WriteLine(current); 
+
+        System.Console.WriteLine("\n\n Use las flechitas del teclado para elegir su opcion");
+
+        switch (Console.ReadKey().Key)
+        {
+            case (ConsoleKey.RightArrow):
+            case (ConsoleKey.UpArrow): current++; break;
+
+            case (ConsoleKey.LeftArrow):
+            case (ConsoleKey.DownArrow): current--; break;
+            case (ConsoleKey.Enter) : return current;      
+            default: break;
+        }
+        }
+
     }
 
     public bool BoolResponses(string arg)
@@ -133,12 +163,6 @@ public class observador
         Console.Clear();
         Console.ForegroundColor = ConsoleColor.DarkGreen;
         System.Console.WriteLine("El torneo ha terminado. ");
-        /*Console.ForegroundColor = ConsoleColor.White;
-
-        foreach (var item in championStatus.PlayerStats)
-        {
-            System.Console.WriteLine($"Player {item.player.Id}. Puntuacion: {item.punctuation} puntos");
-        }*/
 
         Console.ForegroundColor = ConsoleColor.DarkBlue;
 

@@ -5,42 +5,42 @@ public class GamePlayerHand<TToken> : ICloneable<GamePlayerHand<TToken>>, IEquat
 
     public int PlayerId { get; protected set; }
     public bool IPlayed { get { return FichasJugadas.Count < 1 ? true : false; } }//Dice si ha jugado
-    public List<TToken> hand { get; protected set; }//Mano
+    private HashSet<TToken> handPrivate = new HashSet<TToken>();
+    public List<TToken> hand { get => this.handPrivate.ToList<TToken>(); }//Mano
     public Stack<TToken> FichasJugadas { get; protected set; } = new Stack<TToken>() { };//Fichas jugadas
 
     public bool ContainsToken(TToken itoken)
     {
-        return hand.Contains(itoken);
+        return handPrivate.Contains(itoken);
     }
 
-    public GamePlayerHand(int PlayerId, List<TToken> itoken)
+    public GamePlayerHand(int PlayerId, HashSet<TToken> itoken)
     {
-        this.hand = itoken;
+        this.handPrivate = itoken;
         this.PlayerId = PlayerId;
     }
 
     public void AddLastPlay(TToken itoken)
     {
         FichasJugadas.Push(itoken);
-        hand.Remove(itoken);
+        handPrivate.Remove(itoken);
     }
 
     public bool LastPlay(out TToken temp)
     {
-        if (FichasJugadas.Count < 1) { temp = hand[0]; return false; }//Devuelve un valor inecesari
+        if (FichasJugadas.Count < 1) { temp = handPrivate.ElementAt(0); return false; }//Devuelve un valor inecesari
         temp = FichasJugadas.Peek();
         return true;
     }
 
-    public GamePlayerHand<TToken> Clone() => new GamePlayerHand<TToken>(this.PlayerId, this.hand);
+    public GamePlayerHand<TToken> Clone() => new GamePlayerHand<TToken>(this.PlayerId, this.handPrivate);
 
     public bool Equals(GamePlayerHand<TToken>? other)
     {
-        if (other == null || other.hand.Count != this.hand.Count || !other.PlayerId.Equals(this.PlayerId)) { return false; }
-        for (int i = 0; i < other.hand.Count; i++)
+        if (other == null || other.handPrivate.Count != this.handPrivate.Count || !other.PlayerId.Equals(this.PlayerId)) { return false; }
+        foreach (var item in other.hand)
         {
-            if (!other.hand[i].Equals(this.hand[i])) { return false; }
-
+            if (!this.handPrivate.Contains(item)) { return false; }
         }
         return true;
     }
@@ -53,7 +53,7 @@ public class GamePlayerHand<TToken> : ICloneable<GamePlayerHand<TToken>>, IEquat
     public override string ToString()
     {
         string temp = string.Empty;
-        foreach (var item in this.hand)
+        foreach (var item in this.handPrivate)
         {
             temp += " " + item.ToString() + " ";
         }

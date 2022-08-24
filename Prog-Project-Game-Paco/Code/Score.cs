@@ -9,7 +9,7 @@ public class ClassicScore : IGetScore<IToken>
         //le da un valor a la ficha
         int score = 0;
         score = (int)(token.Part1.ComponentValue + token.Part2.ComponentValue);
-           if(score<0){score=score*-1;}
+        if (score < 0) { score = score * -1; }
         return score;
     }
 }
@@ -22,14 +22,24 @@ public class Double : ClassicScore, IGetScore<IToken>
         //le da un valor a la ficha
         double result = base.Score(itoken);
 
-        if (itoken.ItsDouble()) result *= 2;
-        if( result<0){result=result*-1;}
+        if (ItsDouble(itoken)) result *= 2;
+        if (result < 0) { result = result * -1; }
         return result;
+    }
+
+
+    public virtual bool ItsDouble(IToken x)
+    {
+        //es doble si sus partes son iguales
+        return (x.Part1.Equals(x.Part2));
     }
 
 }
 
+
+
 #endregion
+
 //Champion
 #region  Champion
 

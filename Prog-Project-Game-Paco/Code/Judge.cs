@@ -223,7 +223,7 @@ public class Judge : IDescriptible, IJudgeGame
 
 public class CorruptionJugde : Judge, IJudgeGame
 {
-    public static string Description => "Juez Corrupto para el juego";
+    public static new string Description => "Juez Corrupto para el juego";
     protected Random random { get; set; }
     public CorruptionJugde(IStopGame<IPlayer, IToken> stop, IGetScore<IToken> getscore, IWinCondition<(IPlayer player, List<IToken> hand), IToken> winCondition, IValidPlay<IBoard, IToken, IChooseStrategyWrapped> valid) : base(stop, getscore, winCondition, valid)
     {
@@ -286,7 +286,7 @@ public class ChampionJudge : IDescriptible, IChampionJudge<GameStatus>
     protected virtual IWinCondition<IGame<GameStatus>, List<IPlayerScore>> winCondition { get; set; }
     protected virtual IValidPlay<List<IGame<GameStatus>>, IPlayer, bool> valid { get; set; }
     protected virtual IGetScore<List<IPlayerScore>> howtogetscore { get; set; }
-    protected virtual CalculateChampionScore getPlayerScore { get; set; }
+    protected virtual CalculateChampionScore getPlayerScore { get; set; } = new CalculateChampionScore(new List<int>());
     protected virtual List<IGame<GameStatus>> finishedGames { get; set; } = new List<IGame<GameStatus>>();
 
     protected virtual List<int> playersId { get; set; } = new List<int>();
@@ -352,7 +352,7 @@ public class ChampionJudge : IDescriptible, IChampionJudge<GameStatus>
 
 public class CorruptionChampionJugde : ChampionJudge, IChampionJudge<GameStatus>
 {
-    public static string Description => "Juez Corrupto para el Torneo";
+    public static new string Description => "Juez Corrupto para el Torneo";
     public CorruptionChampionJugde(IStopGame<List<IGame<GameStatus>>, List<IPlayerScore>> stopcriteria, IWinCondition<IGame<GameStatus>, List<IPlayerScore>> winCondition, IValidPlay<List<IGame<GameStatus>>, IPlayer, bool> valid, IGetScore<List<IPlayerScore>> howtogetscore) : base(stopcriteria, winCondition, valid, howtogetscore)
     {
     }

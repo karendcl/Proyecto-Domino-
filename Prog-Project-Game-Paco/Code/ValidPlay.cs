@@ -7,14 +7,13 @@ namespace Game;
 public abstract class ValidPlayClass : IValidPlay<IBoard, IToken, IChooseStrategyWrapped>
 {
 
-    public ValidPlayClass(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer){}
     public static string Description => "Valid Play";
 
     public virtual IChooseStrategyWrapped ValidPlay(IBoard board, IToken token)
     {
 
         var choose = new ChooseStrategyWrapped(board, token);
-        bool z = false;
+
         if (FirstPlay(board)) //Si es l primera partida siempre se puede poner ficha
         {
             return (new ChooseStrategyWrapped(board, token, true));
@@ -78,15 +77,10 @@ public abstract class ValidPlayClass : IValidPlay<IBoard, IToken, IChooseStrateg
 # region Derivates class
 public class ClassicPlay : ValidPlayClass
 {
-    public static string Description => "Clasico (solo si los numeros son iguales)";
-    public ClassicPlay(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer) : base(equality, Comparer)
-    {
-    }
-
+    public static new string Description => "Clasico (solo si los numeros son iguales)";
     protected override bool Match(double Part1, double part2)
     {
-        //part2 = (int)part2;
-        //Part1 = (int)Part1;
+
         return (part2.Equals(Part1));
     }
 
@@ -101,10 +95,7 @@ public class ClassicPlay : ValidPlayClass
 
 public class BiggerValidPlay : ValidPlayClass
 {
-    public static string Description => "Solo si el numero a jugar es mayor al numero ya en la mesa";
-    public BiggerValidPlay(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer) : base(equality, Comparer)
-    {
-    }
+    public static new string Description => "Solo si el numero a jugar es mayor al numero ya en la mesa";
 
     protected override bool Match(double token, double board)
     {
@@ -119,10 +110,8 @@ public class BiggerValidPlay : ValidPlayClass
 
 public class SmallerValidPlay : ValidPlayClass
 {
-    public static string Description => "Solo si el numero a jugar es menor al numero ya en la mesa";
-    public SmallerValidPlay(IEqualityComparer<IToken> equality, IComparer<IToken> Comparer) : base(equality, Comparer)
-    {
-    }
+    public static new string Description => "Solo si el numero a jugar es menor al numero ya en la mesa";
+
 
     protected override bool Match(double Part1, double part2)
     {

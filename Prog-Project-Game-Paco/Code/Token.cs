@@ -117,34 +117,11 @@ public class Token : IToken //ficha
         this.Part2 = Part2;
     }
 
-    public virtual bool ItsDouble()
-    {
-        //es doble si sus partes son iguales
-        return (this.Part1.Equals(this.Part2));
-    }
-
-
 
     public override string ToString()
     {
         return "[" + Part1 + "|" + Part2 + "] ";
     }
-
-    public virtual bool IsMatch(IToken other)
-    {
-        //dos fichas son match si la parte de una es igual a una parte de la otra
-        return (this.Part1.Equals(other.Part1)) ||
-               (this.Part1.Equals(other.Part2)) ||
-               (this.Part2.Equals(other.Part2)) ||
-               (this.Part2.Equals(other.Part1));
-    }
-
-    public virtual bool Contains(int a)
-    {
-        return (this.Part1.Equals(a) || this.Part2.Equals(a));
-    }
-
-
 
     public virtual void SwapToken()
     {
@@ -165,36 +142,29 @@ public class Token : IToken //ficha
 public class TokensManager : ITokensManager
 {
     protected int TokensForEach { get; set; }
+
     public List<IToken> Elements { get; protected set; }
 
     public IEqualityComparer<IToken> equalityComparer { get; protected set; }
 
-    public IComparer<IToken> Comparer { get; protected set; }
 
-    public TokensManager(int TokensForEach, IComparer<IToken> Comparer, IEqualityComparer<IToken> equalityComparer, List<IToken> tokens)
+    public TokensManager(int TokensForEach, IEqualityComparer<IToken> equalityComparer, List<IToken> tokens)
     {
-
-        this.Comparer = Comparer;
-        this.Elements = new List<IToken>();
-        this.Comparer = Comparer;
         this.equalityComparer = equalityComparer;
         this.Elements = tokens;
         this.TokensForEach = TokensForEach;
     }
 
 
-    public virtual bool ItsDouble(IToken x)
-    {
-        return (x.Part1.Equals(x.Part2));
-    }
 
 
 
-    public List<IToken> GetTokens()
+
+    public HashSet<IToken> GetTokens()
     {
 
         int count = 0;
-        var list = new List<IToken>();
+        var Set = new HashSet<IToken>(this.equalityComparer);
 
         while (count != TokensForEach)
         {
@@ -204,44 +174,27 @@ public class TokensManager : ITokensManager
             var index = r.Next(0, cantidadDisponible);
             cantidadDisponible--;
             count++;
-            list.Add(this.Elements[index]);
+            Set.Add(this.Elements[index]);
             this.Elements.RemoveAt(index);
 
         }
 
-        return list;
+        return Set;
     }
 
 
 }
 
-
-public class ComparerTokens : IComparer<IToken>
-{
-
-    public int Compare(IToken? x, IToken? y)
-    {
-        int temp = 0;
-        int xNorma = (int)(Math.Pow(2, x.Part1.ComponentValue) + Math.Pow(2, x.Part2.ComponentValue));
-
-        int yNorma = (int)(Math.Pow(2, y.Part1.ComponentValue) + Math.Pow(2, y.Part2.ComponentValue));
-
-        if (xNorma == yNorma) return 0;
-        if (xNorma < yNorma) return -1;
-        return 1;
-
-    }
-}
 
 public class IEquatablePorCaras : IEqualityComparer<IToken>
 {
     public bool Equals(IToken? x, IToken? y)
     {
-        if (x == null || y == null) return false;
-        bool a = (x.Part1 == y.Part1 || x.Part1 == y.Part2);
-        bool b = (x.Part2 == y.Part1 || x.Part2 == y.Part1);
-        return (a || b);
-
+        if (x is null || y is null) { throw new Exception("The tokens can´t be null"); }
+        return (x.Part1.Equals(y.Part1)) ||
+               (x.Part1.Equals(y.Part2)) ||
+               (x.Part2.Equals(y.Part2)) ||
+               (x.Part2.Equals(y.Part1));
     }
 
     public int GetHashCode([DisallowNull] IToken obj)
@@ -302,8 +255,8 @@ public class Fichas_Termoelectricas : IGenerator  //genera las fichas random
         for (int i = 0; i < MaxValue; i++)
         {
             Random random = new Random();
-            double min = random.Next(0, MaxValue/2);
-            double maxPotenci = random.Next(MaxValue/2, MaxValue);
+            double min = random.Next(0, MaxValue / 2);
+            double maxPotenci = random.Next(MaxValue / 2, MaxValue);
 
 
             EnergyGenerator generator = new EnergyGenerator(GetAName(), min, maxPotenci);

@@ -65,7 +65,7 @@ public class SemiSmart : IPlayerStrategy
             if (choose.CanMatch) valor++;
         }
 
-        if (itoken.ItsDouble()) valor++;
+
 
         valor += (int)(watch.howtogetscore.Score(itoken) / 2);
 

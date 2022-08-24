@@ -79,12 +79,14 @@ public class Championship : IChampionship<ChampionStatus>
             GameOver(game, gameStatus, i); // Se envia el estatus general del torneo con el ultimo estatus de la partida
             if (judge.EndGame(this.FinishGames)) // se pregunta si se puede continuar jugando
             {
-               // ChampionOver();
+                // ChampionOver();
                 break;
             }
             Orders c = Orders.NextPlay;
-            if (!Continue(c)) { //ChampionPrint();
-                                 break; }// Se espera confirmacion para continuar a la siguiente partida 
+            if (!Continue(c))
+            { //ChampionPrint();
+                break;
+            }// Se espera confirmacion para continuar a la siguiente partida 
 
         }
         ChampionOver(); //Se envia el ultimo estado del torneo 
@@ -97,7 +99,7 @@ public class Championship : IChampionship<ChampionStatus>
     {
         this.GamesStatus.Push(gameStatus);
         this.FinishGames.Add(game);
-        //this.PrintGames(gameStatus);
+
     }
 
     protected void PrintGames(GameStatus gameStatus) //Se crea el estado de la partida dado que ocurrio un evento a nivel de partida que debe imprimirse
@@ -118,14 +120,14 @@ public class Championship : IChampionship<ChampionStatus>
         return championStatus;
     }
 
-    protected void ControlPlayers(List<IPlayer> players) //Se contorla los players
+    protected List<IPlayer> ControlPlayers(List<IPlayer> players) //Se contorla los players
     {
         var temp = new List<IPlayer>();
         foreach (var player in players)
         {
             if (judge.ValidPlay(player)) temp.Add(player);
         }
-        players = temp;
+        return temp;
     }
     protected void PlayerStatistics() //Estadisticas de los jugadores
     {

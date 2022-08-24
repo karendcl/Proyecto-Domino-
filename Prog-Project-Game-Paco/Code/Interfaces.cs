@@ -92,7 +92,8 @@ public interface IPlayerScore : IDescriptible, IEquatable<PlayerScore>, IEquatab
 
     int PlayerId { get; }
     void AddScore(double score);
-    bool Equals(PlayerScore? other);
+
+    new bool Equals(PlayerScore? other);
     void LessScore(double score);
     void resetScore();
     void SetScore(double score);
@@ -154,12 +155,9 @@ public interface IToken
     ITokenizable Part2 { get; }
 
     IToken Clone();
-    bool Contains(int a);
 
-
-    bool ItsDouble();
-    bool IsMatch(IToken other);
     void SwapToken();
+
     string ToString();
 }
 /// <summary>
@@ -171,15 +169,14 @@ public interface ITokensManager
 {
     List<IToken> Elements { get; }
     IEqualityComparer<IToken> equalityComparer { get; }
-    IComparer<IToken> Comparer { get; }
 
     /// <summary>
     ///  Distribute the tokens under a given criteria
     /// </summary>
     /// <param name=""></param>
     /// <returns></returns>
-    List<IToken> GetTokens();
-    bool ItsDouble(IToken itoken);
+    HashSet<IToken> GetTokens();
+
 }
 
 
@@ -190,7 +187,7 @@ public interface ITokensManager
 
 public interface IDescriptible
 {
-    public static string Description { get; }
+    public static string Description { get; } = "Description";
 }
 public interface ICloneable<T> : ICloneable
 {
@@ -438,11 +435,11 @@ public interface IPlayer : ICloneable<IPlayer>, IEquatable<IPlayer>, IEqualityCo
     /// <param name=""></param>
     /// <returns></returns>
     int ChooseSide(IChooseStrategyWrapped choose, IWatchPlayer watchPlayer);
-    IPlayer Clone();
-    bool Equals(IPlayer? other);
-    bool Equals(IPlayer? x, IPlayer? y);
-    bool Equals(int otherId);
-    int GetHashCode(IPlayer obj);
+    new IPlayer Clone();
+    new bool Equals(IPlayer? other);
+    new bool Equals(IPlayer? x, IPlayer? y);
+    new bool Equals(int otherId);
+    new int GetHashCode(IPlayer obj);
     string ToString();
 }
 
@@ -458,7 +455,7 @@ public interface IBoard : ICloneable<IBoard>
     IToken Last { get; }
 
     void AddTokenToBoard(IToken itoken, int side);
-    IBoard Clone();
+    new IBoard Clone();
     IBoard Clone(List<IToken> CopyTokens);
     string ToString();
 }
@@ -491,7 +488,7 @@ public interface IGame<TStatus> : ICloneable<IGame<TStatus>>
     /// <param name=""></param>
     /// <returns></returns>
     double PlayerScore(IPlayer player);
-    IGame<TStatus> Clone();
+    new IGame<TStatus> Clone();
     /// <summary>
     ///  The game is initialized, receives the board to play and the players
     /// </summary>

@@ -40,7 +40,7 @@ public abstract class WinCondition : IWinCondition<(IPlayer player, List<IToken>
 public class MinScore : WinCondition
 {
 
-    public static string Description => "Gana el jugador que tenga menos puntos";
+    public static new string Description => "Gana el jugador que tenga menos puntos";
     public override List<IPlayer> FinalWinner(double[] scores, List<(IPlayer player, List<IToken> hand)> players)
     {
         var result = new List<IPlayer>();
@@ -61,7 +61,7 @@ public class MinScore : WinCondition
 
 public class MaxScore : WinCondition
 {
-    public static string Description => "Gana el jugador que tenga mas puntos";
+    public new static string Description => "Gana el jugador que tenga mas puntos";
     public override List<IPlayer> FinalWinner(double[] scores, List<(IPlayer player, List<IToken> hand)> players)
     {
         var result = new List<IPlayer>();
@@ -82,7 +82,7 @@ public class MaxScore : WinCondition
 
 public class MiddleScore : WinCondition
 {
-    public static string Description { get { return "Gana el jugador que tenga la media de puntos"; } }
+    public new static string Description { get { return "Gana el jugador que tenga la media de puntos"; } }
 
     public override List<IPlayer> FinalWinner(double[] scores, List<(IPlayer player, List<IToken> hand)> players)
     {
@@ -117,7 +117,7 @@ public class WinChampion : IWinCondition<IGame<GameStatus>, List<IPlayerScore>>
     protected List<WPlayer<IPlayer>> players { get; set; }
     protected List<int> cantwins { get; set; }
 
-    protected IGetScore<List<IPlayerScore>> howtogetscore { get; set; }
+    protected IGetScore<List<IPlayerScore>> howtogetscore { get; set; } = new ScoreChampionNormal();
     protected virtual Dictionary<int, List<IPlayerScore>> playersScore { get; set; } = new Dictionary<int, List<IPlayerScore>>();
     public static string Description => "Gana el torneo, aquel jugador que haya ganado la mayor cantidad de veces";
 

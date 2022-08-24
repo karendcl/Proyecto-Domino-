@@ -12,14 +12,14 @@ public class Game : IGame<GameStatus>
     public virtual event Predicate<Orders> CanContinue;//  Evento de si puede continuar la partida
     public virtual IBoard? board { get; protected set; } //Tablero se recibe en play a game
     public virtual List<IPlayer>? GamePlayers { get { return GetPlayerList(); } }
-    protected virtual List<IPlayer>? player { get; set; }// Jugadores de la partida
+    protected virtual List<IPlayer> player { get; set; } = new List<IPlayer>();// Jugadores de la partida
     internal virtual int MaxDouble { get; set; } //Maximo doble a jugar
     internal IJudgeGame judge { get; set; } //Juez de la partida
     protected List<GamePlayerHand<IToken>> hands { get { return this.PlayersHands.Values.ToList<GamePlayerHand<IToken>>(); } } //Mano de los jugadores
     protected List<PlayerStats> PlayerStats = new List<PlayerStats>() { };  //Estadisticas de los jugadores
     protected TokensManager Manager { get; set; } // Administrador de las fichas
 
-    protected Dictionary<int, GamePlayerHand<IToken>> PlayersHands { get; set; }
+    protected Dictionary<int, GamePlayerHand<IToken>> PlayersHands { get; set; } = new Dictionary<int, GamePlayerHand<IToken>>() { };
 
     public Game(int max, IJudgeGame judge, TokensManager manager)
     {
@@ -42,6 +42,7 @@ public class Game : IGame<GameStatus>
     protected List<IPlayer>? GetPlayerList()
     {
         var x = new List<IPlayer>();
+
         foreach (var item in this.player)
         {
             x.Add(item.Clone());
@@ -76,7 +77,7 @@ public class Game : IGame<GameStatus>
 
         foreach (var item in players)
         {
-            List<IToken> temp = this.Manager.GetTokens();
+            var temp = this.Manager.GetTokens();
             item.AddHand(temp.ToList());
             GamePlayerHand<IToken> hand = new GamePlayerHand<IToken>(item.Id, temp);
             PlayersHands.TryAdd(item.Id, hand);

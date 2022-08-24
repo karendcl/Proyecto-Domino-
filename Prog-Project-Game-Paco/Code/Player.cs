@@ -130,7 +130,7 @@ public class CorruptionPlayer : Player, ICorruptible, IPlayer
 {
     public CorruptionPlayer(int id) : base(id) { }
 
-    public static string Description => "Jugador Corrupto/Tramposo";
+    public static new string Description => "Jugador Corrupto/Tramposo";
 
     public override IToken BestPlay(IWatchPlayer watchPlayer)
     {

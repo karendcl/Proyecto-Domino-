@@ -159,6 +159,18 @@ public class CorruptionPlayer : Player, ICorruptible, IPlayer
 
     }
 
+
+    public override IPlayer Clone()
+    {
+        var temp = new CorruptionPlayer(this.Id);
+        foreach (var item in strategias)
+        {
+            temp.AddStrategy(item);
+        }
+        return temp;
+    }
+
+
 }
 
 

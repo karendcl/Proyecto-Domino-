@@ -68,10 +68,9 @@ public class Championship : IChampionship<ChampionStatus>
             game.GameStatus += this.PrintGames;// Suscribirse al evento
             game.CanContinue += this.Continue;//Suscribirse al evento
             List<IPlayer> players = GlobalPlayers.GetNextPlayers(); //Jugadores en esta partida
-            ControlPlayers(players);// Se controla que los jugadores puedan jugar dicha partida
-            if (players.Count < 1) //Si no hay jugadores se acabo el torneo
+            players = ControlPlayers(players);// Se controla que los jugadores puedan jugar dicha partida
+            if (players.Count <= 1) //Si no hay jugadores se acabo el torneo
             {
-                ChampionOver();
                 break;
             }
             GameStatus gameStatus = game.PlayAGame(new Board(), players);// Se envia el ultimo estatus de la partida 
@@ -79,12 +78,11 @@ public class Championship : IChampionship<ChampionStatus>
             GameOver(game, gameStatus, i); // Se envia el estatus general del torneo con el ultimo estatus de la partida
             if (judge.EndGame(this.FinishGames)) // se pregunta si se puede continuar jugando
             {
-                // ChampionOver();
                 break;
             }
             Orders c = Orders.NextPlay;
             if (!Continue(c))
-            { //ChampionPrint();
+            {
                 break;
             }// Se espera confirmacion para continuar a la siguiente partida 
 
@@ -138,6 +136,7 @@ public class Championship : IChampionship<ChampionStatus>
             double punctuation = 0;
             foreach (var Game in this.FinishGames)
             {
+                if (Game is null) { throw new Exception(); }
                 if (Game.GamePlayers.Contains(player))
                 {
                     punctuation += Game.PlayerScore(player);

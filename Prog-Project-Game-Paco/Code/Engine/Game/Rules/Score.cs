@@ -16,8 +16,8 @@ public class ClassicScore : IGetScore<IToken>
 
 public class Double : ClassicScore, IGetScore<IToken>
 {
-    public static string Description => "Doble. Si una ficha es doble, su valor se duplica";
-    public double Score(IToken itoken)
+    public static new string Description => "Doble. Si una ficha es doble, su valor se duplica";
+    public new double Score(IToken itoken)
     {
         //le da un valor a la ficha
         double result = base.Score(itoken);

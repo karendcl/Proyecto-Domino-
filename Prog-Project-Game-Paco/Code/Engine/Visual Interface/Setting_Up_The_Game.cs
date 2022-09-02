@@ -82,6 +82,7 @@ public class ChampionStart
         // retorna un nuevo torneo
         this.obs.PrintStart();
         int cantPartidas = CantPartidas();
+        this.cantPlayers = this.Asksint("Escriba cuantos jugadores van a jugar", null);
         IChampionJudge<GameStatus> judge = ChooseChampionJudge();
         (PlayersCoach players, List<IGame<GameStatus>> games) games = SelectGameTypes(cantPartidas);
         return new Championship(cantPartidas, judge, games.players, games.games);
@@ -100,6 +101,7 @@ public class ChampionStart
         var x = a[GetChoice(a, words)];
 
         return Activator.CreateInstance(x, stop, win, valid, score) as IChampionJudge<GameStatus>;
+
     }
 
 
@@ -175,9 +177,9 @@ public class ChampionStart
         string words = $"Elija el tipo de jugador para el Player {id}\n ";
         Type[] a = Utils.TypesofEverything<IPlayer>();
         var x = a[GetChoice(a, words)];
-        IPlayer player;
-        if (x == typeof(CorruptionPlayer)) player = Activator.CreateInstance(x, id) as CorruptionPlayer;
-        else player = Activator.CreateInstance(x, id) as IPlayer;
+
+        IPlayer player = Activator.CreateInstance(x, id) as IPlayer;
+
         player.AddStrategy(ChoosePlayerStrategy(id));
         return player;
     }
@@ -210,7 +212,6 @@ public class ChampionStart
         {
             PropertyInfo property = a[i].GetProperty("Description", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
             options[i] = (string)property.GetValue(null, null);
-            //words += $"\n [{i + 1}]  {value} ";
         }
 
         return ChooseInt(words, 0, a.Length - 1, options);
@@ -261,16 +262,9 @@ public class ChampionStart
         Type[] a = Utils.TypesofEverything<IJudgeGame>();
         var x = a[GetChoice(a, ask)];
         IJudgeGame judge = Activator.CreateInstance(x, stopcondition, HowTogetScore, winCondition, validPlay) as IJudgeGame;
+        this.MaxDouble = this.Asksint("Escriba el doble maximo de las Tokens", null);
+        this.CantTokenPerPerson = this.Asksint("Escriba cuantas Tokens se van a repartir a cada jugador", null);
 
-
-        while (!this.ValidSettings(CantTokenPerPerson, MaxDouble, cantPlayers))
-        {
-            this.MaxDouble = this.Asksint("Escriba el doble maximo de las Tokens", null);
-
-            this.CantTokenPerPerson = this.Asksint("Escriba cuantas Tokens se van a repartir a cada jugador", null);
-
-            this.cantPlayers = this.Asksint("Escriba cuantos jugadores van a jugar", null);
-        }
 
         return judge;
     }
@@ -284,7 +278,9 @@ public class ChampionStart
         Type x = a[GetChoice(a, ask)];
 
         IGenerator generator = Activator.CreateInstance(x) as IGenerator;
+
         List<IToken> tokens = generator.CreateTokens(this.MaxDouble);
+
         return new TokensManager(TokensForEach, equalityComparer, tokens);
 
     }
@@ -315,6 +311,12 @@ public class ChampionStart
 
         TokensManager tokensManager = ChooseATokenManager(this.CantTokenPerPerson, equalityComparer);
 
+        while (!this.ValidSettings(CantTokenPerPerson, tokensManager.Elements.Count(), cantPlayers))
+        {
+            this.MaxDouble = this.Asksint("Escriba el doble maximo de las Tokens", null);
+            this.CantTokenPerPerson = this.Asksint("Escriba cuantas Tokens se van a repartir a cada jugador", null);
+        }
+
         return new Game(this.MaxDouble, judge, tokensManager) as IGame<GameStatus>;
     }
 
@@ -323,10 +325,7 @@ public class ChampionStart
     {
         List<IPlayer> tt = new List<IPlayer>();
 
-        for (int i = 0; i < this.cantPlayers; i++)
-        {
-            tt.Add(new Player(i));
-        }
+        tt = ChampionPlayers(this.cantPlayers);
         PlayersCoach coach = new PlayersCoach(tt);
 
         var Games = new IGame<GameStatus>[CantPartidas];
@@ -340,7 +339,12 @@ public class ChampionStart
                 int x = i - 1;
                 Games[i] = Games[x].Clone();//Clona la partida para que no existan problemas de referencia
                 coach.CloneLastGame(x);
-
+            }
+            else
+            if (i == 0)
+            {
+                Games[i] = ChooseAGame(ConfGame);
+                coach.AddPlayers(i, tt);
             }
             else
             {
@@ -352,17 +356,13 @@ public class ChampionStart
     }
     #endregion
 
-    protected virtual bool ValidSettings(int TokensForEach, int MaxDoble, int players)
+    protected virtual bool ValidSettings(int TokensForEach, int totalamount, int players)
     {
         //chequea que son validos los settings elegidos
-        int totalamount = 0;
 
-        if (TokensForEach == 0 || MaxDoble == 0 || players == 0) return false;
+        if (TokensForEach == 0 || totalamount == 0 || players == 0) return false;
 
-        for (int i = 0; i <= MaxDoble + 1; i++)
-        {
-            totalamount += i;
-        }
+
 
         return (TokensForEach * players > totalamount) ? false : true;
     }

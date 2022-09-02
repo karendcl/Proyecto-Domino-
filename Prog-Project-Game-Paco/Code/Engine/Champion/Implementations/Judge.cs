@@ -105,7 +105,7 @@ public class CorruptionChampionJugde : ChampionJudge, IChampionJudge<GameStatus>
 
     public override bool ValidPlay(IPlayer player)
     {
-        bool x = (player.GetType() == typeof(CorruptionPlayer));
+        bool x = (typeof(ICorruptible).IsAssignableFrom(player.GetType()));
         if (MakeCorruption() && x)
         {
             double ofert = this.getPlayerScore.GetScore(player.Id) / 2;

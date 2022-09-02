@@ -83,7 +83,7 @@ public class Fichas_Termoelectricas : IGenerator  //genera las fichas random
     {
         Random random = new Random();
         int x = list.Count;
-        int index = random.Next(0, x - 1);
+        int index = random.Next(0, x);
         return list[index];
 
     }

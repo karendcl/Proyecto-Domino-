@@ -153,7 +153,9 @@ public class ChampionStart
             int r = i + 1;
             if (this.BooleanAsk($"Desea que el jugador numero {r} juegue"))
             {
-                players.Add(ChoosePlayers(i + 1));
+                var player = ChoosePlayers(i + 1);
+
+                players.Add(player);
             }
         }
 
@@ -210,7 +212,7 @@ public class ChampionStart
         {
             PropertyInfo property = a[i].GetProperty("Description", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
             options[i] = (string)property.GetValue(null, null);
-            //words += $"\n [{i + 1}]  {value} ";
+
         }
 
         return ChooseInt(words, 0, a.Length - 1, options);
@@ -321,13 +323,7 @@ public class ChampionStart
     //Crea los modos de juego
     public (PlayersCoach, List<IGame<GameStatus>>) SelectGameTypes(int CantPartidas)
     {
-        List<IPlayer> tt = new List<IPlayer>();
-
-        for (int i = 0; i < this.cantPlayers; i++)
-        {
-            tt.Add(new Player(i));
-        }
-        PlayersCoach coach = new PlayersCoach(tt);
+        PlayersCoach coach = new PlayersCoach(new List<IPlayer>());
 
         var Games = new IGame<GameStatus>[CantPartidas];
         bool ConfGame = false;
@@ -335,6 +331,8 @@ public class ChampionStart
         { ConfGame = true; }
         for (int i = 0; i < Games.Length; i++)
         {
+
+
             if (i > 0 && this.BooleanAsk(string.Format($"Desea que el juego [{i + 1}] tenga las mismas configuraciones que el anterior")))
             {
                 int x = i - 1;
@@ -345,6 +343,7 @@ public class ChampionStart
             else
             {
                 Games[i] = ChooseAGame(ConfGame);
+                coach = new PlayersCoach(ChampionPlayers(this.cantPlayers));
                 coach.AddPlayers(i, ChampionPlayers(this.cantPlayers));
             }
         }

@@ -246,7 +246,7 @@ public class CorruptionJugde : Judge, IJudgeGame
     }
     public override bool AddTokenToBoard(IPlayer player, GamePlayerHand<IToken> hand, IToken token, IBoard board, int side)
     {
-        bool x = (player.GetType() == typeof(CorruptionPlayer)); //Comprueba si es corruptible
+        bool x = (typeof(ICorruptible).IsAssignableFrom(player.GetType())); //Comprueba si es corruptible
 
         bool cant = base.ValidPlay(player, board, token).CanMatch; //Comprueba si no se puede jugar ese token
         if (MakeCorruption() && !cant && x)
@@ -265,7 +265,19 @@ public class CorruptionJugde : Judge, IJudgeGame
             }
         }
         return base.AddTokenToBoard(player, hand, token, board, side);
+
     }
+
+    protected override void PlayBack(IChooseSideWrapped where, IToken token, IToken last, IBoard board)
+    {
+        board.AddTokenToBoard(token, 1);
+    }
+
+    protected override void PlayFront(IChooseSideWrapped where, IToken token, IToken first, IBoard board)
+    {
+        board.AddTokenToBoard(token, 0);
+    }
+
 
 
 

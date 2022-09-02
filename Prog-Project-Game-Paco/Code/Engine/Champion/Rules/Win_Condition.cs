@@ -17,7 +17,7 @@ public class WinChampion : IWinCondition<IGame<GameStatus>, List<IPlayerScore>>
     {
         this.players = new List<WPlayer<IPlayer>>() { };
         this.cantwins = new List<int>() { };
-        this.Porcent = porcentWins;
+        this.Porcent = porcentWins/100;
     }
 
     protected void Run(List<IGame<GameStatus>> games)

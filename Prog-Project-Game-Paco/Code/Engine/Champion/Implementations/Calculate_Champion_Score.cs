@@ -12,6 +12,7 @@ public class CalculateChampionScore
         Run();
     }
 
+
     public void Run()
     {
         foreach (var item in playersId)

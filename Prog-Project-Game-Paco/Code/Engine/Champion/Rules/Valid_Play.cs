@@ -10,7 +10,7 @@ public class ValidChampionPorcientoPerdidas : IValidPlay<List<IGame<GameStatus>>
 
     public ValidChampionPorcientoPerdidas(double Porcent)
     {
-        this.Porcent = Porcent;
+        this.Porcent = Porcent/100;
     }
     public bool ValidPlay(List<IGame<GameStatus>> games, IPlayer player)
     {
@@ -50,16 +50,19 @@ public class ValidChampionPerdidasConsecutivas : IValidPlay<List<IGame<GameStatu
         for (int i = 0; i < games.Count; i++)
         {
             var game = games[i];
-            game.Winner().Contains(player);
+            
+            if (!game.Winner().Contains(player)){
             if (lastIndex == 0 || i - lastIndex == 1)
             {
                 count++;
+                
             }
-            else
-            {
-                lastIndex = 0;
+            else count=0;
+            
+                lastIndex = i;
             }
-            if (lastIndex > this.CantdeVecesConsecutivas) return false;
+
+            if (count >= this.CantdeVecesConsecutivas) return false;
 
         }
 

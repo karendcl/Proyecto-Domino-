@@ -33,7 +33,7 @@ public class GameStatus //Actualiza en la pantalla todo lo que ocurre en cada ju
         if (this.Hands is not null)
             foreach (var item in this.Hands)
             {
-                if (item is not null)
+                if (item is not null && this.actualPlayer is not null)
                     if (item.Equals(this.actualPlayer.Id))
                     {
                         return item;

@@ -1,7 +1,5 @@
 namespace Game;
 
-
-
 public class GameStatus //Actualiza en la pantalla todo lo que ocurre en cada juego
 {
     public List<IPlayer> winners { get; protected set; } = new List<IPlayer>() { };

@@ -15,7 +15,7 @@ public class PlayerStats : IEquatable<PlayerStats> //Da la informacion de cada j
         if (this.punctuation < 0) this.punctuation = punctuation;
     }
 
-    public bool Equals(PlayerStats? other)
+    public bool Equals(PlayerStats other)
     {
         if (other == null) return false;
         return this.player.Equals(other.player);

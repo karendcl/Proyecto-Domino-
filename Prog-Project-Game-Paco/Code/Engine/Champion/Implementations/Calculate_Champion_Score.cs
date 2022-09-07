@@ -3,7 +3,6 @@ namespace Game;
 public class CalculateChampionScore
 {
     protected Dictionary<int, List<IPlayerScore>> players = new Dictionary<int, List<IPlayerScore>>();
-
     Dictionary<int, double> scores = new Dictionary<int, double>();
     protected List<int> playersId { get; set; }
     public CalculateChampionScore(List<int> playersId)
@@ -11,7 +10,6 @@ public class CalculateChampionScore
         this.playersId = playersId;
         Run();
     }
-
 
     public void Run()
     {
@@ -64,7 +62,6 @@ public class CalculateChampionScore
     {
         scores[Playerid] -= score;
     }
-
 
 
 }

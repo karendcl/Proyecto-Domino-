@@ -10,6 +10,6 @@ public interface IWatchPlayer
     IGetScore<IToken> howtogetscore { get; }
     IStopGame<IPlayer, IToken> stopCondition { get; }
     IValidPlay<IBoard, IToken, IChooseStrategyWrapped> validPlay { get; }
-    IWinCondition<(IPlayer player, List<IToken> hand), IToken> winCondition { get; }
+    IWinCondition<(IPlayer player, List<IToken> hand, double score), IToken> winCondition { get; }
     IBoard board { get; }
 }

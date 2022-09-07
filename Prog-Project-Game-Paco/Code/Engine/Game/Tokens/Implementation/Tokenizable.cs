@@ -2,35 +2,56 @@ namespace Game;
 
 #region ITokenizable
 
+
+public abstract class Tokenizable : ITokenizable
+{
+    public static string Description { get; } = "Description";
+    public abstract double ComponentValue { get; protected set; }
+
+    public abstract ITokenizable Clone();
+
+
+    public virtual int CompareTo(ITokenizable other)
+    {
+        return this.ComponentValue.CompareTo(other?.ComponentValue);
+
+    }
+
+    public virtual bool Equals(ITokenizable other)
+    {
+        if (other == null) return false;
+        return this.ComponentValue.Equals(other.ComponentValue);
+    }
+
+
+    public string Paint() => Description;
+
+
+}
+
 /* Todos los objetos pueden ser tokenizados solo con implementar ITokenizable */
 /// <summary>
 ///  Enteros siendo Tokenizados
 /// </summary>
 /// <param name=""></param>
 /// <returns></returns>
-public class NormalInt : ITokenizable
+public class NormalInt : Tokenizable
 {
     public static string Description => "Enteros";
 
-    public double ComponentValue { get; protected set; }
+    public override double ComponentValue { get; protected set; }
 
     public NormalInt(int value) { this.ComponentValue = value; }
-    public int CompareTo(ITokenizable? obj)
-    {
-        return this.ComponentValue.CompareTo(obj?.ComponentValue);
-    }
 
+    public override ITokenizable Clone()
+    {
+        return new NormalInt((int)this.ComponentValue);
+    }
 
     public override string ToString()
     {
         return this.ComponentValue.ToString();
 
-    }
-
-    public bool Equals(ITokenizable? other)
-    {
-        if (other == null) return false;
-        return this.ComponentValue.Equals(other.ComponentValue);
     }
 
     public string Paint()
@@ -43,7 +64,7 @@ public class NormalInt : ITokenizable
 /// </summary>
 /// <param name=""></param>
 /// <returns></returns>
-public class EnergyGenerator : ITokenizable
+public class EnergyGenerator : Tokenizable
 {
     public string name { get; set; }
 
@@ -52,14 +73,12 @@ public class EnergyGenerator : ITokenizable
 
     public static string Description { get => "Termoeléctrica"; }
 
-    public double ComponentValue => PotencialNow();// Este es el valor a tener en cuenta para un token
+    public override double ComponentValue { get { return PotencialNow(); } protected set { this.ComponentValue = value; } }// Este es el valor a tener en cuenta para un token
 
-
-    public override string ToString()
+    public override ITokenizable Clone()
     {
-        return this.ComponentValue.ToString();
+        return new EnergyGenerator(this.name, this.minPotenci, this.maxPotenci);
     }
-
 
     public double PotencialNow()
     {
@@ -68,22 +87,12 @@ public class EnergyGenerator : ITokenizable
         return x * random.Next((int)minPotenci, (int)maxPotenci);
     }
 
-    public string Paint()
+    public override string ToString()
     {
-        return Description;
+        return this.ComponentValue.ToString();
+
     }
 
-    public int CompareTo(ITokenizable? other)
-    {
-        if (other == null) return -1;
-        return this.ComponentValue.CompareTo(other.ComponentValue);
-    }
-
-    public bool Equals(ITokenizable? other)
-    {
-        if (other == null) return false;
-        return this.ComponentValue.Equals(other.ComponentValue);
-    }
 
     public EnergyGenerator(string name, double minPotenci, double maxPotenci)
     {

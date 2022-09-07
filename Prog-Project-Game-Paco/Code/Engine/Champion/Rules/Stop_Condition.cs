@@ -90,7 +90,7 @@ public class StopChampionPerHaveAWinner : IStopGame<List<IGame<GameStatus>>, Lis
     {
 
         List<IPlayer> players = this.winCondition.Winner(criterio, howtogetscore);
-        if (players.Count > CantGanadores) return true;
+        if (players.Count >= CantGanadores) return true;
         return false;
     }
 }

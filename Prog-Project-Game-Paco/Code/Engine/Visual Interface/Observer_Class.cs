@@ -172,7 +172,13 @@ public class observador
 
         foreach (var item in championStatus.Winners)
         {
-            System.Console.WriteLine($" Player {item.Id}");
+            //double sc = 0;
+            foreach (var score in championStatus.PlayerStats)
+            {
+               if (score.player.Id == item.Id)// sc += score.punctuation; 
+               System.Console.WriteLine($" Player {item.Id} con un score total de {score.punctuation}");
+            }
+           // System.Console.WriteLine($" Player {item.Id} con un score total de {sc}");
         }
 
         System.Console.WriteLine("\nPresiona una tecla para continuar...");

@@ -6,10 +6,10 @@ public class WatchPlayer : IWatchPlayer
     public IGetScore<IToken> howtogetscore { get; protected set; }
     public IStopGame<IPlayer, IToken> stopCondition { get; protected set; }
     public IValidPlay<IBoard, IToken, IChooseStrategyWrapped> validPlay { get; protected set; }
-    public IWinCondition<(IPlayer player, List<IToken> hand), IToken> winCondition { get; protected set; }
+    public IWinCondition<(IPlayer player, List<IToken> hand, double score), IToken> winCondition { get; protected set; }
     public IBoard board { get; protected set; }
 
-    public WatchPlayer(IGetScore<IToken> howtogetscore, IStopGame<IPlayer, IToken> stopCondition, IValidPlay<IBoard, IToken, IChooseStrategyWrapped> validPlay, IWinCondition<(IPlayer player, List<IToken> hand), IToken> winCondition, IBoard board)
+    public WatchPlayer(IGetScore<IToken> howtogetscore, IStopGame<IPlayer, IToken> stopCondition, IValidPlay<IBoard, IToken, IChooseStrategyWrapped> validPlay, IWinCondition<(IPlayer player, List<IToken> hand, double score), IToken> winCondition, IBoard board)
     {
         this.howtogetscore = howtogetscore;
         this.stopCondition = stopCondition;

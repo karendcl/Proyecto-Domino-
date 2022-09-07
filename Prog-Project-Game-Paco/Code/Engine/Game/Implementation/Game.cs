@@ -17,11 +17,11 @@ public class Game : IGame<GameStatus>
     internal IJudgeGame judge { get; set; } //Juez de la partida
     protected List<GamePlayerHand<IToken>> hands { get { return this.PlayersHands.Values.ToList<GamePlayerHand<IToken>>(); } } //Mano de los jugadores
     protected List<PlayerStats> PlayerStats = new List<PlayerStats>() { };  //Estadisticas de los jugadores
-    protected TokensManager Manager { get; set; } // Administrador de las fichas
+    protected ITokensManager Manager { get; set; } // Administrador de las fichas
 
     protected Dictionary<int, GamePlayerHand<IToken>> PlayersHands { get; set; } = new Dictionary<int, GamePlayerHand<IToken>>() { };
 
-    public Game(int max, IJudgeGame judge, TokensManager manager)
+    public Game(int max, IJudgeGame judge, ITokensManager manager)
     {
 
         this.MaxDouble = max;
@@ -217,7 +217,7 @@ public class Game : IGame<GameStatus>
     {
         return player.BestPlay(watch);
     }
-    public IGame<GameStatus> Clone() => new Game(this.MaxDouble, this.judge, this.Manager);
+    public IGame<GameStatus> Clone() => new Game(this.MaxDouble, this.judge.Clone(), this.Manager.Clone());
 
 }
 

@@ -5,7 +5,7 @@ namespace Game;
 /// </summary>
 /// <param name=""></param>
 /// <returns></returns>
-public interface ITokenizable : IComparable<ITokenizable>, IEquatable<ITokenizable>, IDescriptible
+public interface ITokenizable : IComparable<ITokenizable>, IEquatable<ITokenizable>, IDescriptible, ICloneable<ITokenizable>
 {
     string Paint();
     /// <summary>
@@ -14,6 +14,7 @@ public interface ITokenizable : IComparable<ITokenizable>, IEquatable<ITokenizab
     /// <param name=""></param>
     /// <returns></returns>
     double ComponentValue { get; }
+
 
 }
 /// <summary>

@@ -30,7 +30,7 @@ public class Token : IToken //ficha
 
     public virtual IToken Clone()
     {
-        return new Token(this.Part1, this.Part2);
+        return new Token(this.Part1.Clone(), this.Part2.Clone());
     }
 }
 #endregion

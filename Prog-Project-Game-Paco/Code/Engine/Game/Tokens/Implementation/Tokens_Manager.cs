@@ -42,8 +42,19 @@ public class TokensManager : ITokensManager
 
         return Set;
     }
-
-
+    protected virtual List<IToken> CloneTokens()
+    {
+        var temp = new List<IToken>();
+        foreach (var item in this.Elements)
+        {
+            temp.Add(item.Clone());
+        }
+        return temp;
+    }
+    public virtual ITokensManager Clone()
+    {
+        return new TokensManager(this.TokensForEach, this.equalityComparer, CloneTokens());
+    }
 }
 
 

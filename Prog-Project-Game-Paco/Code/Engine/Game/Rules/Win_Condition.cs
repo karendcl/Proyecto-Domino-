@@ -1,110 +1,83 @@
 
 namespace Game;
 
-public abstract class WinCondition : IWinCondition<(IPlayer player, List<IToken> hand), IToken>
-{
-    public static string Description => "Game WinCondition";
 
-    public virtual List<IPlayer> Winner(List<(IPlayer player, List<IToken> hand)> players, IGetScore<IToken> howtogetscore)
-    {
-        //devuelve una lista de ganadores de la partida
-        int count = 0;
-        var result = new List<IPlayer>();
-        double[] scores = new double[players.Count];
-
-        foreach (var (player, hand) in players)
-        {
-            if (hand.Count == 0)
-            {
-                result.Add(player);
-            }
-
-            foreach (var IToken in player.hand)
-            {
-                scores[count] += howtogetscore.Score(IToken);
-            }
-            count++;
-        }
-
-        if (result.Count != 0) return result;
-
-        return FinalWinner(scores, players);
-    }
-
-    public abstract List<IPlayer> FinalWinner(double[] scores, List<(IPlayer player, List<IToken> hand)> players);
-    //este es el metodo que va a cambiar
-
-
-
-}
-public class MinScore : WinCondition
+public class MinScore : IWinCondition<(IPlayer player, List<IToken> hand, double score), IToken>
 {
 
     public static new string Description => "Gana el jugador que tenga menos puntos";
-    public override List<IPlayer> FinalWinner(double[] scores, List<(IPlayer player, List<IToken> hand)> players)
+
+    public List<IPlayer> Winner(List<(IPlayer player, List<IToken> hand, double score)> criterios, IGetScore<IToken> howtogetscore)
     {
-        var result = new List<IPlayer>();
+        List<IPlayer> result = new List<IPlayer>();
 
-        double score = scores.Min();
+        double min = double.MaxValue;
 
-        for (int i = 0; i < scores.Length; i++)
+        foreach (var item in criterios)
         {
-            if (scores[i] == score)
-            {
-                result.Add(players[i].player);
-            }
+            if (item.score < min)
+            min = item.score;
+        }
+
+        foreach (var item in criterios)
+        {
+            if (item.score==min)
+            result.Add(item.player);
         }
 
         return result;
     }
 }
 
-public class MaxScore : WinCondition
+public class MaxScore : IWinCondition<(IPlayer player, List<IToken> hand, double score), IToken>
 {
     public new static string Description => "Gana el jugador que tenga mas puntos";
-    public override List<IPlayer> FinalWinner(double[] scores, List<(IPlayer player, List<IToken> hand)> players)
+
+    public List<IPlayer> Winner(List<(IPlayer player, List<IToken> hand, double score)> criterios, IGetScore<IToken> howtogetscore)
     {
-        var result = new List<IPlayer>();
+        List<IPlayer> result = new List<IPlayer>();
 
-        double score = scores.Max();
+        double max = double.MinValue;
+    
 
-        for (int i = 0; i < scores.Length; i++)
+        foreach (var item in criterios)
         {
-            if (scores[i] == score)
-            {
-                result.Add(players[i].player);
-            }
+            if (item.score > max)
+            max = item.score;
+        }
+
+        foreach (var item in criterios)
+        {
+            if (item.score==max)
+            result.Add(item.player);
         }
 
         return result;
     }
 }
 
-public class MiddleScore : WinCondition
+public class MiddleScore : IWinCondition<(IPlayer player, List<IToken> hand, double score), IToken>
 {
-    public new static string Description { get { return "Gana el jugador que tenga la media de puntos"; } }
-
-    public override List<IPlayer> FinalWinner(double[] scores, List<(IPlayer player, List<IToken> hand)> players)
+    public List<IPlayer> Winner(List<(IPlayer player, List<IToken> hand, double score)> criterios, IGetScore<IToken> howtogetscore)
     {
-        var result = new List<IPlayer>();
+        List<IPlayer> result = new List<IPlayer>();
 
-        double[] temp = new double[scores.Length];
-        temp = scores.ToArray();
+        int mid = criterios.Count /2;
+        double sc = criterios[mid].score;
 
-        Array.Sort(temp);
-        int mid = temp.Length / 2;
-        double score = temp[mid];
-
-
-        for (int i = 0; i < scores.Length; i++)
+      
+        foreach (var item in criterios)
         {
-            if (scores[i] == score)
-            {
-                result.Add(players[i].player);
-            }
+            if (item.score==sc)
+            result.Add(item.player);
         }
 
         return result;
     }
-}
+
+
+public new static string Description { get { return "Gana el jugador que tenga la media de puntos"; } }
+
+}   
+
 

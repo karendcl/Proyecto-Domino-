@@ -6,12 +6,10 @@ namespace Game;
 /// </summary>
 /// <param name=""></param>
 /// <returns></returns>
-public interface IToken
+public interface IToken : ICloneable<IToken>
 {
     ITokenizable Part1 { get; }
     ITokenizable Part2 { get; }
-
-    IToken Clone();
 
     void SwapToken();
 

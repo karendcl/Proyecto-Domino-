@@ -7,7 +7,7 @@ namespace Game;
 /// </summary>
 /// <param name=""></param>
 /// <returns></returns>
-public interface IJudgeGame
+public interface IJudgeGame : ICloneable<IJudgeGame>
 {
     /// <summary>
     ///  It is in charge of processing whether or not it is possible to put the piece on the board

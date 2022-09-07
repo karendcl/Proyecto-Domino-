@@ -5,7 +5,7 @@ namespace Game;
 /// </summary>
 /// <param name=""></param>
 /// <returns></returns>
-public interface ITokensManager
+public interface ITokensManager : ICloneable<ITokensManager>
 {
     List<IToken> Elements { get; }
     IEqualityComparer<IToken> equalityComparer { get; }

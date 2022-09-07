@@ -24,7 +24,6 @@ public class Championship : IChampionship<ChampionStatus>
 {
     #region Global
 
-
     #region Events
     public virtual event Predicate<Orders> CanContinue;//Evento que pregunta al final de cada partida si se puede continuar
     public virtual event Action<ChampionStatus> status;// Evento que envia la informacion del torneo en cada accion desde poner un ficha hasta el final del mismo
@@ -75,7 +74,7 @@ public class Championship : IChampionship<ChampionStatus>
             }
             GameStatus gameStatus = game.PlayAGame(new Board(), players);// Se envia el ultimo estatus de la partida 
             this.judge.AddFinishGame(game); //Se añade la ultima partida 
-            GameOver(game, gameStatus, i); // Se envia el estatus general del torneo con el ultimo estatus de la partida
+            GameOver(game, gameStatus); // Se envia el estatus general del torneo con el ultimo estatus de la partida
             if (judge.EndGame(this.FinishGames)) // se pregunta si se puede continuar jugando
             {
                 break;
@@ -93,7 +92,7 @@ public class Championship : IChampionship<ChampionStatus>
     #region Mandar informacion de los partidos
 
     public bool Continue(Orders orders) => this.CanContinue(orders);
-    protected void GameOver(IGame<GameStatus> game, GameStatus gameStatus, int i) //Significa que se acabo esa partida
+    protected void GameOver(IGame<GameStatus> game, GameStatus gameStatus) //Significa que se acabo esa partida
     {
         this.GamesStatus.Push(gameStatus);
         this.FinishGames.Add(game);
@@ -136,11 +135,18 @@ public class Championship : IChampionship<ChampionStatus>
             double punctuation = 0;
             foreach (var Game in this.FinishGames)
             {
-                if (Game is null) { throw new Exception(); }
-                if (Game.GamePlayers.Contains(player))
+                // if (Game is null) { throw new Exception(); }
+                foreach (var item in Game.GamePlayers)
                 {
-                    punctuation += Game.PlayerScore(player);
+                    if (item.Id == player.Id)
+                    {
+                        punctuation = Game.PlayerScore(item);
+                    }
                 }
+                // if (Game.GamePlayers.Contains(player))
+                //{
+                //  punctuation += Game.PlayerScore(player);
+                //}
             }
             temp.AddPuntuation(punctuation);
             Strats.Add(temp);
@@ -153,6 +159,7 @@ public class Championship : IChampionship<ChampionStatus>
     {
         this.ItsChampionOver = true;//Se inidica que terminó el torneo
         PlayerStatistics();
+
         ChampionStatus status = CreateAChampionStatus();
         this.status.Invoke(status);// Invocar el evento
 
@@ -160,11 +167,7 @@ public class Championship : IChampionship<ChampionStatus>
 
     protected List<IPlayer> ChampionWinners() => this.judge.Winners();
 
-    protected void ChampionPrint()
-    {
-        ChampionStatus championStatus = this.CreateAChampionStatus();
-        this.status.Invoke(championStatus); //Invocar el evento
-    }
+
 
 }
 

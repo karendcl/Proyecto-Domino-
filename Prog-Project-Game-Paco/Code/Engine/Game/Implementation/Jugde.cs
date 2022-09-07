@@ -7,7 +7,7 @@ public class Judge : IDescriptible, IJudgeGame
     #region Global
     protected virtual IStopGame<IPlayer, IToken> stopcriteria { get; set; }
     protected virtual IGetScore<IToken> howtogetscore { get; set; }
-    protected virtual IWinCondition<(IPlayer player, List<IToken> hand), IToken> winCondition { get; set; }
+    protected virtual IWinCondition<(IPlayer player, List<IToken> hand, double score), IToken> winCondition { get; set; }
     protected virtual IValidPlay<IBoard, IToken, IChooseStrategyWrapped> valid { get; set; }
     protected virtual IPlayer playernow { get; set; } = null!;
     protected virtual List<IChooseStrategyWrapped> validTokenFornow { get; set; }
@@ -21,7 +21,7 @@ public class Judge : IDescriptible, IJudgeGame
 
 
     //Guarda las fichas que son validas en un momento x
-    public Judge(IStopGame<IPlayer, IToken> stop, IGetScore<IToken> getscore, IWinCondition<(IPlayer player, List<IToken> hand), IToken> winCondition, IValidPlay<IBoard, IToken, IChooseStrategyWrapped> valid)
+    public Judge(IStopGame<IPlayer, IToken> stop, IGetScore<IToken> getscore, IWinCondition<(IPlayer player, List<IToken> hand, double score), IToken> winCondition, IValidPlay<IBoard, IToken, IChooseStrategyWrapped> valid)
     {
         this.stopcriteria = stop;
         this.howtogetscore = getscore;
@@ -61,7 +61,7 @@ public class Judge : IDescriptible, IJudgeGame
 
         if (valid.CanMatch) { validTokenFornow.Add(valid); }
 
-        //Implemetar aca las descalificaciones
+
         return valid;
     }
 
@@ -69,7 +69,7 @@ public class Judge : IDescriptible, IJudgeGame
     {
         if (!playerScores.ContainsKey(player.Id))
         {
-            playerScores.Add(player.Id, new PlayerScore(player.Id));
+            this.playerScores.Add(player.Id, new PlayerScore(player.Id));
         }
     }
     public virtual bool EndGame(List<(IPlayer, List<IToken>)> players, IBoard board)// True si se cumple la condicion de parada
@@ -197,10 +197,10 @@ public class Judge : IDescriptible, IJudgeGame
 
     public virtual List<IPlayer> Winner(List<(IPlayer player, List<IToken> hand)> players)
     {
-        List<(IPlayer player, List<IToken> hand)> temp = new List<(IPlayer player, List<IToken> hand)>() { };
+        List<(IPlayer player, List<IToken> hand, double score)> temp = new List<(IPlayer player, List<IToken> hand, double score)>() { };
         foreach (var (player, hand) in players)
         {
-            if (ItsThePlayerHand(player, hand)) { temp.Add((player, hand)); }
+            if (ItsThePlayerHand(player, hand) && this.playerScores.ContainsKey(player.Id)) { temp.Add((player, hand, this.playerScores[player.Id].Score)); }
         }
         if (temp.Count < 1) { return new List<IPlayer>() { }; }
         return this.winCondition.Winner(temp, this.howtogetscore);
@@ -217,14 +217,18 @@ public class Judge : IDescriptible, IJudgeGame
         return true;
     }
 
+    public virtual IJudgeGame Clone()
+    {
+        return new Judge(this.stopcriteria, this.howtogetscore, this.winCondition, this.valid);
+    }
 }
 
 
-public class CorruptionJugde : Judge, IJudgeGame
+public class CorruptionJugde : Judge
 {
     public static new string Description => "Juez Corrupto para el juego";
     protected Random random { get; set; }
-    public CorruptionJugde(IStopGame<IPlayer, IToken> stop, IGetScore<IToken> getscore, IWinCondition<(IPlayer player, List<IToken> hand), IToken> winCondition, IValidPlay<IBoard, IToken, IChooseStrategyWrapped> valid) : base(stop, getscore, winCondition, valid)
+    public CorruptionJugde(IStopGame<IPlayer, IToken> stop, IGetScore<IToken> getscore, IWinCondition<(IPlayer player, List<IToken> hand, double score), IToken> winCondition, IValidPlay<IBoard, IToken, IChooseStrategyWrapped> valid) : base(stop, getscore, winCondition, valid)
     {
         this.random = new Random();
     }
@@ -278,7 +282,10 @@ public class CorruptionJugde : Judge, IJudgeGame
         board.AddTokenToBoard(token, 0);
     }
 
-
+    public override IJudgeGame Clone()
+    {
+        return new CorruptionJugde(this.stopcriteria, this.howtogetscore, this.winCondition, this.valid);
+    }
 
 
 
